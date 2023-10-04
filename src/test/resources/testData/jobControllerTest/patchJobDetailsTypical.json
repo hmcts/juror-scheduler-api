@@ -1,0 +1,34 @@
+{
+  "cron_expression": "* 5 * * * ?",
+  "information": {
+    "description": "description 123",
+    "name": "name 123",
+    "tags": [
+      "tag 123"
+    ]
+  },
+  "method": "POST",
+  "url": "http://localhost:8080/health",
+  "headers": {
+    "additionalProp1": "val1",
+    "additionalProp2": "value2",
+    "additionalProp3": "value 3"
+  },
+  "authentication_default": "NONE",
+  "payload": "{\"value\":\"key1\",\"value2\":\"key2\",\"value3\":\"key3\",\"value4\":{\"value1\":\"key1\",\"value2\":\"key2\"}}",
+  "validations": [
+    {
+      "type": "STATUS_CODE" ,
+      "expected_status_code": 201
+    },
+    {
+      "type": "MAX_RESPONSE_TIME" ,
+      "max_response_time_ms": 1000
+    },
+    {
+      "type": "JSON_PATH" ,
+      "path": "status",
+      "expected_response": "UP"
+    }
+  ]
+}

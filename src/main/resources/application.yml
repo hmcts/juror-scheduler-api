@@ -1,0 +1,118 @@
+server:
+  port: 8080
+
+management:
+  endpoint:
+    health:
+      show-details: "always"
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health, info, prometheus
+
+springdoc:
+  packagesToScan: uk.gov.hmcts.juror.scheduler.api.controllers
+  writer-with-order-by-keys: true
+
+spring:
+  config:
+    import: "optional:configtree:/mnt/secrets/juror/"
+  application:
+    name: HMCTS Scheduler
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER_NAME}
+    password: ${DB_PASSWORD}
+    properties:
+      charSet: UTF-8
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 10000
+      #Taherah commented out x1
+      #poolName: {to-be-defined}HikariCP
+      maxLifetime: 7200000
+      connectionTimeout: 30000
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+            non_contextual_creation: true
+        format_sql: true
+    show-sql: false
+    generate-ddl: false
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    properties:
+      org:
+        quartz:
+          job-store:
+            dataSource: datasource
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            useProperties: false
+            tablePrefix: QRTZ_
+            misfireThreshold: 60000
+            clusterCheckinInterval: 5000
+            isClustered: true
+          threadPool:
+            threadPriority: 5
+            threadCount: 10
+            class: org.quartz.simpl.SimpleThreadPool
+            threadsInheritContextClassLoaderOfInitializingThread: true
+          scheduler:
+            instanceId: AUTO
+            instanceName: quartz-scheduler
+logging:
+  level:
+    uk.gov.hmcts.juror: trace
+azure:
+  application-insights:
+    instrumentation-key: ${juror.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+
+uk:
+  gov:
+    hmcts:
+      juror:
+        security:
+          token-validity: 1800000
+          secret: ${SECRET}
+          admin-user:
+            email: ${ADMIN_EMAIL:}
+            password: ${ADMIN_PASSWORD:}
+            firstname: ${ADMIN_FIRSTNAME:}
+            lastname: ${ADMIN_LASTNAME:}
+scheduler:
+  security:
+    juror-api-service-authentication:
+      id: JDCRON001
+      issuer: Scheduler Service
+      subject: Cron
+      token-validity: 1600000
+      secret: ${JUROR_API_SERVICE_AUTHENTICATION_SECRET}
+    api-job-execution-service-authentication:
+      issuer: Scheduler Service
+      subject: scheduler@scheduler.cgi.com
+      token-validity: 1600000
+      secret: ${API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET}
+---
+spring:
+  config:
+    activate:
+      on-profile:  test
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    generate-ddl: true
+  quartz:
+    jdbc:
+      initialize-schema: always

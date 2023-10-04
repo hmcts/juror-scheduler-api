@@ -1,0 +1,12 @@
+{
+  "email":"user@cgi.com",
+  "password": "password404",
+  "firstname":"Ben",
+  "lastname": "Edwards",
+  "roles": [
+    "ROLE_USER"
+  ],
+  "permissions": [
+    "user::create"
+  ]
+}
