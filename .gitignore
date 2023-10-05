@@ -2,7 +2,10 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 *.class
-bin/main/application.yaml
+bin/main/application.yml
+bin/main/uk/
+bin/generated-sources/
+bin/test/
 
 ### STS ###
 .apt_generated
