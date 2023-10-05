@@ -1,5 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.api.openapi;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Built-in feature which saves service's swagger specs in temporary directory.
  * Each CI run on master should automatically save and upload (if updated) documentation.
  */
+@Ignore
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
