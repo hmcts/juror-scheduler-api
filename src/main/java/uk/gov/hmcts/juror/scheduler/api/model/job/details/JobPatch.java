@@ -13,7 +13,7 @@ import uk.gov.hmcts.juror.scheduler.api.validation.CronExpression;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public abstract class JobPatch {
+public class JobPatch {
 
     @JsonProperty("cron_expression")
     @Schema(description = "This is the cron expression that will be used to setup automated triggering of this Job")

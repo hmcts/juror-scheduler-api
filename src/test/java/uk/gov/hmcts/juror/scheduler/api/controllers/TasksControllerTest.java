@@ -18,7 +18,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
@@ -114,7 +114,7 @@ class TasksControllerTest {
             }
 
 
-            List<Task> responseList = new ArrayList<>();
+            List<TaskDetail> responseList = new ArrayList<>();
 
             responseList.add(TestUtil.generateTask());
             responseList.add(TestUtil.generateTask());

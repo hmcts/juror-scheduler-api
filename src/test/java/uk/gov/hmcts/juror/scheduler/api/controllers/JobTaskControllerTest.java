@@ -18,13 +18,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.testSupport.APIConstantsTest;
 import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.StatusUpdate;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
 import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
@@ -99,14 +99,14 @@ class JobTaskControllerTest  {
         void positive_get_task() throws Exception {
             final String jobKey = "ABC";
             final Long taskId = 1L;
-            Task task = TestUtil.generateTask();
-            when(taskMapper.toTask(any())).thenReturn(task);
+            TaskDetail taskDetail = TestUtil.generateTask();
+            when(taskMapper.toTask(any())).thenReturn(taskDetail);
 
             this.mockMvc
                 .perform(get(GET_TASK_DETAILS, jobKey, taskId).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().json(createResponseStringFromObject(task), true));
+                .andExpect(content().json(createResponseStringFromObject(taskDetail), true));
             verify(taskService, times(1)).getLatestTask(eq(jobKey), eq(taskId));
             verify(taskMapper, times(1)).toTask(any());
         }

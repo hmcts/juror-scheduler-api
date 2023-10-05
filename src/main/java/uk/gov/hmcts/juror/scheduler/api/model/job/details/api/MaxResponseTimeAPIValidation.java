@@ -19,17 +19,17 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @JsonTypeName("MAX_RESPONSE_TIME")
 public class MaxResponseTimeAPIValidation extends APIValidation {
 
+    @NotNull
+    @Min(1)
+    @Max(30_000)
+    @JsonProperty("max_response_time_ms")
+    @Schema(description = "This is the maximum response time that is allowed before the TaskEntity will fail.")
+    private Integer maxResponseTimeMS;
+
     @Schema(type = "string", allowableValues = "MAX_RESPONSE_TIME")
     @NotNull
     @Override
     public ValidationType getType() {
         return ValidationType.MAX_RESPONSE_TIME;
     }
-
-    @NotNull
-    @Min(1)
-    @Max(30000)
-    @JsonProperty("max_response_time_ms")
-    @Schema(description = "This is the maximum response time that is allowed before the TaskEntity will fail.")
-    private Integer maxResponseTimeMS;
 }

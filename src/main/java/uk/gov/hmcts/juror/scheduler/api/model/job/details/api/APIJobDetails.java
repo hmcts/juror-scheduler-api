@@ -13,10 +13,10 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.JobDetails;
 import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
 import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
 import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
-import uk.gov.hmcts.juror.scheduler.api.model.job.details.JobDetails;
 
 import java.util.List;
 import java.util.Map;
@@ -26,13 +26,6 @@ import java.util.Map;
 @NoArgsConstructor
 @SuperBuilder
 public class APIJobDetails extends JobDetails {
-
-    @Schema(allowableValues = "API")
-    @Override
-    public JobType getType() {
-        return type;
-    }
-
 
     @NotNull
     @Schema(description = "The method to use when making the API request")
@@ -44,21 +37,30 @@ public class APIJobDetails extends JobDetails {
     private String url;
 
     @Schema(description = "All the headers that should be included when making the API Request")
-    @Size(min = 1,max = 100)
+    @Size(min = 1, max = 100)
     private Map<
             @NotNull @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String,
             @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String> headers;
 
-    @Schema(description = "If present an authentication token will automatically be added to your API request based on the selected system.")
+    @Schema(description = "If present an authentication token will automatically be added to your API request based "
+            + "on the selected system.")
     @JsonProperty("authentication_default")
     private AuthenticationDefaults authenticationDefault;
 
-    @Schema(description = "The payload to include along with the request (Note this is should not be present for GET requests)")
+    @Schema(description = "The payload to include along with the request (Note this is should not be present for GET "
+            + "requests)")
     @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String payload;
 
-    @Schema(description = "A list of validations that should be applied to the response after the API request has been made. If any of these fail the task will fail.")
+    @Schema(description = "A list of validations that should be applied to the response after the API request has "
+            + "been made. If any of these fail the task will fail.")
     @NotEmpty
     @Size(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_SHORT)
     private List<@Valid ? extends APIValidation> validations;
+
+    @Schema(allowableValues = "API")
+    @Override
+    public JobType getType() {
+        return type;
+    }
 }

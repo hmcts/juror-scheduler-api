@@ -35,7 +35,7 @@ import uk.gov.hmcts.juror.scheduler.testSupport.APIConstantsTest;
 import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValidation;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyDisabledError;
@@ -721,33 +721,33 @@ class JobControllerTest {
             }
         }
 
-        private void performAndValidatePositive(List<Task> tasks) throws Exception {
+        private void performAndValidatePositive(List<TaskDetail> taskDetails) throws Exception {
             final String jobKey = "ABC";
-            when(taskMapper.toTaskList(any())).thenReturn(tasks);
+            when(taskMapper.toTaskList(any())).thenReturn(taskDetails);
 
             this.mockMvc
                     .perform(get(GET_JOB_TASKS, jobKey).contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(content().json(createResponseStringFromObject(tasks), true));
+                    .andExpect(content().json(createResponseStringFromObject(taskDetails), true));
             verify(taskService, times(1)).getTasks(eq(jobKey));
             verify(taskMapper, times(1)).toTaskList(any());
         }
 
         @Test
         void positive_get_tasks_single() throws Exception {
-            List<Task> responseTasks = new ArrayList<>();
-            responseTasks.add(TestUtil.generateTask());
-            performAndValidatePositive(responseTasks);
+            List<TaskDetail> responseTaskDetails = new ArrayList<>();
+            responseTaskDetails.add(TestUtil.generateTask());
+            performAndValidatePositive(responseTaskDetails);
         }
 
         @Test
         void positive_get_tasks_multiple() throws Exception {
-            List<Task> responseTasks = new ArrayList<>();
-            responseTasks.add(TestUtil.generateTask());
-            responseTasks.add(TestUtil.generateTask());
-            responseTasks.add(TestUtil.generateTask());
-            performAndValidatePositive(responseTasks);
+            List<TaskDetail> responseTaskDetails = new ArrayList<>();
+            responseTaskDetails.add(TestUtil.generateTask());
+            responseTaskDetails.add(TestUtil.generateTask());
+            responseTaskDetails.add(TestUtil.generateTask());
+            performAndValidatePositive(responseTaskDetails);
         }
 
         @Test
@@ -792,15 +792,15 @@ class JobControllerTest {
             }
         }
 
-        private void performAndValidatePositive(Task task) throws Exception {
+        private void performAndValidatePositive(TaskDetail taskDetail) throws Exception {
             final String jobKey = "ABC";
-            when(taskMapper.toTask(any())).thenReturn(task);
+            when(taskMapper.toTask(any())).thenReturn(taskDetail);
 
             this.mockMvc
                     .perform(get(GET_JOB_STATUS, jobKey).contentType(MediaType.APPLICATION_JSON))
                     .andDo(print())
                     .andExpect(status().isOk())
-                    .andExpect(content().json(createResponseStringFromObject(task), true));
+                    .andExpect(content().json(createResponseStringFromObject(taskDetail), true));
             verify(taskService, times(1)).getLatestTask(jobKey);
             verify(taskMapper, times(1)).toTask(any());
         }

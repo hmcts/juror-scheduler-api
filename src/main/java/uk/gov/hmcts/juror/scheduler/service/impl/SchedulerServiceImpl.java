@@ -26,6 +26,7 @@ import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
 @Service
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")
 public class SchedulerServiceImpl implements SchedulerService {
     private final Scheduler scheduler;
 
@@ -167,6 +168,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     private JobDetail buildJobDetails(String jobKey) {
         final JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("key", jobKey);

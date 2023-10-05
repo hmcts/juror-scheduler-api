@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.StatusUpdate;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
 import uk.gov.hmcts.juror.scheduler.config.PermissionConstants;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
 import uk.gov.hmcts.juror.standard.api.model.error.InternalServerError;
@@ -55,7 +55,7 @@ public class JobTaskController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Returns the task details", content =
                             {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Task.class))}),
+                                    schema = @Schema(implementation = TaskDetail.class))}),
                     @ApiResponse(responseCode = "401", description = "Unauthorised", content = {@Content(mediaType =
                             MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = UnauthorisedError.class))}),
                     @ApiResponse(responseCode = "404", description = "Not Found", content = {@Content(mediaType =
@@ -64,7 +64,7 @@ public class JobTaskController {
                             MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema =
                     @Schema(implementation = InternalServerError.class))})
             })
-    public ResponseEntity<Task> getTaskDetail(
+    public ResponseEntity<TaskDetail> getTaskDetail(
             @Pattern(regexp = APIConstants.JOB_KEY_REGEX) @PathVariable(name = "job-key") @Schema(type = "string") @Valid String jobKey,
             @Min(APIConstants.TASK_ID_MIN) @Max(APIConstants.TASK_ID_MAX) @PathVariable(name = "task-id") @Schema(type =
                     "integer") @Valid long taskId) {
@@ -79,7 +79,7 @@ public class JobTaskController {
             responses = {
                     @ApiResponse(responseCode = "202", description = "Successfully updated TaskEntity status", content =
                             {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = Task.class))}),
+                                    schema = @Schema(implementation = TaskDetail.class))}),
                     @ApiResponse(responseCode = "401", description = "Unauthorised", content = {@Content(mediaType =
                             MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = UnauthorisedError.class))}),
                     @ApiResponse(responseCode = "404", description = "Not Found", content = {@Content(mediaType =

@@ -18,8 +18,8 @@ import uk.gov.hmcts.juror.standard.service.exceptions.InvalidEnumValueException;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public enum AuthenticationDefaults {
@@ -40,6 +40,7 @@ public enum AuthenticationDefaults {
     }
 
     @JsonCreator
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static AuthenticationDefaults forValues(String value) {
         try {
             return valueOf(value);
@@ -118,13 +119,13 @@ public enum AuthenticationDefaults {
         private BiConsumer<APIJobDetailsEntity, RequestSpecification> getJurorApiServiceAuthenticationProvider() {
             return (apiJobDetailsEntity, requestSpecification) -> {
                 final Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jurorApiServiceJwtSecret));
-                final Map<String, Object> claims = new HashMap<>();
+                final Map<String, Object> claims = new ConcurrentHashMap<>();
                 claims.put("login", "AUTO");   //cronuser
                 claims.put("userLevel", "1");
                 claims.put("daysToExpire", 6);
                 claims.put("passwordWarning", true);
 
-                final Map<String, Object> staff = new HashMap<>();
+                final Map<String, Object> staff = new ConcurrentHashMap<>();
                 staff.put("name", "AUTO"); //cron user
                 staff.put("rank", -1);
                 staff.put("active", 1);

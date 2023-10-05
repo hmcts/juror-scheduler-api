@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.2.1.3168'
 }
 
-group = 'uk.gov.hmcts.juror.schedular'
+group = 'uk.gov.hmcts.juror.scheduler'
 version = '0.0.1'
 
 java {
@@ -133,8 +133,8 @@ project.tasks['check'].dependsOn integration
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Juror :: juror-scheduler"
-    property "sonar.projectKey", "uk.gov.hmcts.juror:juror-scheduler"
+    property "sonar.projectName", "Juror :: juror-scheduler-api"
+    property "sonar.projectKey", "uk.gov.hmcts.juror:juror-scheduler-api"
   }
 }
 
@@ -261,7 +261,7 @@ dependencies {
 mainClassName = 'uk.gov.hmcts.juror.scheduler.Application'
 
 bootJar {
-  archiveFileName = "juror-scheduler.jar"
+  archiveFileName = "juror-scheduler-api.jar"
 
   manifest {
     attributes('Implementation-Version': project.version.toString())

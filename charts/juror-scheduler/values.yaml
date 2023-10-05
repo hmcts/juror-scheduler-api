@@ -1,7 +1,7 @@
 java:
   applicationPort: 8080
   image: 'hmctspublic.azurecr.io/juror/scheduler:latest'
-  ingressHost: juror-scheduler-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+  ingressHost: juror-scheduler-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: juror
 #  Uncomment once the vault containing the app insights key has been set up
 #  keyVaults:

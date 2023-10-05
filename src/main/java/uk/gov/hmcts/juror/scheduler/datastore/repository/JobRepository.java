@@ -1,7 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.datastore.repository;
 
 import jakarta.persistence.criteria.JoinType;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -14,8 +13,6 @@ import java.util.Set;
 @Repository
 public interface JobRepository extends JpaRepository<APIJobDetailsEntity, String>,
     JpaSpecificationExecutor<APIJobDetailsEntity> {
-
-    boolean existsById(@NotNull String jobKey);
 
     interface Specs {
 

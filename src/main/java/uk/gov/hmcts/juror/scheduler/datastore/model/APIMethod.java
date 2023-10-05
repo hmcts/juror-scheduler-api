@@ -16,6 +16,7 @@ public enum APIMethod {
     TRACE;
 
     @JsonCreator
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static APIMethod forValues(String value) {
         try{
             return valueOf(value);

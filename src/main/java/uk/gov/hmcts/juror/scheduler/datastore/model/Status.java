@@ -17,6 +17,7 @@ public enum Status {
     INDETERMINATE;
 
     @JsonCreator
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static Status forValues(String value) {
         try{
             return valueOf(value);

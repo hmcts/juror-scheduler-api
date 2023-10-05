@@ -21,7 +21,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
         APIJobDetails.class
 })
 @SuperBuilder
-public abstract class JobDetails {
+public class JobDetails {
 
     @NotNull
     @Schema(description = "This is the type of Job the details is representing")

@@ -6,16 +6,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.juror.scheduler.datastore.repository.JobRepository;
-import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
-import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
-import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobPatch;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.JobSearchFilter;
+import uk.gov.hmcts.juror.scheduler.datastore.repository.JobRepository;
 import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
+import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
+import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyDisabledError;
 import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyEnabledError;
@@ -28,9 +27,11 @@ import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")
 public class JobServiceImpl implements JobService {
 
     private final SchedulerService schedulerService;
@@ -58,7 +59,7 @@ public class JobServiceImpl implements JobService {
         jobRepository.deleteById(jobKey);
     }
 
-    private void throwErrorIfJobDoesNotExist(String jobKey) throws NotFoundException {
+    private void throwErrorIfJobDoesNotExist(String jobKey) {
         if (!doesJobExist(jobKey)) {
             throw new NotFoundException("Job with key '" + jobKey + "' not found");
         }
@@ -133,6 +134,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    @SuppressWarnings("PMD.LawOfDemeter")
     public List<APIJobDetailsEntity> getJobs(JobSearchFilter searchFilter) {
         List<Specification<APIJobDetailsEntity>> specifications = new ArrayList<>();
 
@@ -143,9 +145,10 @@ public class JobServiceImpl implements JobService {
         if (searchFilter.getTags() != null) {
             specifications.add(JobRepository.Specs.byTags(searchFilter.getTags()));
         }
-        List<APIJobDetailsEntity> foundJobs = jobRepository.findAll(JobRepository.Specs.orderByCreatedOn(Specification.allOf(
-                specifications
-        )));
+        List<APIJobDetailsEntity> foundJobs =
+                jobRepository.findAll(JobRepository.Specs.orderByCreatedOn(Specification.allOf(
+                        specifications
+                )));
 
         if (foundJobs.isEmpty()) {
             throw new NotFoundException("No Jobs found for the provided filter");
@@ -155,50 +158,37 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
+//    @SuppressWarnings("PMD.NPathComplexity")
     public APIJobDetailsEntity updateJob(String jobKey, APIJobPatch jobPatch) {
-        APIJobDetailsEntity jobDetailsEntity = getJob(jobKey);
-        boolean requiresReschedule = false;
+        final APIJobDetailsEntity jobDetailsEntity = getJob(jobKey);
+        AtomicBoolean requiresReschedule = new AtomicBoolean(false);
 
-        Information information = jobPatch.getInformation();
-        if (information != null) {
-            if (information.getName() != null) {
-                jobDetailsEntity.setName(information.getName());
-            }
-            if (information.getDescription() != null) {
-                jobDetailsEntity.setDescription(information.getDescription());
-            }
-            if (information.getTags() != null) {
-                jobDetailsEntity.setTags(information.getTags());
-            }
-        }
-        if (jobPatch.getCronExpression() != null) {
-            jobDetailsEntity.setCronExpression(jobPatch.getCronExpression());
-            requiresReschedule = true;
-        }
-        if (jobPatch.getMethod() != null) {
-            jobDetailsEntity.setMethod(jobPatch.getMethod());
-        }
-        if (jobPatch.getUrl() != null) {
-            jobDetailsEntity.setUrl(jobPatch.getUrl());
-        }
-        if (jobPatch.getHeaders() != null) {
-            jobDetailsEntity.setHeaders(jobPatch.getHeaders());
-        }
-        if (jobPatch.getAuthenticationDefault() != null) {
-            jobDetailsEntity.setAuthenticationDefault(jobPatch.getAuthenticationDefault());
-        }
-        if (jobPatch.getPayload() != null) {
-            jobDetailsEntity.setPayload(jobPatch.getPayload());
-        }
-        if (jobPatch.getValidations() != null) {
-            jobDetailsEntity.setValidations(jobDetailsMapper.apiValidationEntityList(jobPatch.getValidations()));
-        }
-        jobDetailsEntity = save(jobDetailsEntity);
-        if (requiresReschedule) {
+        Optional.ofNullable(jobPatch.getInformation()).ifPresent(information -> {
+            Optional.ofNullable(information.getName()).ifPresent(jobDetailsEntity::setName);
+            Optional.ofNullable(information.getDescription()).ifPresent(jobDetailsEntity::setDescription);
+            Optional.ofNullable(information.getTags()).ifPresent(jobDetailsEntity::setTags);
+        });
+
+        Optional.ofNullable(jobPatch.getCronExpression()).ifPresent(value -> {
+            jobDetailsEntity.setCronExpression(value);
+            requiresReschedule.set(true);
+        });
+
+        Optional.ofNullable(jobPatch.getMethod()).ifPresent(jobDetailsEntity::setMethod);
+        Optional.ofNullable(jobPatch.getUrl()).ifPresent(jobDetailsEntity::setUrl);
+        Optional.ofNullable(jobPatch.getHeaders()).ifPresent(jobDetailsEntity::setHeaders);
+        Optional.ofNullable(jobPatch.getAuthenticationDefault()).ifPresent(jobDetailsEntity::setAuthenticationDefault);
+        Optional.ofNullable(jobPatch.getPayload()).ifPresent(jobDetailsEntity::setPayload);
+        Optional.ofNullable(jobPatch.getValidations()).ifPresent(
+                validations -> jobDetailsEntity.setValidations(jobDetailsMapper.apiValidationEntityList(validations)));
+
+        APIJobDetailsEntity updatedJobDetailsEntity = save(jobDetailsEntity);
+        if (requiresReschedule.get()) {
             //TODO improve
             schedulerService.unregister(jobKey);
-            schedulerService.register(jobDetailsEntity);
+            schedulerService.register(updatedJobDetailsEntity);
         }
-        return jobDetailsEntity;
+        return updatedJobDetailsEntity;
     }
+
 }

@@ -64,7 +64,7 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.findFirstByJobKeyOrderByCreatedAt(jobKey);
     }
 
-
+    @Override
     public TaskEntity getLatestTask(String jobKey, long taskId) {
         if (!jobService.doesJobExist(jobKey)) {
             throw new NotFoundException("Job with key '" + jobKey + "' not found");
@@ -93,6 +93,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @SuppressWarnings("PMD.LawOfDemeter")
     public List<TaskEntity> getTasks(TaskSearchFilter searchFilter) {
         List<Specification<TaskEntity>> specifications = new ArrayList<>();
 

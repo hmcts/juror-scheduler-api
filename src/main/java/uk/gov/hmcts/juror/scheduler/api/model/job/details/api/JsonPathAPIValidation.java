@@ -17,12 +17,6 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @NoArgsConstructor
 @JsonTypeName("JSON_PATH")
 public class JsonPathAPIValidation extends APIValidation {
-    @Schema(type = "string", allowableValues = "JSON_PATH")
-    @NotNull
-    @Override
-    public ValidationType getType() {
-        return ValidationType.JSON_PATH;
-    }
 
     @NotNull
     @JsonPath
@@ -33,4 +27,12 @@ public class JsonPathAPIValidation extends APIValidation {
     @Schema(description = "This is the expected value that the JsonPath should return when evaluated against the API response")
     @JsonProperty("expected_response")
     private String expectedResponse;
+
+
+    @Schema(type = "string", allowableValues = "JSON_PATH")
+    @NotNull
+    @Override
+    public ValidationType getType() {
+        return ValidationType.JSON_PATH;
+    }
 }

@@ -16,7 +16,7 @@ public enum JobType {
 
     private final Class<? extends JobDetails> jobDetailsClass;
 
-    private final Class<? extends org.quartz.Job> jobProcessingClass;
+    private final Class<? extends Job> jobProcessingClass;
 
     JobType(Class<? extends JobDetails> jobDetailsClass, Class<? extends Job> jobProcessingClass) {
         this.jobDetailsClass = jobDetailsClass;
@@ -24,6 +24,7 @@ public enum JobType {
     }
 
     @JsonCreator
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static JobType forValues(String value) {
         try{
             return valueOf(value);

@@ -18,17 +18,19 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @NoArgsConstructor
 @JsonTypeName("STATUS_CODE")
 public class StatusCodeAPIValidation extends APIValidation {
+
+    @NotNull
+    @Min(100)
+    @Max(599)
+    @JsonProperty("expected_status_code")
+    @Schema(description = "The expected status code from the API request. Job will fail if something other then this "
+            + "is returned.")
+    private Integer expectedStatusCode;
+
     @Schema(type = "string", allowableValues = "STATUS_CODE")
     @NotNull
     @Override
     public ValidationType getType() {
         return ValidationType.STATUS_CODE;
     }
-
-    @NotNull
-    @Min(100)
-    @Max(599)
-    @JsonProperty("expected_status_code")
-    @Schema(description = "The expected status code from the API request. Job will fail if something other then this is returned.")
-    private Integer expectedStatusCode;
 }

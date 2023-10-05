@@ -25,7 +25,7 @@ public class MaxResponseTimeAPIValidationEntity extends APIValidationEntity {
 
     @NotNull
     @Min(1)
-    @Max(30000)
+    @Max(30_000)
     @Setter
     private int maxResponseTimeMS;
 

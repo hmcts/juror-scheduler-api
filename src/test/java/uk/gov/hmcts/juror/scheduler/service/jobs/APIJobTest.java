@@ -281,7 +281,7 @@ class APIJobTest {
         when(jobDetail.getJobDataMap()).thenReturn(jobDataMap);
         when(context.getJobDetail()).thenReturn(jobDetail);
         RuntimeException cause = new RuntimeException("An example unexpected error");
-        when(jobService.getJob(eq(jobKey))).thenThrow(cause);
+        when(jobService.getJob(jobKey)).thenThrow(cause);
 
         InternalServerException exception = assertThrows(InternalServerException.class, () -> apiJob.execute(context));
 

@@ -1,15 +1,18 @@
 package uk.gov.hmcts.juror.scheduler.config;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@SuppressWarnings("PMD.ShortClassName")
 public final class PermissionConstants {
 
     private PermissionConstants() {
 
     }
 
-    public static final class Job {
 
-        private Job() {
-        }
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class Job {
 
         public static final String ENABLE = "job::enable";
         public static final String DISABLE = "job::disable";
@@ -23,11 +26,8 @@ public final class PermissionConstants {
     }
 
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class Task {
-
-        private Task() {
-
-        }
 
         public static final String VIEW = "task::view";
         public static final String STATUS_UPDATE = "task::status::update";

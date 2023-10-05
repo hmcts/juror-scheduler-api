@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @Builder
-public class Task {
+public class TaskDetail {
 
 
     @Pattern(regexp = APIConstants.JOB_KEY_REGEX)

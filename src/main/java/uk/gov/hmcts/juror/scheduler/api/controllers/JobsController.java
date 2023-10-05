@@ -28,7 +28,7 @@ import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.config.PermissionConstants;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.JobSearchFilter;
 import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
@@ -46,6 +46,9 @@ import java.util.Set;
 @Slf4j
 @RequestMapping(value = "/jobs", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
+@SuppressWarnings({
+        "PMD.ExcessiveImports"
+})
 public class JobsController {
 
     private final JobService jobService;
@@ -91,7 +94,7 @@ public class JobsController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "List of Tasks.", content = {@Content(mediaType =
                             MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = Task.class)))}),
+                            array = @ArraySchema(schema = @Schema(implementation = TaskDetail.class)))}),
                     @ApiResponse(responseCode = "400", description = "Invalid Parameters", content = {@Content(mediaType =
                             MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation =
                             InvalidPayloadError.class))}),

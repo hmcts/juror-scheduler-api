@@ -11,16 +11,15 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.FileCopyUtils;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.MaxResponseTimeAPIValidation;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
 import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
-import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.JsonPathAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValidation;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.JsonPathAPIValidationEntity;
@@ -91,7 +90,6 @@ public class TestUtil {
                 .builder()
                 .key(RandomStringUtils.randomAlphabetic(3, 25))
                 .cronExpression("* 5 * * * ?")
-                .type(JobType.API)
                 .information(generateInformation())
                 .method(APIMethod.GET)
                 .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
@@ -113,7 +111,6 @@ public class TestUtil {
                 .builder()
                 .createdAt(LocalDateTime.now())
                 .lastUpdatedAt(LocalDateTime.now().plusHours(1))
-                .type(JobType.API)
                 .information(generateInformation())
                 .method(APIMethod.GET)
                 .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
@@ -154,9 +151,9 @@ public class TestUtil {
                 .build();
     }
 
-    public static Task generateTask() {
-        Task.TaskBuilder builder = Task.builder();
-        return Task.builder()
+    public static TaskDetail generateTask() {
+        TaskDetail.TaskDetailBuilder builder = TaskDetail.builder();
+        return TaskDetail.builder()
                 .jobKey(RandomStringUtils.randomAlphabetic(3, 25))
                 .taskId(ThreadLocalRandom.current().nextInt(1, 30000))
                 .createdAt(LocalDateTime.now())

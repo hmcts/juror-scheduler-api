@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
+@SuppressWarnings({
+        "PMD.TooManyMethods",
+        "PMD.AvoidDuplicateLiterals"
+})
 public abstract class JobDetailsMapper {
 
     @Mapping(target = "lastUpdatedAt", ignore = true)
@@ -35,14 +39,13 @@ public abstract class JobDetailsMapper {
     @Mapping(target = "information.name", source = "name")
     @Mapping(target = "information.tags", source = "tags")
     @Mapping(target = "information.description", source = "description")
-    @Mapping(target = "type",constant = "API")
-
+    @Mapping(target = "type", constant = "API")
     public abstract APIJobDetails toJobDetailsJobDetails(APIJobDetailsEntity jobDetails);
 
     @Mapping(target = "information.name", source = "name")
     @Mapping(target = "information.tags", source = "tags")
     @Mapping(target = "information.description", source = "description")
-    @Mapping(target = "type",constant = "API")
+    @Mapping(target = "type", constant = "API")
     public abstract APIJobDetailsResponse toAPIJobDetailsResponse(APIJobDetailsEntity jobDetails);
 
 
@@ -70,14 +73,14 @@ public abstract class JobDetailsMapper {
 
     @AfterMapping
     public void updateValidationsJobs(@MappingTarget APIJobDetailsEntity apiJobDetailsEntity) {
-        if(!CollectionUtils.isEmpty(apiJobDetailsEntity.getValidations())){
+        if (!CollectionUtils.isEmpty(apiJobDetailsEntity.getValidations())) {
             apiJobDetailsEntity.getValidations().forEach(validation -> validation.setJob(apiJobDetailsEntity));
         }
     }
 
     public APIValidationEntity apiValidationToEntry(APIValidation apiValidation) {
         //TODO make dynamic
-        if(apiValidation == null){
+        if (apiValidation == null) {
             return null;
         }
         if (apiValidation instanceof StatusCodeAPIValidation statusCodeValidation) {
@@ -91,6 +94,7 @@ public abstract class JobDetailsMapper {
         }
         throw new UnsupportedOperationException("Unknown validation type: " + apiValidation.getClass());
     }
+
     public List<APIValidationEntity> apiValidationEntityList(List<? extends APIValidation> validationList) {
         if (CollectionUtils.isEmpty(validationList)) {
             return Collections.emptyList();
@@ -100,7 +104,7 @@ public abstract class JobDetailsMapper {
 
     public APIValidation apiValidationEntryToValidation(APIValidationEntity apiValidation) {
         //TODO make dynamic
-        if(apiValidation == null){
+        if (apiValidation == null) {
             return null;
         }
         if (apiValidation instanceof StatusCodeValidationEntity statusCodeValidation) {
@@ -114,6 +118,7 @@ public abstract class JobDetailsMapper {
         }
         throw new UnsupportedOperationException("Unknown validation type: " + apiValidation.getClass());
     }
+
     public List<APIValidation> apiValidationList(List<? extends APIValidationEntity> validationList) {
         if (CollectionUtils.isEmpty(validationList)) {
             return Collections.emptyList();

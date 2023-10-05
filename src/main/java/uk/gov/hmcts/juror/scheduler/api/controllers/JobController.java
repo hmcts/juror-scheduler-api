@@ -23,16 +23,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
-import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.JobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobPatch;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.config.PermissionConstants;
 import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
+import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
+import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.api.model.error.InternalServerError;
 import uk.gov.hmcts.juror.standard.api.model.error.InvalidPayloadError;
 import uk.gov.hmcts.juror.standard.api.model.error.NotFoundError;
@@ -49,6 +49,10 @@ import java.util.List;
 @Slf4j
 @RequestMapping(value = "/job/{job-key}", produces = MediaType.APPLICATION_JSON_VALUE)
 @Validated
+@SuppressWarnings({
+        "PMD.ExcessiveImports",
+        "PMD.AvoidDuplicateLiterals"
+})
 public class JobController {
 
     private final JobService jobService;
@@ -261,7 +265,7 @@ public class JobController {
                                     content =
                                             {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                                       array = @ArraySchema(schema =
-                                                      @Schema(implementation = Task.class)))}),
+                                                      @Schema(implementation = TaskDetail.class)))}),
                        @ApiResponse(responseCode = "401", description = "Unauthorised", content = {@Content(mediaType =
                                                                                                                     MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                                                                                                             schema =
@@ -277,7 +281,7 @@ public class JobController {
                                                                 MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema =
                                                         @Schema(implementation = InternalServerError.class))})
                })
-    public ResponseEntity<List<Task>> getJobTasks(
+    public ResponseEntity<List<TaskDetail>> getJobTasks(
             @Pattern(regexp = APIConstants.JOB_KEY_REGEX) @PathVariable(name = "job-key") @Valid String jobKey
     ) {
         return new ResponseEntity<>(taskMapper.toTaskList(taskService.getTasks(jobKey)), HttpStatus.OK);
@@ -291,7 +295,7 @@ public class JobController {
                        @ApiResponse(responseCode = "200", description = "TaskEntity details found for this Job",
                                     content =
                                             {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                                      schema = @Schema(implementation = Task.class))}),
+                                                      schema = @Schema(implementation = TaskDetail.class))}),
                        @ApiResponse(responseCode = "401", description = "Unauthorised", content = {@Content(mediaType =
                                                                                                                     MediaType.APPLICATION_PROBLEM_JSON_VALUE,
                                                                                                             schema =
@@ -307,7 +311,7 @@ public class JobController {
                                                                 MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema =
                                                         @Schema(implementation = InternalServerError.class))})
                })
-    public ResponseEntity<Task> getJobStatus(
+    public ResponseEntity<TaskDetail> getJobStatus(
             @Pattern(regexp = APIConstants.JOB_KEY_REGEX) @PathVariable(name = "job-key") @Valid String jobKey
     ) {
         return new ResponseEntity<>(taskMapper.toTask(taskService.getLatestTask(jobKey)), HttpStatus.OK);

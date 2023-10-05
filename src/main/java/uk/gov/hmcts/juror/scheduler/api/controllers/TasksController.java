@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
-import uk.gov.hmcts.juror.scheduler.api.model.task.Task;
 import uk.gov.hmcts.juror.scheduler.config.PermissionConstants;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
@@ -58,7 +58,7 @@ public class TasksController {
         responses = {
             @ApiResponse(responseCode = "200", description = "List of Tasks.", content = {@Content(mediaType =
                 MediaType.APPLICATION_JSON_VALUE,
-                array = @ArraySchema(schema = @Schema(implementation = Task.class)))}),
+                array = @ArraySchema(schema = @Schema(implementation = TaskDetail.class)))}),
             @ApiResponse(responseCode = "400", description = "Invalid Parameters", content = {@Content(mediaType =
                 MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation =
                 InvalidPayloadError.class))}),
@@ -71,7 +71,7 @@ public class TasksController {
             @Schema(implementation = InternalServerError.class))})
         }
     )
-    public ResponseEntity<List<Task>> getTasks(
+    public ResponseEntity<List<TaskDetail>> getTasks(
         @RequestParam(name = "from_date",required = false) @Schema(name = "from_date", description = "The date at which we should " +
             "return any failures from.", defaultValue = "Today's date minus 7 days") @Valid LocalDateTime fromDate,
         @RequestParam(name = "job_key",required = false) @Schema(name = "job_key",

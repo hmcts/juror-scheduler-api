@@ -25,6 +25,7 @@ public enum ValidationType {
     }
 
     @JsonCreator
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static ValidationType forValues(String value) {
         try {
             return valueOf(value);
