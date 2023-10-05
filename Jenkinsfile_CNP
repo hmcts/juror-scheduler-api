@@ -28,7 +28,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-  enableDbMigration(product)
+  //enableDbMigration(product)
   loadVaultSecrets(secrets)
   enableSlackNotifications('#juror-build-notices')
   syncBranchesWithMaster(branchesToSync)
@@ -54,32 +54,32 @@ withPipeline(type, product, component) {
       reportName           : "Checkstyle Test Report"
     ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/checkstyle",
-      reportFiles          : "functionalTest.html",
-      reportName           : "Checkstyle Functional Test Report"
-    ]
+//    publishHTML target: [
+//      allowMissing         : true,
+//      alwaysLinkToLastBuild: true,
+//      keepAll              : true,
+//      reportDir            : "build/reports/checkstyle",
+//      reportFiles          : "functionalTest.html",
+//      reportName           : "Checkstyle Functional Test Report"
+//    ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/checkstyle",
-      reportFiles          : "integrationTest.html",
-      reportName           : "Checkstyle Integration Test Report"
-    ]
+//    publishHTML target: [
+//      allowMissing         : true,
+//      alwaysLinkToLastBuild: true,
+//      keepAll              : true,
+//      reportDir            : "build/reports/checkstyle",
+//      reportFiles          : "integrationTest.html",
+//      reportName           : "Checkstyle Integration Test Report"
+//    ]
 
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/tests/test",
-      reportFiles          : "index.html",
-      reportName           : "Unit Tests Report"
-    ]
+//    publishHTML target: [
+//      allowMissing         : true,
+//      alwaysLinkToLastBuild: true,
+//      keepAll              : true,
+//      reportDir            : "build/reports/tests/test",
+//      reportFiles          : "index.html",
+//      reportName           : "Unit Tests Report"
+//    ]
 
     publishHTML target: [
       allowMissing         : true,
