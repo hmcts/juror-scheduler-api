@@ -229,7 +229,7 @@ dependencies {
   // Documentation, logging
   implementation 'org.projectlombok:lombok:1.18.26'
   implementation 'org.jetbrains:annotations:20.1.0'
-  testImplementation 'junit:junit:4.13.1'
+  testImplementation 'junit:junit:4.13.2'
   annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
   // Data Mapping
