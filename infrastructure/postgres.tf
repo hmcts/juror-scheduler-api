@@ -4,7 +4,7 @@ data "azurerm_subnet" "postgres" {
   virtual_network_name = "ss-${var.env}-vnet"
 }
 
-module "scheduler_db" {
+module "postgresql_flexible" {
   providers = {
     azurerm.postgres_network = azurerm.postgres_network
   }
