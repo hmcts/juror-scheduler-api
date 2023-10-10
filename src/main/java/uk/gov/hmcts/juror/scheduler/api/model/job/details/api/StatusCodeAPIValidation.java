@@ -23,7 +23,7 @@ public class StatusCodeAPIValidation extends APIValidation {
     @Min(100)
     @Max(599)
     @JsonProperty("expected_status_code")
-    @Schema(description = "The expected status code from the API request. Job will fail if something other then this "
+    @Schema(description = "The expected status code from the API request. Job will fail if something other than this "
             + "is returned.")
     private Integer expectedStatusCode;
 

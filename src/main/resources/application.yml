@@ -83,6 +83,7 @@ uk:
     hmcts:
       juror:
         security:
+          use-database: true
           token-validity: 1800000
           secret: ${SECRET}
           admin-user:
