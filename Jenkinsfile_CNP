@@ -19,7 +19,6 @@ def secrets = [
     secret('scheduler-api-POSTGRES-DATABASE', 'DB_NAME'),
     secret('scheduler-api-POSTGRES-USER', 'DB_USER_NAME'),
     secret('scheduler-api-POSTGRES-PASS', 'DB_PASSWORD')
-        //Add secrets here
     ],
 ]
 
