@@ -11,8 +11,7 @@ def component = "scheduler-api"
 def branchesToSync = ['demo']
 
 def secrets = [
-//  'juror-${env}': [
-  'juror-stg': [
+  'juror-${env}': [
     secret('app-insights-connection-string', 'app-insights-connection-string'),
     secret('AppInsightsInstrumentationKey', 'azure.application-insights.instrumentation-key'),
     secret('scheduler-api-POSTGRES-HOST', 'DB_HOST'),
