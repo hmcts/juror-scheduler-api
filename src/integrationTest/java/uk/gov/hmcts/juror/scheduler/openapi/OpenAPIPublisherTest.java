@@ -1,4 +1,4 @@
-package uk.gov.hmcts.juror.scheduler.controllers;
+package uk.gov.hmcts.juror.scheduler.openapi;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
