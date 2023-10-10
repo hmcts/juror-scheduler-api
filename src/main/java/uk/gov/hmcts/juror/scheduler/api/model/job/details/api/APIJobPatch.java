@@ -44,7 +44,7 @@ public class APIJobPatch extends JobPatch {
     @JsonProperty("authentication_default")
     private AuthenticationDefaults authenticationDefault;
 
-    @Schema(description = "The payload to include along with the request (Note this is should not be present for GET requests)")
+    @Schema(description = "The payload to include along with the request (Note this should not be present for GET requests)")
     @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String payload;
 
