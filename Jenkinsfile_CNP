@@ -35,11 +35,11 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-  env.DB_HOST = "128.1.2.3"
-  env.DB_PORT = "5678"
-  env.DB_NAME = "wibble"
+  //env.DB_HOST = "128.1.2.3"
+  //env.DB_PORT = "5678"
+  //env.DB_NAME = "wibble"
   //enableDbMigration(product)
-  //loadVaultSecrets(secrets)
+  loadVaultSecrets(secrets)
   enableSlackNotifications('#juror-build-notices')
   syncBranchesWithMaster(branchesToSync)
 
