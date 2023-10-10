@@ -25,31 +25,32 @@ java:
         - name: scheduler-api-JOB-SECRET
           alias: API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET
   environment:
-    - name: POSTGRES_SSL_MODE
-      value: require
-    - name: DB_HOST
-      valueFrom:
-        secret: DB_HOST
-    - name: DB_PORT
-      valueFrom:
-        secret: DB_PORT
-    - name: DB_NAME
-      valueFrom:
-        secret: DB_NAME
-    - name: DB_USER_NAME
-      valueFrom:
-        secret: DB_USER_NAME
-    - name: DB_PASSWORD
-      valueFrom:
-        secret: DB_PASSWORD
-    - name: SECRET
-      valueFrom:
-        secret: SECRET
-    - name: JUROR_API_SERVICE_AUTHENTICATION_SECRET
-      valueFrom:
-        secret: JUROR_API_SERVICE_AUTHENTICATION_SECRET
-    - name: API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET
-      valueFrom:
-        secret: API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET
+    POSTGRES_SSL_MODE: require
+#    - name: POSTGRES_SSL_MODE
+#      value: require
+#    - name: DB_HOST
+#      valueFrom:
+#        secret: DB_HOST
+#    - name: DB_PORT
+#      valueFrom:
+#        secret: DB_PORT
+#    - name: DB_NAME
+#      valueFrom:
+#        secret: DB_NAME
+#    - name: DB_USER_NAME
+#      valueFrom:
+#        secret: DB_USER_NAME
+#    - name: DB_PASSWORD
+#      valueFrom:
+#        secret: DB_PASSWORD
+#    - name: SECRET
+#      valueFrom:
+#        secret: SECRET
+#    - name: JUROR_API_SERVICE_AUTHENTICATION_SECRET
+#      valueFrom:
+#        secret: JUROR_API_SERVICE_AUTHENTICATION_SECRET
+#    - name: API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET
+#      valueFrom:
+#        secret: API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET
 
     
