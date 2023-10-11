@@ -18,7 +18,10 @@ def secrets = [
     secret('scheduler-api-POSTGRES-PORT', 'DB_PORT'),
     secret('scheduler-api-POSTGRES-DATABASE', 'DB_NAME'),
     secret('scheduler-api-POSTGRES-USER', 'DB_USER_NAME'),
-    secret('scheduler-api-POSTGRES-PASS', 'DB_PASSWORD')
+    secret('scheduler-api-POSTGRES-PASS', 'DB_PASSWORD'),
+    secret('scheduler-api-SECRET', 'SECRET'),
+    secret('scheduler-api-API-SECRET', 'JUROR_API_SERVICE_AUTHENTICATION_SECRET'),
+    secret('scheduler-api-JOB-SECRET', 'API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET')
     ],
 ]
 
@@ -34,9 +37,6 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-  //env.DB_HOST = "128.1.2.3"
-  //env.DB_PORT = "5678"
-  //env.DB_NAME = "wibble"
   //enableDbMigration(product)
   loadVaultSecrets(secrets)
   enableSlackNotifications('#juror-build-notices')
