@@ -35,7 +35,7 @@ import uk.gov.hmcts.juror.scheduler.testSupport.APIConstantsTest;
 import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
 import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
-import uk.gov.hmcts.juror.standard.api.model.error.KeyAlreadyInUseError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.GenericErrorHandlerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;

@@ -38,9 +38,9 @@ import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValid
 import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyDisabledError;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyEnabledError;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.NotAScheduledJobError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
 import uk.gov.hmcts.juror.standard.service.exceptions.BusinessRuleValidationException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 

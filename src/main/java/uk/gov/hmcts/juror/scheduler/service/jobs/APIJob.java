@@ -15,10 +15,10 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.model.JobResult;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
-import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -62,10 +62,15 @@ public class APIJob implements Job {
                 task.setStatus(Status.FAILED_UNEXPECTED_EXCEPTION);
                 taskService.saveTask(task);
             }
-            if (exception instanceof APIHandleableException) {
-                throw exception;
-            }
-            throw new InternalServerException("Unexpected exception when executing Job for Key " + jobKey, exception);
+            context.setResult(
+                    JobResult.builder()
+                            .passed(false)
+                            .error(JobResult.ErrorDetails.builder()
+                            .message(exception.getMessage())
+                                    .throwable(exception)
+                                    .build())
+                            .build()
+            );
         }
     }
 

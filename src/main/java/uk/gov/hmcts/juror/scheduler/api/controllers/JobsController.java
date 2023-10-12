@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
@@ -34,7 +35,6 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.filter.JobSearchFilter;
 import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.standard.api.model.error.InternalServerError;
 import uk.gov.hmcts.juror.standard.api.model.error.InvalidPayloadError;
-import uk.gov.hmcts.juror.standard.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.standard.api.model.error.NotFoundError;
 import uk.gov.hmcts.juror.standard.api.model.error.UnauthorisedError;
 

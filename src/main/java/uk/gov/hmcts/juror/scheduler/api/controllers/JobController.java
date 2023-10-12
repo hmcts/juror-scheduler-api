@@ -24,6 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.IncorrectPayloadForJobTypeError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.JobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobPatch;
@@ -37,10 +41,6 @@ import uk.gov.hmcts.juror.standard.api.model.error.InternalServerError;
 import uk.gov.hmcts.juror.standard.api.model.error.InvalidPayloadError;
 import uk.gov.hmcts.juror.standard.api.model.error.NotFoundError;
 import uk.gov.hmcts.juror.standard.api.model.error.UnauthorisedError;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.IncorrectPayloadForJobTypeError;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyDisabledError;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.JobAlreadyEnabledError;
-import uk.gov.hmcts.juror.standard.api.model.error.bvr.NotAScheduledJobError;
 
 import java.util.List;
 
