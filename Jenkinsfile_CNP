@@ -37,7 +37,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-  //enableDbMigration(product)
+  enableDbMigration(product)
   loadVaultSecrets(secrets)
   enableSlackNotifications('#juror-build-notices')
   syncBranchesWithMaster(branchesToSync)
