@@ -7,7 +7,7 @@ uk:
           token-validity: 1800000
           secret: dummy-secret
           admin-user:
-            email: dummy-email
+            email: dummy@email.com
             password: dummy-password
             firstname: dummy-firstname
             lastname: dummy-lastname
