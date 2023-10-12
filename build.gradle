@@ -188,7 +188,7 @@ ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
-  implementation files('lib/spring-support-library-0.1.1-plain.jar')
+  implementation files('lib/spring-support-library-0.1.2-plain.jar')
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
