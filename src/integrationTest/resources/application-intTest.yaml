@@ -5,12 +5,12 @@ uk:
         security:
           use-database: true
           token-validity: 1800000
-          secret: dummy-secret
+          secret: dummy_secret
           admin-user:
             email: dummy@email.com
-            password: dummy-password
-            firstname: dummy-firstname
-            lastname: dummy-lastname
+            password: password
+            firstname: firstname
+            lastname: lastname
 scheduler:
   security:
     juror-api-service-authentication:
@@ -18,9 +18,9 @@ scheduler:
       issuer: Scheduler Service
       subject: Cron
       token-validity: 1600000
-      secret: dummy-api-secret
+      secret: dummy_api_secret
     api-job-execution-service-authentication:
       issuer: Scheduler Service
       subject: scheduler@scheduler.cgi.com
       token-validity: 1600000
-      secret: dummy-job-secret
+      secret: dummy_job_secret
