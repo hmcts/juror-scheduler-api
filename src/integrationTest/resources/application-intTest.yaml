@@ -1,0 +1,26 @@
+uk:
+  gov:
+    hmcts:
+      juror:
+        security:
+          use-database: true
+          token-validity: 1800000
+          secret: dummy-secret
+          admin-user:
+            email: dummy-email
+            password: dummy-password
+            firstname: dummy-firstname
+            lastname: dummy-lastname
+scheduler:
+  security:
+    juror-api-service-authentication:
+      id: JDCRON001
+      issuer: Scheduler Service
+      subject: Cron
+      token-validity: 1600000
+      secret: dummy-api-secret
+    api-job-execution-service-authentication:
+      issuer: Scheduler Service
+      subject: scheduler@scheduler.cgi.com
+      token-validity: 1600000
+      secret: dummy-job-secret

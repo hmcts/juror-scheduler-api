@@ -218,6 +218,9 @@ dependencies {
   implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
   implementation 'org.jetbrains:annotations:20.1.0'
+  
+  testImplementation 'com.h2database:h2:2.2.224'
+  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
   testImplementation 'junit:junit:4.13.2'
 
   // Data Mapping
