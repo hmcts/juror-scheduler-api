@@ -39,7 +39,6 @@ GradleBuilder builder = new GradleBuilder(this, product)
 withPipeline(type, product, component) {
   //enableDbMigration(product)
   loadVaultSecrets(secrets)
-  enableHighLevelDataSetup()
   enableSlackNotifications('#juror-build-notices')
   syncBranchesWithMaster(branchesToSync)
 
