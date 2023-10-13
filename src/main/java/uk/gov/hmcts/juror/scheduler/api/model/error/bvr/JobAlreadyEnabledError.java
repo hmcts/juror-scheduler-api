@@ -10,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@SuppressWarnings("All")
 public class JobAlreadyEnabledError extends BusinessRuleError {
 
     @JsonIgnore

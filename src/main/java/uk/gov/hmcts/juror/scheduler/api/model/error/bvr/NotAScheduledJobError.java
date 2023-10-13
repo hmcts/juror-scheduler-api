@@ -10,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@SuppressWarnings("All")
 public class NotAScheduledJobError extends BusinessRuleError {
 
     @JsonIgnore
