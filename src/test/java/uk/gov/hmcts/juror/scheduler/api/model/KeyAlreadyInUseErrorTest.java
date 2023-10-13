@@ -2,6 +2,7 @@ package uk.gov.hmcts.juror.scheduler.api.model;
 
 import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
 
+@SuppressWarnings("All")
 class KeyAlreadyInUseErrorTest extends GenericErrorTest<KeyAlreadyInUseError>{
     @Override
     protected String getErrorCode() {
