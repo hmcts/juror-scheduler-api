@@ -10,7 +10,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@SuppressWarnings("All")
 public class IncorrectPayloadForJobTypeError extends BusinessRuleError {
 
     @JsonIgnore

@@ -133,6 +133,7 @@ sonarqube {
   properties {
     property "sonar.projectName", "Juror :: juror-scheduler-api"
     property "sonar.projectKey", "uk.gov.hmcts.juror:juror-scheduler-api"
+    property "sonar.cpd.exclusions", "src/main/java/uk/gov/hmcts/juror/scheduler/api/model/**"
   }
 }
 
