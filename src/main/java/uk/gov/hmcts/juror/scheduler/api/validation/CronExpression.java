@@ -11,10 +11,12 @@ import java.lang.annotation.Target;
 
 @Documented
 @Constraint(validatedBy = CronExpressionValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CronExpression {
     String message() default "Invalid Cron Expression";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

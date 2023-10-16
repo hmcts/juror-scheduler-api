@@ -11,10 +11,12 @@ import java.lang.annotation.Target;
 
 @Documented
 @Constraint(validatedBy = JsonPathValidator.class)
-@Target( { ElementType.METHOD, ElementType.FIELD })
+@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonPath {
     String message() default "Invalid JsonPath";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

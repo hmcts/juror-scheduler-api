@@ -1,6 +1,5 @@
 package uk.gov.hmcts.juror.scheduler.service.impl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
 import uk.gov.hmcts.juror.scheduler.datastore.repository.TaskRepository;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
-import uk.gov.hmcts.juror.scheduler.testSupport.TestSpecification;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
@@ -41,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,11 +46,15 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-        classes = {
-                TaskServiceImpl.class
-        }
+    classes = {
+        TaskServiceImpl.class
+    }
 )
 @DisplayName("TaskServiceImpl")
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.ExcessiveImports"
+})
 class TaskServiceImplTest {
 
     @MockBean
@@ -64,26 +65,26 @@ class TaskServiceImplTest {
     @Autowired
     private TaskServiceImpl taskService;
 
-    private final static String jobKey = "ABC123";
+    private static final String JOB_KEY = "ABC123";
 
     @DisplayName("public TaskEntity createTask(APIJobDetailsEntity apiJobDetailsEntity)")
     @Nested
     class CreateTask {
         @Test
         @DisplayName("Success")
-        void positive_create_task_successfully() {
-            APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder().key(jobKey).build();
+        void positiveCreateTaskSuccessfully() {
+            APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder().key(JOB_KEY).build();
 
             when(taskRepository.save(any(TaskEntity.class)))
-                    .thenAnswer(invocation -> {
-                        TaskEntity task = invocation.getArgument(0);
-                        task.setTaskId(5L);
-                        return task;
-                    });
+                .thenAnswer(invocation -> {
+                    TaskEntity task = invocation.getArgument(0);
+                    task.setTaskId(5L);
+                    return task;
+                });
             TaskEntity taskEntity = taskService.createTask(apiJobDetailsEntity);
-            assertEquals(5L, taskEntity.getTaskId());
-            Assertions.assertEquals(apiJobDetailsEntity, taskEntity.getJob());
-            Assertions.assertEquals(Status.PENDING, taskEntity.getStatus());
+            assertEquals(5L, taskEntity.getTaskId(), "Task id must match");
+            assertEquals(apiJobDetailsEntity, taskEntity.getJob(), "Job must match");
+            assertEquals(Status.PENDING, taskEntity.getStatus(), "Status must match");
         }
     }
 
@@ -92,12 +93,12 @@ class TaskServiceImplTest {
     class SaveTask {
         @Test
         @DisplayName("Success")
-        void positive_save_task_successfully() {
+        void positiveSaveTaskSuccessfully() {
             TaskEntity taskEntityProvided = new TaskEntity();
             TaskEntity savedTaskEntity = new TaskEntity();
             savedTaskEntity.setTaskId(4L);
-            when(taskRepository.save(eq(taskEntityProvided))).thenReturn(savedTaskEntity);
-            Assertions.assertEquals(savedTaskEntity, taskService.saveTask(taskEntityProvided));
+            when(taskRepository.save(taskEntityProvided)).thenReturn(savedTaskEntity);
+            assertEquals(savedTaskEntity, taskService.saveTask(taskEntityProvided), "Task must match");
         }
     }
 
@@ -106,26 +107,27 @@ class TaskServiceImplTest {
     class GetTasksForJob {
         @Test
         @DisplayName("Success")
-        void positive_get_tasks_successfully() {
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(true);
+        void positiveGetTasksSuccessfully() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             List<TaskEntity> taskEntityList = new ArrayList<>();
             taskEntityList.add(TaskEntity.builder().taskId(1L).build());
             taskEntityList.add(TaskEntity.builder().taskId(2L).build());
             taskEntityList.add(TaskEntity.builder().taskId(3L).build());
 
-            when(taskRepository.findAllByJobKey(eq(jobKey))).thenReturn(taskEntityList);
+            when(taskRepository.findAllByJobKey(JOB_KEY)).thenReturn(taskEntityList);
 
-            assertEquals(taskEntityList, taskService.getTasks(jobKey));
-            verify(taskRepository, times(1)).findAllByJobKey(eq(jobKey));
+            assertEquals(taskEntityList, taskService.getTasks(JOB_KEY), "Task must match");
+            verify(taskRepository, times(1)).findAllByJobKey(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job not Found")
-        void negative_job_not_found() {
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(false);
+        void negativeJobNotFound() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(false);
 
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> taskService.getTasks(jobKey));
-            assertEquals("Job with key '" + jobKey + "' not found", exception.getMessage());
+            NotFoundException exception = assertThrows(NotFoundException.class, () -> taskService.getTasks(JOB_KEY));
+            assertEquals("Job with key '" + JOB_KEY + "' not found",
+                exception.getMessage(), "Message must match");
         }
     }
 
@@ -134,20 +136,22 @@ class TaskServiceImplTest {
     class GetTaskForJob {
         @Test
         @DisplayName("Success")
-        void positive_get_tasks_successfully() {
-            when(jobService.doesJobExist(jobKey)).thenReturn(true);
+        void positiveGetTasksSuccessfully() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             TaskEntity task = TaskEntity.builder().taskId(1L).build();
-            when(taskRepository.findFirstByJobKeyOrderByCreatedAt(jobKey)).thenReturn(task);
-            Assertions.assertEquals(task, taskService.getLatestTask(jobKey));
-            verify(taskRepository, times(1)).findFirstByJobKeyOrderByCreatedAt(jobKey);
+            when(taskRepository.findFirstByJobKeyOrderByCreatedAt(JOB_KEY)).thenReturn(task);
+            assertEquals(task, taskService.getLatestTask(JOB_KEY), "Task must match");
+            verify(taskRepository, times(1)).findFirstByJobKeyOrderByCreatedAt(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job not Found")
-        void negative_job_not_found() {
-            when(jobService.doesJobExist(jobKey)).thenReturn(false);
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> taskService.getLatestTask(jobKey));
-            assertEquals("Job with key '" + jobKey + "' not found", exception.getMessage());
+        void negativeJobNotFound() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(false);
+            NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> taskService.getLatestTask(JOB_KEY));
+            assertEquals("Job with key '" + JOB_KEY + "' not found",
+                exception.getMessage(), "Message must match");
         }
     }
 
@@ -156,39 +160,41 @@ class TaskServiceImplTest {
     class GetTaskForJobKeyAndTaskId {
         @Test
         @DisplayName("Success")
-        void positive_get_task_successfully() {
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(true);
+        void positiveGetTaskSuccessfully() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             long taskId = 1L;
             Optional<TaskEntity> optional = Optional.of(TaskEntity.builder().taskId(taskId).build());
-            when(taskRepository.findByJobKeyAndTaskId(eq(jobKey), eq(taskId))).thenReturn(optional);
+            when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
 
-            Assertions.assertEquals(optional.get(), taskService.getLatestTask(jobKey, taskId));
-            verify(jobService, times(1)).doesJobExist(eq(jobKey));
-            verify(taskRepository, times(1)).findByJobKeyAndTaskId(eq(jobKey), eq(taskId));
+            assertEquals(optional.get(), taskService.getLatestTask(JOB_KEY, taskId), "Task must match");
+            verify(jobService, times(1)).doesJobExist(JOB_KEY);
+            verify(taskRepository, times(1)).findByJobKeyAndTaskId(JOB_KEY, taskId);
         }
 
         @Test
         @DisplayName("Task not found")
-        void negative_task_not_found() {
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(true);
+        void negativeTaskNotFound() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             long taskId = 1L;
             Optional<TaskEntity> optional = Optional.empty();
-            when(taskRepository.findByJobKeyAndTaskId(eq(jobKey), eq(taskId))).thenReturn(optional);
+            when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
 
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> taskService.getLatestTask(jobKey,
-                    taskId));
-            assertEquals("Task not found for JobKey: " + jobKey + " and taskId " + taskId, exception.getMessage());
+            NotFoundException exception = assertThrows(NotFoundException.class, () -> taskService.getLatestTask(JOB_KEY,
+                taskId));
+            assertEquals("Task not found for JobKey: " + JOB_KEY + " and taskId " + taskId,
+                exception.getMessage(), "Message must match");
 
         }
 
         @Test
         @DisplayName("Job not Found")
-        void negative_job_not_found() {
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(false);
+        void negativeJobNotFound() {
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(false);
 
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> taskService.getLatestTask(jobKey,
-                    1L));
-            assertEquals("Job with key '" + jobKey + "' not found", exception.getMessage());
+            NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> taskService.getLatestTask(JOB_KEY, 1L));
+            assertEquals("Job with key '" + JOB_KEY + "' not found",
+                exception.getMessage(), "Message must match");
         }
     }
 
@@ -199,43 +205,43 @@ class TaskServiceImplTest {
 
         @ParameterizedTest(name = "Success - Only status: {0}")
         @EnumSource(Status.class)
-        void positive_update_status_only(Status status) {
+        void positiveUpdateStatusOnly(Status status) {
             long taskId = 1L;
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(true);
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
             Optional<TaskEntity> optional = Optional.of(taskEntity);
-            when(taskRepository.findByJobKeyAndTaskId(eq(jobKey), eq(taskId))).thenReturn(optional);
-            when(taskRepository.save(eq(taskEntity))).thenReturn(taskEntity);
+            when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
+            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
 
             StatusUpdate statusUpdate = new StatusUpdate();
             statusUpdate.setStatus(status);
 
-            taskService.updateStatus(jobKey, taskId, statusUpdate);
+            taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(1)).save(eq(taskEntity));
-            Assertions.assertEquals(status, taskEntity.getStatus());
-            assertEquals("Msg", taskEntity.getMessage());
+            verify(taskRepository, times(1)).save(taskEntity);
+            assertEquals(status, taskEntity.getStatus(), "Status must match");
+            assertEquals("Msg", taskEntity.getMessage(), "Message must match");
         }
 
         @Test
         @DisplayName("Success - Status and message")
-        void positive_update_status_and_message() {
+        void positiveUpdateStatusAndMessage() {
             long taskId = 1L;
-            when(jobService.doesJobExist(eq(jobKey))).thenReturn(true);
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
             Optional<TaskEntity> optional = Optional.of(taskEntity);
-            when(taskRepository.findByJobKeyAndTaskId(eq(jobKey), eq(taskId))).thenReturn(optional);
-            when(taskRepository.save(eq(taskEntity))).thenReturn(taskEntity);
+            when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
+            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
 
             StatusUpdate statusUpdate = new StatusUpdate();
             statusUpdate.setStatus(Status.VALIDATION_PASSED);
             statusUpdate.setMessage("New Message");
 
-            taskService.updateStatus(jobKey, taskId, statusUpdate);
+            taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(1)).save(eq(taskEntity));
-            Assertions.assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus());
-            assertEquals("New Message", taskEntity.getMessage());
+            verify(taskRepository, times(1)).save(taskEntity);
+            assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
+            assertEquals("New Message", taskEntity.getMessage(), "Message must match");
         }
     }
 
@@ -245,9 +251,9 @@ class TaskServiceImplTest {
     class DeleteALlByJobKey {
         @Test
         @DisplayName("Success")
-        void positive_delete_all_by_job_key() {
-            taskService.deleteAllByJobKey(jobKey);
-            verify(taskRepository, times(1)).deleteAllByJobKey(eq(jobKey));
+        void positiveDeleteAllByJobKey() {
+            taskService.deleteAllByJobKey(JOB_KEY);
+            verify(taskRepository, times(1)).deleteAllByJobKey(JOB_KEY);
         }
     }
 
@@ -262,7 +268,7 @@ class TaskServiceImplTest {
 
 
         @DisplayName("No search Filters")
-        void positive_no_search_filters() {
+        void positiveNoSearchFilters() {
             LocalDateTime currentLocalDateTime = LocalDateTime.now();
             try (MockedStatic<TaskRepository.Specs> utilities = Mockito.mockStatic(TaskRepository.Specs.class)) {
                 List<TaskEntity> tasks = new ArrayList<>();
@@ -274,26 +280,27 @@ class TaskServiceImplTest {
                 TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder().build();
 
                 try (MockedStatic<Specification> specificationMockedStatic =
-                             Mockito.mockStatic(Specification.class)) {
+                         Mockito.mockStatic(Specification.class)) {
 
                     try (MockedStatic<LocalDateTime> localDateTimeMock =
-                                 Mockito.mockStatic(LocalDateTime.class)) {
+                             Mockito.mockStatic(LocalDateTime.class)) {
                         localDateTimeMock.when(LocalDateTime::now).thenReturn(currentLocalDateTime);
 
                         List<TaskEntity> returnedJobs = taskService.getTasks(taskSearchFilter);
+                        assertEquals(tasks.size(), returnedJobs.size(), "Size must match");
+                        assertThat("Returned jobs should match", returnedJobs,
+                            hasItems(tasks.toArray(new TaskEntity[0])));
 
                         specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                         List<Specification<TaskEntity>> specs = captor.getValue();
-                        assertNotNull(specs);
-                        assertEquals(1, specs.size());
-                        assertEquals(tasks.size(), returnedJobs.size());
-                        assertThat(returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
+                        assertNotNull(specs, "Specs must not be null");
+                        assertEquals(1, specs.size(), "Spec size must match");
                     }
                 }
                 utilities.verify(
-                        () -> TaskRepository.Specs.byCreateDateGreaterThan(eq(currentLocalDateTime.minusDays(7))),
-                        times(1));
+                    () -> TaskRepository.Specs.byCreateDateGreaterThan(currentLocalDateTime.minusDays(7)),
+                    times(1));
 
                 utilities.verify(() -> TaskRepository.Specs.byJobKey(any()), never());
                 utilities.verify(() -> TaskRepository.Specs.byStatus(any()), never());
@@ -303,7 +310,7 @@ class TaskServiceImplTest {
 
         @Test
         @DisplayName("Job Key Filters")
-        void positive_job_key_filter() {
+        void positiveJobKeyFilter() {
             LocalDateTime currentLocalDateTime = LocalDateTime.now();
             try (MockedStatic<TaskRepository.Specs> utilities = Mockito.mockStatic(TaskRepository.Specs.class)) {
                 List<TaskEntity> tasks = new ArrayList<>();
@@ -312,31 +319,32 @@ class TaskServiceImplTest {
                 tasks.add(TaskEntity.builder().taskId(3L).build());
                 when(taskRepository.findAll(ArgumentMatchers.<Specification<TaskEntity>>any())).thenReturn(tasks);
 
-                TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder().jobKey(jobKey).build();
+                TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder().jobKey(JOB_KEY).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic =
-                             Mockito.mockStatic(Specification.class)) {
+                         Mockito.mockStatic(Specification.class)) {
 
                     try (MockedStatic<LocalDateTime> localDateTimeMock =
-                                 Mockito.mockStatic(LocalDateTime.class)) {
+                             Mockito.mockStatic(LocalDateTime.class)) {
                         localDateTimeMock.when(LocalDateTime::now).thenReturn(currentLocalDateTime);
 
                         List<TaskEntity> returnedJobs = taskService.getTasks(taskSearchFilter);
+                        assertEquals(tasks.size(), returnedJobs.size(), "Returned job size must match");
+                        assertThat("Returned jobs should match", returnedJobs,
+                            hasItems(tasks.toArray(new TaskEntity[0])));
 
                         specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                         List<Specification<TaskEntity>> specs = captor.getValue();
-                        assertNotNull(specs);
-                        assertEquals(2, specs.size());
-                        assertEquals(tasks.size(), returnedJobs.size());
-                        assertThat(returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
+                        assertNotNull(specs, "Specs should not be null");
+                        assertEquals(2, specs.size(), "Spec size must match");
                     }
                 }
                 utilities.verify(
-                        () -> TaskRepository.Specs.byCreateDateGreaterThan(eq(currentLocalDateTime.minusDays(7))),
-                        times(1));
+                    () -> TaskRepository.Specs.byCreateDateGreaterThan(currentLocalDateTime.minusDays(7)),
+                    times(1));
 
-                utilities.verify(() -> TaskRepository.Specs.byJobKey(eq(jobKey)), times(1));
+                utilities.verify(() -> TaskRepository.Specs.byJobKey(JOB_KEY), times(1));
                 utilities.verify(() -> TaskRepository.Specs.byStatus(any()), never());
                 utilities.verify(() -> TaskRepository.Specs.orderByCreatedOn(any()), times(1));
             }
@@ -344,7 +352,7 @@ class TaskServiceImplTest {
 
         @Test
         @DisplayName("Single Status Filters")
-        void positive_single_status_filter() {
+        void positiveSingleStatusFilter() {
             LocalDateTime currentLocalDateTime = LocalDateTime.now();
             try (MockedStatic<TaskRepository.Specs> utilities = Mockito.mockStatic(TaskRepository.Specs.class)) {
                 List<TaskEntity> tasks = new ArrayList<>();
@@ -359,36 +367,37 @@ class TaskServiceImplTest {
                 TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder().statuses(statusSet).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic =
-                             Mockito.mockStatic(Specification.class)) {
+                         Mockito.mockStatic(Specification.class)) {
 
                     try (MockedStatic<LocalDateTime> localDateTimeMock =
-                                 Mockito.mockStatic(LocalDateTime.class)) {
+                             Mockito.mockStatic(LocalDateTime.class)) {
                         localDateTimeMock.when(LocalDateTime::now).thenReturn(currentLocalDateTime);
 
                         List<TaskEntity> returnedJobs = taskService.getTasks(taskSearchFilter);
+                        assertEquals(tasks.size(), returnedJobs.size(), "Returned Job size must match");
+                        assertThat("Returned jobs should match", returnedJobs,
+                            hasItems(tasks.toArray(new TaskEntity[0])));
 
                         specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                         List<Specification<TaskEntity>> specs = captor.getValue();
-                        assertNotNull(specs);
-                        assertEquals(2, specs.size());
-                        assertEquals(tasks.size(), returnedJobs.size());
-                        assertThat(returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
+                        assertNotNull(specs,"Specs must not be null");
+                        assertEquals(2, specs.size(), "Spec size must match");
                     }
                 }
                 utilities.verify(
-                        () -> TaskRepository.Specs.byCreateDateGreaterThan(eq(currentLocalDateTime.minusDays(7))),
-                        times(1));
+                    () -> TaskRepository.Specs.byCreateDateGreaterThan(currentLocalDateTime.minusDays(7)),
+                    times(1));
 
                 utilities.verify(() -> TaskRepository.Specs.byJobKey(any()), never());
-                utilities.verify(() -> TaskRepository.Specs.byStatus(eq(statusSet)), times(1));
+                utilities.verify(() -> TaskRepository.Specs.byStatus(statusSet), times(1));
                 utilities.verify(() -> TaskRepository.Specs.orderByCreatedOn(any()), times(1));
             }
         }
 
         @Test
         @DisplayName("Multiple Status Filters")
-        void positive_multiple_status_filter() {
+        void positiveMultipleStatusFilter() {
             LocalDateTime currentLocalDateTime = LocalDateTime.now();
             try (MockedStatic<TaskRepository.Specs> utilities = Mockito.mockStatic(TaskRepository.Specs.class)) {
                 List<TaskEntity> tasks = new ArrayList<>();
@@ -405,29 +414,29 @@ class TaskServiceImplTest {
                 TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder().statuses(statusSet).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic =
-                             Mockito.mockStatic(Specification.class)) {
+                         Mockito.mockStatic(Specification.class)) {
 
                     try (MockedStatic<LocalDateTime> localDateTimeMock =
-                                 Mockito.mockStatic(LocalDateTime.class)) {
+                             Mockito.mockStatic(LocalDateTime.class)) {
                         localDateTimeMock.when(LocalDateTime::now).thenReturn(currentLocalDateTime);
 
                         List<TaskEntity> returnedJobs = taskService.getTasks(taskSearchFilter);
+                        assertEquals(tasks.size(), returnedJobs.size(), "Returned Job size must match");
+                        assertThat("Returned jobs must match",returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
 
                         specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                         List<Specification<TaskEntity>> specs = captor.getValue();
-                        assertNotNull(specs);
-                        assertEquals(2, specs.size());
-                        assertEquals(tasks.size(), returnedJobs.size());
-                        assertThat(returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
+                        assertNotNull(specs,"Specs must not be null");
+                        assertEquals(2, specs.size(), "Spec size must match");
                     }
                 }
                 utilities.verify(
-                        () -> TaskRepository.Specs.byCreateDateGreaterThan(eq(currentLocalDateTime.minusDays(7))),
-                        times(1));
+                    () -> TaskRepository.Specs.byCreateDateGreaterThan(currentLocalDateTime.minusDays(7)),
+                    times(1));
 
                 utilities.verify(() -> TaskRepository.Specs.byJobKey(any()), never());
-                utilities.verify(() -> TaskRepository.Specs.byStatus(eq(statusSet)), times(1));
+                utilities.verify(() -> TaskRepository.Specs.byStatus(statusSet), times(1));
                 utilities.verify(() -> TaskRepository.Specs.orderByCreatedOn(any()), times(1));
             }
 
@@ -435,7 +444,7 @@ class TaskServiceImplTest {
 
         @Test
         @DisplayName("From date Filters")
-        void positive_from_date_filter() {
+        void positiveFromDateFilter() {
             LocalDateTime currentLocalDateTime = LocalDateTime.now();
             try (MockedStatic<TaskRepository.Specs> utilities = Mockito.mockStatic(TaskRepository.Specs.class)) {
                 List<TaskEntity> tasks = new ArrayList<>();
@@ -445,29 +454,29 @@ class TaskServiceImplTest {
                 when(taskRepository.findAll(ArgumentMatchers.<Specification<TaskEntity>>any())).thenReturn(tasks);
 
                 TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder()
-                        .fromDate(currentLocalDateTime.minusDays(3)).build();
+                    .fromDate(currentLocalDateTime.minusDays(3)).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic =
-                             Mockito.mockStatic(Specification.class)) {
+                         Mockito.mockStatic(Specification.class)) {
 
                     try (MockedStatic<LocalDateTime> localDateTimeMock =
-                                 Mockito.mockStatic(LocalDateTime.class)) {
+                             Mockito.mockStatic(LocalDateTime.class)) {
                         localDateTimeMock.when(LocalDateTime::now).thenReturn(currentLocalDateTime);
 
                         List<TaskEntity> returnedJobs = taskService.getTasks(taskSearchFilter);
+                        assertEquals(tasks.size(), returnedJobs.size(), "Returned Job Size must match");
+                        assertThat("Returned jobs must match",returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
 
                         specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                         List<Specification<TaskEntity>> specs = captor.getValue();
-                        assertNotNull(specs);
-                        assertEquals(1, specs.size());
-                        assertEquals(tasks.size(), returnedJobs.size());
-                        assertThat(returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
+                        assertNotNull(specs,"Specs must not be null");
+                        assertEquals(1, specs.size(), "Spec size must match");
                     }
                 }
                 utilities.verify(
-                        () -> TaskRepository.Specs.byCreateDateGreaterThan(eq(currentLocalDateTime.minusDays(3))),
-                        times(1));
+                    () -> TaskRepository.Specs.byCreateDateGreaterThan(currentLocalDateTime.minusDays(3)),
+                    times(1));
 
                 utilities.verify(() -> TaskRepository.Specs.byJobKey(any()), never());
                 utilities.verify(() -> TaskRepository.Specs.byStatus(any()), never());
@@ -477,7 +486,7 @@ class TaskServiceImplTest {
 
         @Test
         @DisplayName("Multiple filters")
-        void positive_multiple_filters() {
+        void positiveMultipleFilters() {
             LocalDateTime currentLocalDateTime = LocalDateTime.now();
             try (MockedStatic<TaskRepository.Specs> utilities = Mockito.mockStatic(TaskRepository.Specs.class)) {
                 List<TaskEntity> tasks = new ArrayList<>();
@@ -491,33 +500,33 @@ class TaskServiceImplTest {
                 statusSet.add(Status.VALIDATION_PASSED);
                 statusSet.add(Status.VALIDATION_PASSED);
                 TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder()
-                        .jobKey(jobKey)
-                        .statuses(statusSet)
-                        .fromDate(currentLocalDateTime.minusDays(3)).build();
+                    .jobKey(JOB_KEY)
+                    .statuses(statusSet)
+                    .fromDate(currentLocalDateTime.minusDays(3)).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic =
-                             Mockito.mockStatic(Specification.class)) {
+                         Mockito.mockStatic(Specification.class)) {
 
                     try (MockedStatic<LocalDateTime> localDateTimeMock =
-                                 Mockito.mockStatic(LocalDateTime.class)) {
+                             Mockito.mockStatic(LocalDateTime.class)) {
                         localDateTimeMock.when(LocalDateTime::now).thenReturn(currentLocalDateTime);
 
                         List<TaskEntity> returnedJobs = taskService.getTasks(taskSearchFilter);
+                        assertEquals(tasks.size(), returnedJobs.size(), "Returned Jobs must match");
+                        assertThat("Returned jobs must match",returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
 
                         specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                         List<Specification<TaskEntity>> specs = captor.getValue();
-                        assertNotNull(specs);
-                        assertEquals(3, specs.size());
-                        assertEquals(tasks.size(), returnedJobs.size());
-                        assertThat(returnedJobs, hasItems(tasks.toArray(new TaskEntity[0])));
+                        assertNotNull(specs,"Specs must not be null");
+                        assertEquals(3, specs.size(), "Spec size must match");
                     }
                 }
                 utilities.verify(
-                        () -> TaskRepository.Specs.byCreateDateGreaterThan(eq(currentLocalDateTime.minusDays(3))),
-                        times(1));
+                    () -> TaskRepository.Specs.byCreateDateGreaterThan(currentLocalDateTime.minusDays(3)),
+                    times(1));
 
-                utilities.verify(() -> TaskRepository.Specs.byJobKey(eq(jobKey)), times(1));
+                utilities.verify(() -> TaskRepository.Specs.byJobKey(JOB_KEY), times(1));
                 utilities.verify(() -> TaskRepository.Specs.byStatus(any()), times(1));
                 utilities.verify(() -> TaskRepository.Specs.orderByCreatedOn(any()), times(1));
             }
@@ -525,28 +534,17 @@ class TaskServiceImplTest {
 
         @Test
         @DisplayName("No Tasks found")
-        void negative_not_tasks_found() {
+        void negativeNotTasksFound() {
 
             when(taskRepository.findAll(ArgumentMatchers.<Specification<TaskEntity>>any())).thenReturn(
-                    Collections.emptyList());
+                Collections.emptyList());
             TaskSearchFilter taskSearchFilter = TaskSearchFilter.builder().build();
             NotFoundException exception = assertThrows(NotFoundException.class, () -> {
                 taskService.getTasks(taskSearchFilter);
             });
 
-            assertEquals("No tasks found for the provided filter", exception.getMessage());
-        }
-
-        private void setupSpecificationMocks(MockedStatic<TaskRepository.Specs> utilities) {
-            utilities.when(() -> TaskRepository.Specs.byJobKey(any()))
-                    .thenReturn(new TestSpecification("byJobKey"));
-            utilities.when(() -> TaskRepository.Specs.byStatus(any()))
-                    .thenReturn(new TestSpecification("byStatus"));
-            utilities.when(() -> TaskRepository.Specs.byCreateDateGreaterThan(any()))
-                    .thenReturn(new TestSpecification("byCreateDateGreaterThan"));
-            utilities.when(() -> TaskRepository.Specs.orderByCreatedOn(any()))
-                    .thenReturn(new TestSpecification("orderByCreatedOn"));
-
+            assertEquals("No tasks found for the provided filter",
+                exception.getMessage(), "Message must match");
         }
     }
 }

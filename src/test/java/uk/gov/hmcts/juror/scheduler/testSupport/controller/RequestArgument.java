@@ -1,5 +1,8 @@
-package uk.gov.hmcts.juror.scheduler.testSupport.controller;
+package uk.gov.hmcts.juror.scheduler.testsupport.controller;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -7,22 +10,26 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.function.Consumer;
 
-@SuppressWarnings("unchecked")
+@Setter
+@Accessors(chain = true)
 public class RequestArgument implements Arguments {
     private Consumer<MockHttpServletRequestBuilder> preActions = (builder) -> {
     };
     private Consumer<ResultActions> postActions = resultActions -> {
     };
 
+    @Getter
     private final String requestPayload;
 
+    @Getter
     private MediaType contentType = MediaType.APPLICATION_JSON;
 
     public RequestArgument(Consumer<MockHttpServletRequestBuilder> preActions, Consumer<ResultActions> postActions) {
         this(preActions, postActions, null);
     }
 
-    public RequestArgument(Consumer<MockHttpServletRequestBuilder> preActions, Consumer<ResultActions> postActions, String requestPayload) {
+    public RequestArgument(Consumer<MockHttpServletRequestBuilder> preActions, Consumer<ResultActions> postActions,
+                           String requestPayload) {
         if (preActions != null) {
             this.preActions = preActions;
         }
@@ -30,11 +37,6 @@ public class RequestArgument implements Arguments {
             this.postActions = postActions;
         }
         this.requestPayload = requestPayload;
-    }
-
-    public <T extends RequestArgument> T setContentType(MediaType mediaType) {
-        contentType = mediaType;
-        return (T) this;
     }
 
     public void runPreActions(MockHttpServletRequestBuilder builder, ControllerTest controllerTest) throws Exception {
@@ -45,25 +47,9 @@ public class RequestArgument implements Arguments {
         this.postActions.accept(resultActions);
     }
 
-    public <T extends RequestArgument> T setPostActions(Consumer<ResultActions> postActions) {
-        this.postActions = postActions;
-        return (T) this;
-    }
-
-    public <T extends RequestArgument> T setPreActions(Consumer<MockHttpServletRequestBuilder> preActions) {
-        this.preActions = preActions;
-        return (T) this;
-    }
-
-    public String getRequestPayload(){
-        return this.requestPayload;
-    }
-    public MediaType getContentType(){
-        return this.contentType;
-    }
 
     @Override
-    public Object[] get() {
+    public final Object[] get() {
         return new Object[]{this};
     }
 }

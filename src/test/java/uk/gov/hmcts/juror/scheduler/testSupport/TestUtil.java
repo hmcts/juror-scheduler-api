@@ -1,4 +1,4 @@
-package uk.gov.hmcts.juror.scheduler.testSupport;
+package uk.gov.hmcts.juror.scheduler.testsupport;
 
 
 import com.jayway.jsonpath.DocumentContext;
@@ -9,29 +9,28 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.FileCopyUtils;
-import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
-import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.MaxResponseTimeAPIValidation;
-import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
-import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
-import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
-import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.JsonPathAPIValidation;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.MaxResponseTimeAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValidation;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.JsonPathAPIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.MaxResponseTimeAPIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.StatusCodeValidationEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
+import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
+import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,13 +48,22 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings("unchecked")
-public class TestUtil {
+@SuppressWarnings({
+    "unchecked",
+    "PMD.ExcessiveImports",
+    "PMD.TooManyMethods",
+    "PMD.TestClassWithoutTestCases"//False positive - support class
+})
+public final class TestUtil {
 
-    private static final Random random;
+    private static final Random RANDOM;
 
     static {
-        random = new Random();
+        RANDOM = new Random();
+    }
+
+    private TestUtil() {
+
     }
 
     @SneakyThrows
@@ -87,108 +95,103 @@ public class TestUtil {
 
     public static APIJobDetails generateAPIJobDetails() {
         return APIJobDetails
-                .builder()
-                .key(RandomStringUtils.randomAlphabetic(3, 25))
-                .cronExpression("* 5 * * * ?")
-                .information(generateInformation())
-                .method(APIMethod.GET)
-                .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
-                .headers(new HashMap<>() {{
-                    put(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25));
-                    put(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25));
-                }})
-                .authenticationDefault(AuthenticationDefaults.NONE)
-                .payload("{\"" + RandomStringUtils.randomAlphabetic(10, 25) + "\":\"" + RandomStringUtils.randomAlphabetic(10,
-                        25) + "\"}")
-                .validations(new ArrayList<>() {{
-                    add(new StatusCodeAPIValidation(201));
-                }})
-                .build();
+            .builder()
+            .key(RandomStringUtils.randomAlphabetic(3, 25))
+            .cronExpression("* 5 * * * ?")
+            .information(generateInformation())
+            .method(APIMethod.GET)
+            .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
+            .headers(
+                Map.of(
+                    RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25),
+                    RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25)))
+            .authenticationDefault(AuthenticationDefaults.NONE)
+            .payload(
+                "{\"" + RandomStringUtils.randomAlphabetic(10, 25) + "\":\""
+                    + RandomStringUtils.randomAlphabetic(10, 25) + "\"}")
+            .validations(
+                List.of(new StatusCodeAPIValidation(201)))
+            .build();
     }
 
     public static APIJobDetailsResponse generateAPIJobDetailsResponse() {
         return APIJobDetailsResponse
-                .builder()
-                .createdAt(LocalDateTime.now())
-                .lastUpdatedAt(LocalDateTime.now().plusHours(1))
-                .information(generateInformation())
-                .method(APIMethod.GET)
-                .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
-                .headers(new HashMap<>() {{
-                    put(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25));
-                    put(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25));
-                }})
-                .authenticationDefault(getRandomEnumValue(AuthenticationDefaults.class))
-                .payload("{\"" + RandomStringUtils.randomAlphabetic(10, 25) + "\":\"" + RandomStringUtils.randomAlphabetic(10,
-                        25) + "\"}")
-                .validations(new ArrayList<>() {{
-                    add(new StatusCodeAPIValidation(201));
-                }})
-                .build();
+            .builder()
+            .createdAt(LocalDateTime.now())
+            .lastUpdatedAt(LocalDateTime.now().plusHours(1))
+            .information(generateInformation())
+            .method(APIMethod.GET)
+            .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
+            .headers(
+                Map.of(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25),
+                    RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25)))
+            .authenticationDefault(getRandomEnumValue(AuthenticationDefaults.class))
+            .payload(
+                "{\"" + RandomStringUtils.randomAlphabetic(10, 25) + "\":\"" + RandomStringUtils.randomAlphabetic(10,
+                    25) + "\"}")
+            .validations(List.of(new StatusCodeAPIValidation(201)))
+            .build();
     }
 
     public static APIJobDetailsEntity generateAPIJobDetailsEntry() {
         Information information = generateInformation();
         return APIJobDetailsEntity
-                .builder()
-                .createdAt(LocalDateTime.now())
-                .lastUpdatedAt(LocalDateTime.now().plusHours(1))
-                .name(information.getName())
-                .description(information.getDescription())
-                .tags(information.getTags())
-                .method(APIMethod.GET)
-                .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
-                .headers(new HashMap<>() {{
-                    put(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25));
-                    put(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25));
-                }})
-                .authenticationDefault(AuthenticationDefaults.JUROR_API_SERVICE)
-                .payload("{\"" + RandomStringUtils.randomAlphabetic(10, 25) + "\":\"" + RandomStringUtils.randomAlphabetic(10,
-                        25) + "\"}")
-                .validations(new ArrayList<>() {{
-                    add(new StatusCodeValidationEntity(201));
-                }})
-                .build();
+            .builder()
+            .createdAt(LocalDateTime.now())
+            .lastUpdatedAt(LocalDateTime.now().plusHours(1))
+            .name(information.getName())
+            .description(information.getDescription())
+            .tags(information.getTags())
+            .method(APIMethod.GET)
+            .url("www." + RandomStringUtils.randomAlphabetic(10, 25) + ".com")
+            .headers(
+                Map.of(RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25),
+                    RandomStringUtils.randomAlphabetic(10, 25), RandomStringUtils.randomAlphabetic(10, 25)))
+            .authenticationDefault(AuthenticationDefaults.JUROR_API_SERVICE)
+            .payload(
+                "{\"" + RandomStringUtils.randomAlphabetic(10, 25) + "\":\""
+                    + RandomStringUtils.randomAlphabetic(10, 25) + "\"}")
+            .validations(List.of(new StatusCodeValidationEntity(201)))
+            .build();
     }
 
     public static TaskDetail generateTask() {
-        TaskDetail.TaskDetailBuilder builder = TaskDetail.builder();
         return TaskDetail.builder()
-                .jobKey(RandomStringUtils.randomAlphabetic(3, 25))
-                .taskId(ThreadLocalRandom.current().nextInt(1, 30000))
-                .createdAt(LocalDateTime.now())
-                .lastUpdatedAt(LocalDateTime.now().plusHours(1))
-                .status(getRandomEnumValue(Status.class))
-                .message(RandomStringUtils.randomAlphabetic(1, 2500))
-                .build();
+            .jobKey(RandomStringUtils.randomAlphabetic(3, 25))
+            .taskId(ThreadLocalRandom.current().nextInt(1, 30_000))
+            .createdAt(LocalDateTime.now())
+            .lastUpdatedAt(LocalDateTime.now().plusHours(1))
+            .status(getRandomEnumValue(Status.class))
+            .message(RandomStringUtils.randomAlphabetic(1, 2500))
+            .build();
     }
 
     private static <T extends Enum<?>> T getRandomEnumValue(Class<T> enumClass) {
         T[] values = enumClass.getEnumConstants();
-        return values[random.nextInt(values.length)];
+        return values[RANDOM.nextInt(values.length)];
     }
 
-    public static <T extends Enum<?>> String[] getEnumNames(Class<T> e) {
-        return Arrays.stream(e.getEnumConstants()).map(Enum::name).toArray(String[]::new);
+    public static <T extends Enum<?>> String[] getEnumNames(Class<T> enumClass) {
+        return Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).toArray(String[]::new);
     }
 
 
     public static APIJobDetailsEntity cloneAPIJobDetailsEntity(APIJobDetailsEntity baseApiJobDetailsEntity) {
         return APIJobDetailsEntity.builder()
-                .key(baseApiJobDetailsEntity.getKey())
-                .cronExpression(baseApiJobDetailsEntity.getCronExpression())
-                .method(baseApiJobDetailsEntity.getMethod())
-                .name(baseApiJobDetailsEntity.getName())
-                .description(baseApiJobDetailsEntity.getDescription())
-                .tags(cloneSet(baseApiJobDetailsEntity.getTags()))
-                .url(baseApiJobDetailsEntity.getUrl())
-                .payload(baseApiJobDetailsEntity.getPayload())
-                .authenticationDefault(baseApiJobDetailsEntity.getAuthenticationDefault())
-                .createdAt(baseApiJobDetailsEntity.getCreatedAt())
-                .lastUpdatedAt(baseApiJobDetailsEntity.getLastUpdatedAt())
-                .headers(cloneMap(baseApiJobDetailsEntity.getHeaders()))
-                .validations(cloneValidations(baseApiJobDetailsEntity.getValidations()))
-                .build();
+            .key(baseApiJobDetailsEntity.getKey())
+            .cronExpression(baseApiJobDetailsEntity.getCronExpression())
+            .method(baseApiJobDetailsEntity.getMethod())
+            .name(baseApiJobDetailsEntity.getName())
+            .description(baseApiJobDetailsEntity.getDescription())
+            .tags(cloneSet(baseApiJobDetailsEntity.getTags()))
+            .url(baseApiJobDetailsEntity.getUrl())
+            .payload(baseApiJobDetailsEntity.getPayload())
+            .authenticationDefault(baseApiJobDetailsEntity.getAuthenticationDefault())
+            .createdAt(baseApiJobDetailsEntity.getCreatedAt())
+            .lastUpdatedAt(baseApiJobDetailsEntity.getLastUpdatedAt())
+            .headers(cloneMap(baseApiJobDetailsEntity.getHeaders()))
+            .validations(cloneValidations(baseApiJobDetailsEntity.getValidations()))
+            .build();
     }
 
     private static List<APIValidationEntity> cloneValidations(List<APIValidationEntity> validations) {
@@ -199,6 +202,7 @@ public class TestUtil {
         return list;
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     private static APIValidationEntity cloneValidation(APIValidationEntity validation) {
         if (validation instanceof StatusCodeValidationEntity statusCodeValidation) {
             return new StatusCodeValidationEntity(statusCodeValidation.getExpectedStatusCode());
@@ -208,7 +212,7 @@ public class TestUtil {
         }
         if (validation instanceof JsonPathAPIValidationEntity jsonPathAPIValidation) {
             return new JsonPathAPIValidationEntity(jsonPathAPIValidation.getPath(),
-                    jsonPathAPIValidation.getExpectedResponse());
+                jsonPathAPIValidation.getExpectedResponse());
         }
         throw new RuntimeException("Unknown validation type: " + validation.getClass());
     }
@@ -221,6 +225,7 @@ public class TestUtil {
         return list;
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     public static APIValidationEntity convertValidation(APIValidation validation) {
         if (validation instanceof StatusCodeAPIValidation statusCodeAPIValidation) {
             return new StatusCodeValidationEntity(statusCodeAPIValidation.getExpectedStatusCode());
@@ -230,7 +235,7 @@ public class TestUtil {
         }
         if (validation instanceof JsonPathAPIValidation jsonPathAPIValidation) {
             return new JsonPathAPIValidationEntity(jsonPathAPIValidation.getPath(),
-                    jsonPathAPIValidation.getExpectedResponse());
+                jsonPathAPIValidation.getExpectedResponse());
         }
         throw new RuntimeException("Unknown validation type: " + validation.getClass());
     }
@@ -245,15 +250,16 @@ public class TestUtil {
 
     public static ResultMatcher jsonMatcher(JSONCompareMode mode, String expectedPayload) {
         return result -> {
-            String actual = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+            String actual = result.getResponse().getContentAsString();
             JSONAssert.assertEquals(
-                    "",
-                    expectedPayload,
-                    actual,
-                    mode
+                "",
+                expectedPayload,
+                actual,
+                mode
             );
         };
     }
+
     public static <T> Stream<T> concat(Stream<T>... streams) {
         Stream<T> mainStream = null;
         for (Stream<T> stream : streams) {
@@ -265,6 +271,7 @@ public class TestUtil {
         }
         return mainStream;
     }
+
     public static String replaceJsonPath(String json, String jsonPath, Object replacement) {
         DocumentContext parsed = JsonPath.parse(json);
         parsed.set(jsonPath, replacement);
@@ -285,6 +292,6 @@ public class TestUtil {
 
     public static void isUnmodifiable(Collection<?> collection) {
         assertThrows(UnsupportedOperationException.class,
-                () -> collection.add(null));
+            () -> collection.add(null));
     }
 }

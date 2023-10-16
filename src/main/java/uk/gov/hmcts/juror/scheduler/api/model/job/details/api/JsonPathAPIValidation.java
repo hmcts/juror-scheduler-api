@@ -24,7 +24,8 @@ public class JsonPathAPIValidation extends APIValidation {
     private String path;
 
     @NotNull
-    @Schema(description = "This is the expected value that the JsonPath should return when evaluated against the API response")
+    @Schema(description = "This is the expected value that the JsonPath "
+        + "should return when evaluated against the API response")
     @JsonProperty("expected_response")
     private String expectedResponse;
 

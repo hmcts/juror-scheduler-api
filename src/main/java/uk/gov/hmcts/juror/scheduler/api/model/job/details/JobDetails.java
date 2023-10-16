@@ -18,7 +18,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
 @Setter
 @NoArgsConstructor
 @Schema(oneOf = {
-        APIJobDetails.class
+    APIJobDetails.class
 })
 @SuperBuilder
 public class JobDetails {
@@ -39,6 +39,7 @@ public class JobDetails {
 
     @JsonProperty("cron_expression")
     @CronExpression
-    @Schema(description = "The cron expression that should be use to schedule this Job. If none is provided the Job will be unscheduled as such will only run if manually triggered.")
+    @Schema(description = "The cron expression that should be use to schedule this Job. "
+        + "If none is provided the Job will be unscheduled as such will only run if manually triggered.")
     private String cronExpression;
 }

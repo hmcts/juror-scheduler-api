@@ -36,8 +36,8 @@ class JsonPathValidatorTest {
         "someValue[0].newValue[2]..value",
     })
     @NullSource
-    public void positive_valid_json_path(String jsonPath) {
-        assertTrue(this.validator.isValid(jsonPath, context));
+    void positiveValidJsonPath(String jsonPath) {
+        assertTrue(this.validator.isValid(jsonPath, context),"Validator should return true");
     }
 
     @ParameterizedTest
@@ -49,7 +49,7 @@ class JsonPathValidatorTest {
         "  ",
         "#",
     })
-    public void negative_invalid_json_path(String jsonPath) {
-        assertFalse(this.validator.isValid(jsonPath, context));
+    void negativeInvalidJsonPath(String jsonPath) {
+        assertFalse(this.validator.isValid(jsonPath, context),"Validator should return false");
     }
 }

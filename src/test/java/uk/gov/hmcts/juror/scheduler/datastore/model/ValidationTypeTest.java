@@ -1,6 +1,9 @@
 package uk.gov.hmcts.juror.scheduler.datastore.model;
 
-class ValidationTypeTest extends EnumTest<ValidationType>{
+@SuppressWarnings({
+    "PMD.TestClassWithoutTestCases" //False positive done via inheritance
+})
+class ValidationTypeTest extends EnumTest<ValidationType> {
     @Override
     protected Class<ValidationType> getEnumClass() {
         return ValidationType.class;

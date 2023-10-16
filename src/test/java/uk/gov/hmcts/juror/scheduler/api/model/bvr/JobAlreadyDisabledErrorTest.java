@@ -1,8 +1,11 @@
 package uk.gov.hmcts.juror.scheduler.api.model.bvr;
 
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
 import uk.gov.hmcts.juror.scheduler.api.model.GenericErrorTest;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
 
+@SuppressWarnings({
+    "PMD.TestClassWithoutTestCases" //False positive done via inheritance
+})
 class JobAlreadyDisabledErrorTest extends GenericErrorTest<JobAlreadyDisabledError> {
     @Override
     protected String getErrorCode() {

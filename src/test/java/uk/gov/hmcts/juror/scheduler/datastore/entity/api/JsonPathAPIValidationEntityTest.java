@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,24 +48,26 @@ class JsonPathAPIValidationEntityTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("jsonPathValidationTestDataProvider")
-    public void testRunner(String name, String path, String expectedValue, String returnedValue,
+    void testRunner(String name, String path, String expectedValue, String returnedValue,
                            boolean expectPass) {
         final JsonPath jsonPath = mock(JsonPath.class);
         validationEntity.setPath(path);
         validationEntity.setExpectedResponse(expectedValue);
         when(response.jsonPath()).thenReturn(jsonPath);
-        when(jsonPath.getString(eq(path))).thenReturn(returnedValue);
+        when(jsonPath.getString(path)).thenReturn(returnedValue);
 
         APIValidationEntity.Result result = validationEntity.validate(response, jobData);
 
         if (expectPass) {
-            assertNotNull(result);
-            assertTrue(result.isPassed());
-            assertNull(result.getMessage());
+            assertNotNull(result,"Result should not be null");
+            assertTrue(result.isPassed(),"Result should be passed");
+            assertNull(result.getMessage(),"Result must not have message");
         } else {
-            assertNotNull(result);
-            assertFalse(result.isPassed());
-            assertEquals("Expected response to return '" + expectedValue + "' for json path '" + path + "' but got '" + returnedValue + "'", result.getMessage());
+            assertNotNull(result,"Result must not be null");
+            assertFalse(result.isPassed(),"Result must not be passed");
+            assertEquals("Expected response to return '" + expectedValue + "' for json path '"
+                + path + "' but got '" + returnedValue + "'", result.getMessage(),
+                "Message must match");
         }
     }
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.juror.scheduler.testSupport.controller;
+package uk.gov.hmcts.juror.scheduler.testsupport.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,33 +12,46 @@ import org.springframework.http.MediaType;
 import java.util.stream.Stream;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public abstract class ControllerWithPayloadTest extends ControllerTest {
 
     public ControllerWithPayloadTest(HttpMethod method, String url, HttpStatus successStatus) {
-        super(method,url,successStatus);
+        super(method, url, successStatus);
     }
+
     protected Stream<InvalidPayloadArgument> getStandardInvalidPayloads() {
         return Stream.of(
-                new InvalidPayloadArgument(null, "Unable to read payload content"),
-                new InvalidPayloadArgument("Non-Json", "Unable to read payload content")
+            new InvalidPayloadArgument(null, "Unable to read payload content"),
+            new InvalidPayloadArgument("Non-Json", "Unable to read payload content")
         );
     }
 
     @ParameterizedTest(name = "Expect error message: {0}")
     @MethodSource({"getInvalidPayloadArgumentSource", "getStandardInvalidPayloads"})
     @DisplayName("Invalid Payload")
-    protected void callAndExpectErrorResponse(ErrorRequestArgument errorRequestArgument) throws Exception {
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert","java:S2699"
+    })//False positive - checked via inheritance
+    void callAndExpectErrorResponse(ErrorRequestArgument errorRequestArgument) throws Exception {
         callAndValidate(errorRequestArgument);
     }
 
     @Test
-    protected void negative_invalid_content_type() throws Exception {
-        callAndValidate(new ErrorRequestArgument(HttpStatus.UNSUPPORTED_MEDIA_TYPE, getTypicalPayload(), "INVALID_CONTENT_TYPE", "Content Type must be application/json").setContentType(MediaType.TEXT_PLAIN));
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert","java:S2699"
+    })//False positive - checked via inheritance
+    void negativeInvalidContentType() throws Exception {
+        callAndValidate(new ErrorRequestArgument(HttpStatus.UNSUPPORTED_MEDIA_TYPE, getTypicalPayload(),
+            "INVALID_CONTENT_TYPE", "Content Type must be application/json").setContentType(MediaType.TEXT_PLAIN));
     }
 
-   @Test
-    protected void negative_missing_content_type() throws Exception {
-        callAndValidate(new ErrorRequestArgument(HttpStatus.UNSUPPORTED_MEDIA_TYPE, getTypicalPayload(), "INVALID_CONTENT_TYPE", "Content Type must be application/json").setContentType(null));
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert","java:S2699"
+    })//False positive - checked via inheritance
+    void negativeMissingContentType() throws Exception {
+        callAndValidate(new ErrorRequestArgument(HttpStatus.UNSUPPORTED_MEDIA_TYPE, getTypicalPayload(),
+            "INVALID_CONTENT_TYPE", "Content Type must be application/json").setContentType(null));
     }
 
     protected abstract String getTypicalPayload();
@@ -47,7 +60,10 @@ public abstract class ControllerWithPayloadTest extends ControllerTest {
 
     @ParameterizedTest(name = "Positive: {0}")
     @MethodSource("getSuccessRequestArgument")
-    protected void positive_valid_typical(SuccessRequestArgument requestArgument) throws Exception {
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert","java:S2699"
+    })//False positive - checked via inheritance
+    void positiveValidTypical(SuccessRequestArgument requestArgument) throws Exception {
         callAndValidate(requestArgument);
     }
 

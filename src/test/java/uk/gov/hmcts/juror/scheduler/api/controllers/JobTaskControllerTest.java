@@ -18,14 +18,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.StatusUpdate;
 import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
-import uk.gov.hmcts.juror.scheduler.testSupport.APIConstantsTest;
-import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
-import uk.gov.hmcts.juror.scheduler.api.model.job.details.StatusUpdate;
-import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
+import uk.gov.hmcts.juror.scheduler.testsupport.APIConstantsTest;
+import uk.gov.hmcts.juror.scheduler.testsupport.ControllerTestSupport;
+import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
@@ -56,7 +56,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     }
 )
 @DisplayName("Controller: /job/{job-key}/task/{task-id}")
-class JobTaskControllerTest  {
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.ExcessiveImports"
+})
+class JobTaskControllerTest {
     private static final String CONTROLLER_BASEURL = "/job/{job-key}/task/{task-id}";
     private static final String GET_TASK_DETAILS = CONTROLLER_BASEURL;
     private static final String UPDATE_TASK_STATUS = CONTROLLER_BASEURL + "/status";
@@ -87,8 +91,10 @@ class JobTaskControllerTest  {
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
 
             if (jobServiceCalled) {
-                verify(taskService, times(1)).getLatestTask(eq(jobKey), eq(taskId));
-                verify(taskMapper, times(status == HttpStatus.NOT_FOUND ? 0 : 1)).toTask(any());
+                verify(taskService, times(1)).getLatestTask(jobKey, taskId);
+                verify(taskMapper, times(status == HttpStatus.NOT_FOUND
+                    ? 0
+                    : 1)).toTask(any());
             } else {
                 verify(taskService, never()).getLatestTask(any(String.class), any(Long.class));
                 verify(taskMapper, never()).toTask(any());
@@ -96,9 +102,9 @@ class JobTaskControllerTest  {
         }
 
         @Test
-        void positive_get_task() throws Exception {
+        void positiveGetTask() throws Exception {
             final String jobKey = "ABC";
-            final Long taskId = 1L;
+            final long taskId = 1L;
             TaskDetail taskDetail = TestUtil.generateTask();
             when(taskMapper.toTask(any())).thenReturn(taskDetail);
 
@@ -107,31 +113,41 @@ class JobTaskControllerTest  {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(createResponseStringFromObject(taskDetail), true));
-            verify(taskService, times(1)).getLatestTask(eq(jobKey), eq(taskId));
+            verify(taskService, times(1)).getLatestTask(jobKey, taskId);
             verify(taskMapper, times(1)).toTask(any());
         }
 
         @Test
-        void negative_invalid_job_key() throws Exception {
-            callAndExpectErrorResponse("A", 1L, "INVALID_PAYLOAD", "getTaskDetail.jobKey: must match \\\"[A-Z_]{3," +
-                    "50}\\\"",
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeInvalidJobKey() throws Exception {
+            callAndExpectErrorResponse("A", 1L, "INVALID_PAYLOAD",
+                "getTaskDetail.jobKey: must match \\\"[A-Z_0-9]{3,50}\\\"",
                 HttpStatus.BAD_REQUEST, false);
         }
 
         @Test
-        void negative_invalid_task_key() throws Exception {
-            callAndExpectErrorResponse("ABC", 0L, "INVALID_PAYLOAD", "getTaskDetail.taskId: must be greater than or " +
-                    "equal to 1",
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeInvalidTaskKey() throws Exception {
+            callAndExpectErrorResponse("ABC", 0L, "INVALID_PAYLOAD",
+                "getTaskDetail.taskId: must be greater than or equal to 1",
                 HttpStatus.BAD_REQUEST, false);
         }
 
         @Test
-        void negative_not_found() throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeNotFound() throws Exception {
             final String jobKey = "ABC";
-            final Long taskId = 1L;
-            doThrow(new NotFoundException("Task not found for JobKey: " + jobKey + " and taskId " + taskId)).when(taskService).getLatestTask(eq(jobKey), eq(taskId));
-            callAndExpectErrorResponse(jobKey, taskId, "NOT_FOUND", "The requested resource could not be " +
-                    "located.",
+            final long taskId = 1L;
+            doThrow(new NotFoundException("Task not found for JobKey: " + jobKey + " and taskId " + taskId))
+                .when(taskService).getLatestTask(jobKey, taskId);
+            callAndExpectErrorResponse(jobKey, taskId, "NOT_FOUND",
+                "The requested resource could not be located.",
                 HttpStatus.NOT_FOUND, true);
         }
     }
@@ -148,13 +164,13 @@ class JobTaskControllerTest  {
                 Arguments.arguments(null, "Unable to read payload content"),
                 //Status
                 Arguments.arguments(TestUtil.replaceJsonPath(payload, "$.status", "INVALID"),
-                    "Invalid status entered. Allowed values are: [PENDING, VALIDATION_PASSED, VALIDATION_FAILED, " +
-                        "FAILED_UNEXPECTED_EXCEPTION, SUCCESS, FAILED, INDETERMINATE]"),
+                    "Invalid status entered. Allowed values are: [PENDING, VALIDATION_PASSED, VALIDATION_FAILED, "
+                        + "FAILED_UNEXPECTED_EXCEPTION, SUCCESS, FAILED, INDETERMINATE]"),
                 Arguments.arguments(TestUtil.deleteJsonPath(payload, "$.status"), "status: must not be null"),
                 //Message
 
-                Arguments.arguments(TestUtil.replaceJsonPath(payload, "$.message", ""), "message: length must be between 1 and" +
-                    " 2500"),
+                Arguments.arguments(TestUtil.replaceJsonPath(payload, "$.message", ""),
+                    "message: length must be between 1 and 2500"),
 
                 Arguments.arguments(TestUtil.replaceJsonPath(payload, "$.message",
                         RandomStringUtils.randomAlphabetic(APIConstantsTest.DEFAULT_MAX_LENGTH_LONG)),
@@ -164,7 +180,10 @@ class JobTaskControllerTest  {
 
         @ParameterizedTest(name = "Expect error message: {1}")
         @MethodSource("invalidUpdateJobStatusPayloadArgumentSource")
-        void negative_update_job_status_invalid_payload(String payload, String expectedErrorMessage) throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeUpdateJobStatusInvalidPayload(String payload, String expectedErrorMessage) throws Exception {
             callAndExpectErrorResponse("ABC", 1L, payload, "INVALID_PAYLOAD", expectedErrorMessage,
                 HttpStatus.BAD_REQUEST, false);
         }
@@ -177,7 +196,8 @@ class JobTaskControllerTest  {
                                                   HttpStatus status,
                                                   boolean jobServiceCalled) throws Exception {
 
-            MockHttpServletRequestBuilder builder = put(UPDATE_TASK_STATUS, jobKey, taskId).contentType(MediaType.APPLICATION_JSON);
+            MockHttpServletRequestBuilder builder = put(UPDATE_TASK_STATUS, jobKey, taskId)
+                .contentType(MediaType.APPLICATION_JSON);
             if (payload != null) {
                 builder
                     .content(payload);
@@ -208,7 +228,7 @@ class JobTaskControllerTest  {
         }
 
         @Test
-        void positive_typical_update() throws Exception {
+        void positiveTypicalUpdate() throws Exception {
             String payload = TestUtil.readResource("updateTaskStatus.json", RESOURCE_PREFIX);
             final String jobKey = "ABC";
             final Long taskId = 1L;
@@ -218,12 +238,13 @@ class JobTaskControllerTest  {
             verify(taskService, times(1)).updateStatus(eq(jobKey), eq(taskId), captor.capture());
             final StatusUpdate statusUpdate = captor.getValue();
 
-            assertEquals(Status.VALIDATION_PASSED, statusUpdate.getStatus());
-            assertEquals("This has passed successfully because of ayz", statusUpdate.getMessage());
+            assertEquals(Status.VALIDATION_PASSED, statusUpdate.getStatus(), "Status must match");
+            assertEquals("This has passed successfully because of ayz", statusUpdate.getMessage(),
+                "Message must match");
         }
 
         @Test
-        void positive_only_status_update() throws Exception {
+        void positiveOnlyStatusUpdate() throws Exception {
             String payload = TestUtil.readResource("updateTaskStatus.json", RESOURCE_PREFIX);
             payload = TestUtil.deleteJsonPath(payload, "$.message");
             final String jobKey = "ABC";
@@ -234,36 +255,45 @@ class JobTaskControllerTest  {
             verify(taskService, times(1)).updateStatus(eq(jobKey), eq(taskId), captor.capture());
             final StatusUpdate statusUpdate = captor.getValue();
 
-            assertEquals(Status.VALIDATION_PASSED, statusUpdate.getStatus());
-            assertNull(statusUpdate.getMessage());
+            assertEquals(Status.VALIDATION_PASSED, statusUpdate.getStatus(), "Status must match");
+            assertNull(statusUpdate.getMessage(), "Message must be null");
         }
 
         @Test
-        void negative_invalid_job_key() throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeInvalidJobKey() throws Exception {
             String payload = TestUtil.readResource("updateTaskStatus.json", RESOURCE_PREFIX);
-            callAndExpectErrorResponse("A", 1L, payload, "INVALID_PAYLOAD", "updateTaskStatus.jobKey: must match " +
-                    "\\\"[A-Z_]{3,50}\\\"",
+            callAndExpectErrorResponse("A", 1L, payload, "INVALID_PAYLOAD",
+                "updateTaskStatus.jobKey: must match \\\"[A-Z_0-9]{3,50}\\\"",
                 HttpStatus.BAD_REQUEST, false);
         }
 
         @Test
-        void negative_invalid_task_key() throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeInvalidTaskKey() throws Exception {
             String payload = TestUtil.readResource("updateTaskStatus.json", RESOURCE_PREFIX);
-            callAndExpectErrorResponse("ABC", -5L, payload, "INVALID_PAYLOAD", "updateTaskStatus.taskId: must be " +
-                    "greater " +
-                    "than " +
-                    "or equal to 1",
+            callAndExpectErrorResponse("ABC", -5L, payload, "INVALID_PAYLOAD",
+                "updateTaskStatus.taskId: must be greater than or equal to 1",
                 HttpStatus.BAD_REQUEST, false);
         }
 
         @Test
-        void negative_not_found() throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeNotFound() throws Exception {
             final String jobKey = "ABC";
             final Long taskId = 1L;
             String payload = TestUtil.readResource("updateTaskStatus.json", RESOURCE_PREFIX);
-            doThrow(new NotFoundException("Task not found for JobKey: " + jobKey + " and taskId " + taskId)).when(taskService).updateStatus(eq(jobKey), eq(taskId), any());
-            callAndExpectErrorResponse(jobKey, taskId, payload, "NOT_FOUND", "The requested resource could not be " +
-                    "located.",
+            doThrow(new NotFoundException("Task not found for JobKey: " + jobKey + " and taskId " + taskId))
+                .when(taskService).updateStatus(eq(jobKey), eq(taskId), any());
+
+            callAndExpectErrorResponse(jobKey, taskId, payload, "NOT_FOUND",
+                "The requested resource could not be located.",
                 HttpStatus.NOT_FOUND, true);
         }
 

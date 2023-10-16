@@ -12,7 +12,6 @@ import uk.gov.hmcts.juror.standard.api.model.error.GenericError;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -27,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
     }
 )
 public abstract class GenericErrorTest<T extends GenericError> {
+    @Autowired
+    private ObjectMapper objectMapper;
 
     protected abstract String getErrorCode();
 
@@ -34,53 +35,53 @@ public abstract class GenericErrorTest<T extends GenericError> {
 
     protected abstract T createErrorObject();
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Test
-    void positive_constructor_test() {
+    void positiveConstructorTest() {
         T errorObject = createErrorObject();
-        assertNotNull(errorObject);
-        assertEquals(getErrorCode(), errorObject.getCode());
+        assertNotNull(errorObject, "Error object must not be null");
+        assertEquals(getErrorCode(), errorObject.getCode(), "Error code must match");
 
         if (getDefaultMessage() != null) {
-            assertNotNull(errorObject.getMessages());
-            assertEquals(1, errorObject.getMessages().size());
-            assertThat(errorObject.getMessages(), hasItem(getDefaultMessage()));
+            assertNotNull(errorObject.getMessages(), "Messages must not be null");
+            assertEquals(1, errorObject.getMessages().size(), "Message size must match");
+            assertThat("Messages must match", errorObject.getMessages(), hasItem(getDefaultMessage()));
         } else {
-            assertNull(errorObject.getMessages());
+            assertNull(errorObject.getMessages(), "Message must be null");
         }
     }
 
     @Test
-    void positive_json_serialize_test() {
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveJsonSerializeTest() {
         T errorObject = createErrorObject();
         validateJson(errorObject, getDefaultMessage());
     }
 
     protected void validateJson(T errorObject, String defaultMessage) {
-        validateJson(errorObject, defaultMessage == null ? null : Collections.singletonList(defaultMessage));
+        validateJson(errorObject, defaultMessage == null
+            ? null
+            : Collections.singletonList(defaultMessage));
     }
 
 
-    protected void validateJson(T error, List<String> messages) {
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
+    protected void validateJson(final T error, final List<String> messages) {
         try {
             String generatedJson = objectMapper.writeValueAsString(error);
 
-            final String messageList;
+            final String messageListStr;
             if (messages == null || messages.isEmpty()) {
-                messageList = "null";
+                messageListStr = "null";
             } else {
-                messages = messages.stream().map(message -> "\"" + message + "\"").collect(Collectors.toList());
-                messageList = "[" + StringUtils.join(messages, ",") + "]";
+                List<String> messageList = messages.stream().map(message -> "\"" + message + "\"").toList();
+                messageListStr = "[" + StringUtils.join(messageList, ",") + "]";
             }
 
-            String expectedJsonBuilder = "{\"code\":\"" +
-                getErrorCode() +
-                "\"" +
-                ",\"messages\":" +
-                messageList +
-                "}";
+            String expectedJsonBuilder =
+                "{\"code\":\"" + getErrorCode() + "\"" + ",\"messages\":" + messageListStr + "}";
 
             JSONAssert.assertEquals(expectedJsonBuilder, generatedJson, true);
         } catch (Exception exception) {

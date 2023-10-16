@@ -19,13 +19,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
-import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
-import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
+import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
 import uk.gov.hmcts.juror.scheduler.config.PermissionConstants;
+import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
 import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
+import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.api.model.error.InternalServerError;
 import uk.gov.hmcts.juror.standard.api.model.error.InvalidPayloadError;
 import uk.gov.hmcts.juror.standard.api.model.error.NotFoundError;
@@ -46,47 +46,46 @@ public class TasksController {
 
     @Autowired
     public TasksController(TaskService taskService, TaskMapper taskMapper) {
-        this.taskService= taskService;
+        this.taskService = taskService;
         this.taskMapper = taskMapper;
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAuthority('" + PermissionConstants.Task.SEARCH +"')")
-    @Operation(summary = "Searches for a list of tasks",
-        description = "Returns the details of the found tasks",
-//        security = {@SecurityRequirement(name = "permission",scopes = Permission.Constants.TASKS_SEARCH)},
+    @PreAuthorize("hasAuthority('" + PermissionConstants.Task.SEARCH + "')")
+    @Operation(summary = "Searches for a list of tasks", description = "Returns the details of the found tasks",
         responses = {
-            @ApiResponse(responseCode = "200", description = "List of Tasks.", content = {@Content(mediaType =
-                MediaType.APPLICATION_JSON_VALUE,
-                array = @ArraySchema(schema = @Schema(implementation = TaskDetail.class)))}),
-            @ApiResponse(responseCode = "400", description = "Invalid Parameters", content = {@Content(mediaType =
-                MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation =
-                InvalidPayloadError.class))}),
-            @ApiResponse(responseCode = "401", description = "Unauthorised", content = {@Content(mediaType =
-                MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = UnauthorisedError.class))}),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = {@Content(mediaType =
-                MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = NotFoundError.class))}),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {@Content(mediaType =
-                MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema =
-            @Schema(implementation = InternalServerError.class))})
-        }
-    )
+            @ApiResponse(responseCode = "200", description = "List of Tasks.",
+                content = {
+                    @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, array = @ArraySchema(
+                        schema = @Schema(implementation = TaskDetail.class)))}),
+            @ApiResponse(responseCode = "400", description = "Invalid Parameters",
+                content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        schema = @Schema(implementation = InvalidPayloadError.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorised",
+                content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        schema = @Schema(implementation = UnauthorisedError.class))}),
+            @ApiResponse(responseCode = "404", description = "Not Found",
+                content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        schema = @Schema(implementation = NotFoundError.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error",
+                content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                        schema = @Schema(implementation = InternalServerError.class))})})
     public ResponseEntity<List<TaskDetail>> getTasks(
-        @RequestParam(name = "from_date",required = false) @Schema(name = "from_date", description = "The date at which we should " +
-            "return any failures from.", defaultValue = "Today's date minus 7 days") @Valid LocalDateTime fromDate,
-        @RequestParam(name = "job_key",required = false) @Schema(name = "job_key",
-            description = "The job to search for. (If none provided all Jobs will be searched)")
+        @RequestParam(name = "from_date", required = false) @Schema(name = "from_date", description =
+            "The date at which we should "
+                + "return any failures from.", defaultValue = "Today's date minus 7 days")
+        @Valid LocalDateTime fromDate,
+        @RequestParam(name = "job_key", required = false) @Schema(name = "job_key", description = "The job to search "
+            + "for. (If none provided all Jobs will be searched)")
         @Pattern(regexp = APIConstants.JOB_KEY_REGEX) @Valid String jobKey,
-        @RequestParam(name = "status",required = false) @Schema(name = "status",
-            description = "The statuses to filter by")
-        @Valid Set<@NotNull Status> statuses
-        ) {
+        @RequestParam(name = "status", required = false) @Schema(name = "status", description = "The statuses to "
+            + "filter by") @Valid Set<@NotNull Status> statuses) {
 
         return ResponseEntity.ok(taskMapper.toTaskList(taskService.getTasks(
-            TaskSearchFilter.builder()
-                .jobKey(jobKey)
-                .fromDate(fromDate)
-                .statuses(statuses)
-                .build())));
+            TaskSearchFilter.builder().jobKey(jobKey).fromDate(fromDate).statuses(statuses).build())));
     }
 }

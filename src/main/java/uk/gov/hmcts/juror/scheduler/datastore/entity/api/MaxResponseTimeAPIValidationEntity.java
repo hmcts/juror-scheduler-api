@@ -31,16 +31,19 @@ public class MaxResponseTimeAPIValidationEntity extends APIValidationEntity {
 
     @Override
     public Result validate(Response response, APIJobDetailsEntity jobData) {
-        boolean passed =  response.getTime() <= maxResponseTimeMS;
+        boolean passed = response.getTime() <= maxResponseTimeMS;
 
-        String message = passed ? null :
-            "API call took longer then the max response time allowed. Max response time: " + maxResponseTimeMS + " ms" +
-                " but took: " + response.getTime() + " ms";
+        String message = passed
+            ? null
+            :
+                "API call took longer then the max response time allowed. Max response time: "
+                    + maxResponseTimeMS + " ms but took: " + response.getTime() + " ms";
         return Result.builder()
             .passed(passed)
             .message(message)
             .build();
     }
+
     @Override
     public ValidationType getType() {
         return ValidationType.MAX_RESPONSE_TIME;

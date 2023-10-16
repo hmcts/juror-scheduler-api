@@ -36,9 +36,10 @@ public abstract class APIValidationEntity {
     protected APIJobDetailsEntity job;
 
 
-    public abstract Result validate(Response response,APIJobDetailsEntity jobData);
+    public abstract Result validate(Response response, APIJobDetailsEntity jobData);
 
     public abstract ValidationType getType();
+
     @Setter
     @Getter
     @Builder

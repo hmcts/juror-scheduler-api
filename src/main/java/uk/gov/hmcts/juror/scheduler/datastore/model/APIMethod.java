@@ -18,10 +18,11 @@ public enum APIMethod {
     @JsonCreator
     @SuppressWarnings("PMD.PreserveStackTrace")
     public static APIMethod forValues(String value) {
-        try{
+        try {
             return valueOf(value);
-        }catch (Exception e){
-            throw new InvalidEnumValueException("Invalid method entered. Allowed values are: " + Arrays.toString(APIMethod.values()));
+        } catch (Exception e) {
+            throw new InvalidEnumValueException(
+                "Invalid method entered. Allowed values are: " + Arrays.toString(APIMethod.values()));
         }
     }
 }

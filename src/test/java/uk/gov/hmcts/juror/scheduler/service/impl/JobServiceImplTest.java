@@ -1,6 +1,5 @@
 package uk.gov.hmcts.juror.scheduler.service.impl;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,6 +15,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobPatch;
@@ -26,6 +29,8 @@ import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValid
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.JsonPathAPIValidationEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.api.MaxResponseTimeAPIValidationEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.api.StatusCodeValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
 import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.JobSearchFilter;
@@ -33,14 +38,8 @@ import uk.gov.hmcts.juror.scheduler.datastore.repository.JobRepository;
 import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
-import uk.gov.hmcts.juror.scheduler.testSupport.TestSpecification;
-import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
-import uk.gov.hmcts.juror.scheduler.datastore.entity.api.MaxResponseTimeAPIValidationEntity;
-import uk.gov.hmcts.juror.scheduler.datastore.entity.api.StatusCodeValidationEntity;
-import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
+import uk.gov.hmcts.juror.scheduler.testsupport.TestSpecification;
+import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
 import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.BusinessRuleValidationException;
 import uk.gov.hmcts.juror.standard.service.exceptions.GenericErrorHandlerException;
@@ -64,7 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -77,9 +75,14 @@ import static org.mockito.Mockito.when;
     }
 )
 @DisplayName("JobServiceImpl")
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.ExcessiveImports",
+    "PMD.TooManyMethods"
+})
 class JobServiceImplTest {
 
-    final String jobKey = "JOB123";
+    private static final String JOB_KEY = "JOB123";
 
     @MockBean
     private SchedulerService schedulerService;
@@ -100,24 +103,25 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Job Exists")
-        void positive_job_exists() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            jobService.deleteJob(jobKey);
-            verify(taskService, times(1)).deleteAllByJobKey(eq(jobKey));
-            verify(jobRepository, times(1)).deleteById(eq(jobKey));
-            verify(schedulerService, times(1)).unregister(eq(jobKey));
+        void positiveJobExists() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            jobService.deleteJob(JOB_KEY);
+            verify(taskService, times(1)).deleteAllByJobKey(JOB_KEY);
+            verify(jobRepository, times(1)).deleteById(JOB_KEY);
+            verify(schedulerService, times(1)).unregister(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job does not Exists")
-        void negative_job_does_not_exists() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
+        void negativeJobDoesNotExists() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
             NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> jobService.deleteJob(jobKey));
-            assertEquals("Job with key '" + jobKey + "' not found", notFoundException.getMessage());
-            verify(taskService, never()).deleteAllByJobKey(eq(jobKey));
-            verify(jobRepository, never()).deleteById(eq(jobKey));
-            verify(schedulerService, never()).unregister(eq(jobKey));
+                () -> jobService.deleteJob(JOB_KEY));
+            assertEquals("Job with key '" + JOB_KEY + "' not found",
+                notFoundException.getMessage(), "Message must match");
+            verify(taskService, never()).deleteAllByJobKey(JOB_KEY);
+            verify(jobRepository, never()).deleteById(JOB_KEY);
+            verify(schedulerService, never()).unregister(JOB_KEY);
         }
     }
 
@@ -127,16 +131,16 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Job Exists")
-        void positive_job_exists() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            assertTrue(jobService.doesJobExist(jobKey));
+        void positiveJobExists() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            assertTrue(jobService.doesJobExist(JOB_KEY), "Job should exist");
         }
 
         @Test
         @DisplayName("Job does not Exists")
-        void positive_job_does_not_exists() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
-            assertFalse(jobService.doesJobExist(jobKey));
+        void positiveJobDoesNotExists() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
+            assertFalse(jobService.doesJobExist(JOB_KEY), "Job should exist");
         }
     }
 
@@ -145,58 +149,59 @@ class JobServiceImplTest {
     class DisableJob {
         @Test
         @DisplayName("Scheduled Job exists and is enabled")
-        void positive_job_exists_is_scheduled_is_enabled() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isDisabled(eq(jobKey))).thenReturn(false);
+        void positiveJobExistsIsScheduledIsEnabled() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isDisabled(JOB_KEY)).thenReturn(false);
 
-            jobService.disable(jobKey);
-            verify(schedulerService, times(1)).isScheduled(eq(jobKey));
-            verify(schedulerService, times(1)).isDisabled(eq(jobKey));
-            verify(schedulerService, times(1)).disable(eq(jobKey));
+            jobService.disable(JOB_KEY);
+            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
+            verify(schedulerService, times(1)).isDisabled(JOB_KEY);
+            verify(schedulerService, times(1)).disable(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job does not exist")
-        void negative_job_does_not_exist() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isDisabled(eq(jobKey))).thenReturn(false);
+        void negativeJobDoesNotExist() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isDisabled(JOB_KEY)).thenReturn(false);
             NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> jobService.disable(jobKey));
-            assertEquals("Job with key '" + jobKey + "' not found", notFoundException.getMessage());
+                () -> jobService.disable(JOB_KEY));
+            assertEquals("Job with key '" + JOB_KEY + "' not found",
+                notFoundException.getMessage(), "Message must match");
 
-            verify(schedulerService, never()).isScheduled(eq(jobKey));
-            verify(schedulerService, never()).isDisabled(eq(jobKey));
-            verify(schedulerService, never()).disable(eq(jobKey));
+            verify(schedulerService, never()).isScheduled(JOB_KEY);
+            verify(schedulerService, never()).isDisabled(JOB_KEY);
+            verify(schedulerService, never()).disable(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is not scheduled")
-        void negative_job_not_scheduled() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(false);
-            when(schedulerService.isDisabled(eq(jobKey))).thenReturn(false);
+        void negativeJobNotScheduled() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(false);
+            when(schedulerService.isDisabled(JOB_KEY)).thenReturn(false);
 
             BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
-                () -> jobService.disable(jobKey));
-            assertEquals(NotAScheduledJobError.class, exception.getErrorObject().getClass());
-            verify(schedulerService, times(1)).isScheduled(eq(jobKey));
-            verify(schedulerService, never()).disable(eq(jobKey));
+                () -> jobService.disable(JOB_KEY));
+            assertEquals(NotAScheduledJobError.class, exception.getErrorObject().getClass(), "Class must match");
+            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
+            verify(schedulerService, never()).disable(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is already disabled")
-        void negative_job_already_disabled() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isDisabled(eq(jobKey))).thenReturn(true);
+        void negativeJobAlreadyDisabled() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isDisabled(JOB_KEY)).thenReturn(true);
 
             BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
-                () -> jobService.disable(jobKey));
-            assertEquals(JobAlreadyDisabledError.class, exception.getErrorObject().getClass());
-            verify(schedulerService, times(1)).isDisabled(eq(jobKey));
-            verify(schedulerService, never()).disable(eq(jobKey));
+                () -> jobService.disable(JOB_KEY));
+            assertEquals(JobAlreadyDisabledError.class, exception.getErrorObject().getClass(), "Class must match");
+            verify(schedulerService, times(1)).isDisabled(JOB_KEY);
+            verify(schedulerService, never()).disable(JOB_KEY);
         }
     }
 
@@ -205,58 +210,59 @@ class JobServiceImplTest {
     class EnableJob {
         @Test
         @DisplayName("Scheduled Job exists and is disabled")
-        void positive_job_exists_is_scheduled_is_disabled() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isEnabled(eq(jobKey))).thenReturn(false);
+        void positiveJobExistsIsScheduledIsDisabled() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isEnabled(JOB_KEY)).thenReturn(false);
 
-            jobService.enable(jobKey);
-            verify(schedulerService, times(1)).isScheduled(eq(jobKey));
-            verify(schedulerService, times(1)).isEnabled(eq(jobKey));
-            verify(schedulerService, times(1)).enable(eq(jobKey));
+            jobService.enable(JOB_KEY);
+            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
+            verify(schedulerService, times(1)).isEnabled(JOB_KEY);
+            verify(schedulerService, times(1)).enable(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job does not exist")
-        void negative_job_does_not_exist() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isEnabled(eq(jobKey))).thenReturn(false);
+        void negativeJobDoesNotExist() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isEnabled(JOB_KEY)).thenReturn(false);
             NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> jobService.enable(jobKey));
-            assertEquals("Job with key '" + jobKey + "' not found", notFoundException.getMessage());
+                () -> jobService.enable(JOB_KEY));
+            assertEquals("Job with key '" + JOB_KEY + "' not found",
+                notFoundException.getMessage(), "Message must match");
 
-            verify(schedulerService, never()).isScheduled(eq(jobKey));
-            verify(schedulerService, never()).isEnabled(eq(jobKey));
-            verify(schedulerService, never()).enable(eq(jobKey));
+            verify(schedulerService, never()).isScheduled(JOB_KEY);
+            verify(schedulerService, never()).isEnabled(JOB_KEY);
+            verify(schedulerService, never()).enable(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is not scheduled")
-        void negative_job_not_scheduled() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(false);
-            when(schedulerService.isEnabled(eq(jobKey))).thenReturn(false);
+        void negativeJobNotScheduled() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(false);
+            when(schedulerService.isEnabled(JOB_KEY)).thenReturn(false);
 
             BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
-                () -> jobService.enable(jobKey));
-            assertEquals(NotAScheduledJobError.class, exception.getErrorObject().getClass());
-            verify(schedulerService, times(1)).isScheduled(eq(jobKey));
-            verify(schedulerService, never()).enable(eq(jobKey));
+                () -> jobService.enable(JOB_KEY));
+            assertEquals(NotAScheduledJobError.class, exception.getErrorObject().getClass(), "Class must match");
+            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
+            verify(schedulerService, never()).enable(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is already enabled")
-        void negative_job_already_enabled() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isScheduled(eq(jobKey))).thenReturn(true);
-            when(schedulerService.isEnabled(eq(jobKey))).thenReturn(true);
+        void negativeJobAlreadyEnabled() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
+            when(schedulerService.isEnabled(JOB_KEY)).thenReturn(true);
 
             BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
-                () -> jobService.enable(jobKey));
-            assertEquals(JobAlreadyEnabledError.class, exception.getErrorObject().getClass());
-            verify(schedulerService, times(1)).isEnabled(eq(jobKey));
-            verify(schedulerService, never()).enable(eq(jobKey));
+                () -> jobService.enable(JOB_KEY));
+            assertEquals(JobAlreadyEnabledError.class, exception.getErrorObject().getClass(), "Class must match");
+            verify(schedulerService, times(1)).isEnabled(JOB_KEY);
+            verify(schedulerService, never()).enable(JOB_KEY);
         }
     }
 
@@ -266,20 +272,21 @@ class JobServiceImplTest {
     class ExecuteJob {
         @Test
         @DisplayName("Job Exists")
-        void positive_job_exists() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
-            jobService.executeJob(jobKey);
-            verify(schedulerService, times(1)).executeJob(eq(jobKey));
+        void positiveJobExists() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
+            jobService.executeJob(JOB_KEY);
+            verify(schedulerService, times(1)).executeJob(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job does not Exists")
-        void negative_job_does_not_exists() {
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
+        void negativeJobDoesNotExists() {
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
             NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> jobService.executeJob(jobKey));
-            assertEquals("Job with key '" + jobKey + "' not found", notFoundException.getMessage());
-            verify(schedulerService, never()).executeJob(eq(jobKey));
+                () -> jobService.executeJob(JOB_KEY));
+            assertEquals("Job with key '" + JOB_KEY + "' not found", notFoundException.getMessage(),
+                "Message must match");
+            verify(schedulerService, never()).executeJob(JOB_KEY);
         }
     }
 
@@ -288,21 +295,21 @@ class JobServiceImplTest {
     class GetJob {
         @Test
         @DisplayName("Job Exists")
-        void positive_job_exists() {
+        void positiveJobExists() {
             Optional<APIJobDetailsEntity> jobDetailsEntityOptional = Optional.of(new APIJobDetailsEntity());
-            when(jobRepository.findById(eq(jobKey))).thenReturn(jobDetailsEntityOptional);
-            APIJobDetailsEntity apiJobDetailsEntity = jobService.getJob(jobKey);
-            assertEquals(jobDetailsEntityOptional.get(), apiJobDetailsEntity);
+            when(jobRepository.findById(JOB_KEY)).thenReturn(jobDetailsEntityOptional);
+            APIJobDetailsEntity apiJobDetailsEntity = jobService.getJob(JOB_KEY);
+            assertEquals(jobDetailsEntityOptional.get(), apiJobDetailsEntity, "JobDetailsEntity must match");
         }
 
         @Test
         @DisplayName("Job does not Exists")
-        void negative_job_does_not_exists() {
+        void negativeJobDoesNotExists() {
             Optional<APIJobDetailsEntity> jobDetailsEntityOptional = Optional.empty();
-            when(jobRepository.findById(eq(jobKey))).thenReturn(jobDetailsEntityOptional);
+            when(jobRepository.findById(JOB_KEY)).thenReturn(jobDetailsEntityOptional);
 
-            NotFoundException exception = assertThrows(NotFoundException.class, () -> jobService.getJob(jobKey));
-            assertEquals("Job not found for key: " + jobKey, exception.getMessage());
+            NotFoundException exception = assertThrows(NotFoundException.class, () -> jobService.getJob(JOB_KEY));
+            assertEquals("Job not found for key: " + JOB_KEY, exception.getMessage(), "Message must match");
         }
     }
 
@@ -311,64 +318,65 @@ class JobServiceImplTest {
     class CreateJob {
         @Test
         @DisplayName("Scheduled Job Created")
-        void positive_scheduled_job_created() {
+        void positiveScheduledJobCreated() {
             APIJobDetails apiJobDetails = new APIJobDetails();
-            apiJobDetails.setKey(jobKey);
+            apiJobDetails.setKey(JOB_KEY);
             apiJobDetails.setCronExpression("* 5 * * * ?");
 
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
 
             APIJobDetailsEntity apiJobDetailsEntity = new APIJobDetailsEntity();
-            apiJobDetailsEntity.setKey(jobKey);
+            apiJobDetailsEntity.setKey(JOB_KEY);
             apiJobDetailsEntity.setCronExpression(apiJobDetails.getCronExpression());
 
-            when(jobDetailsMapper.toAPIJobDetailsEntity(eq(apiJobDetails))).thenReturn(apiJobDetailsEntity);
-            when(jobRepository.save(eq(apiJobDetailsEntity))).thenReturn(apiJobDetailsEntity);
+            when(jobDetailsMapper.toAPIJobDetailsEntity(apiJobDetails)).thenReturn(apiJobDetailsEntity);
+            when(jobRepository.save(apiJobDetailsEntity)).thenReturn(apiJobDetailsEntity);
 
             jobService.createJob(apiJobDetails);
 
-            verify(jobRepository, times(1)).save(eq(apiJobDetailsEntity));
-            verify(schedulerService, times(1)).register(eq(apiJobDetailsEntity));
+            verify(jobRepository, times(1)).save(apiJobDetailsEntity);
+            verify(schedulerService, times(1)).register(apiJobDetailsEntity);
         }
 
         @Test
         @DisplayName("Manual Job Created")
-        void positive_manual_job_created() {
+        void positiveManualJobCreated() {
             APIJobDetails apiJobDetails = new APIJobDetails();
-            apiJobDetails.setKey(jobKey);
+            apiJobDetails.setKey(JOB_KEY);
             apiJobDetails.setCronExpression(null);
 
             final String jobKey = apiJobDetails.getKey();
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(false);
+            when(jobRepository.existsById(jobKey)).thenReturn(false);
 
             APIJobDetailsEntity apiJobDetailsEntity = new APIJobDetailsEntity();
             apiJobDetailsEntity.setKey(jobKey);
             apiJobDetailsEntity.setCronExpression(null);
 
-            when(jobDetailsMapper.toAPIJobDetailsEntity(eq(apiJobDetails))).thenReturn(apiJobDetailsEntity);
-            when(jobRepository.save(eq(apiJobDetailsEntity))).thenReturn(apiJobDetailsEntity);
+            when(jobDetailsMapper.toAPIJobDetailsEntity(apiJobDetails)).thenReturn(apiJobDetailsEntity);
+            when(jobRepository.save(apiJobDetailsEntity)).thenReturn(apiJobDetailsEntity);
 
             jobService.createJob(apiJobDetails);
 
-            verify(jobRepository, times(1)).save(eq(apiJobDetailsEntity));
+            verify(jobRepository, times(1)).save(apiJobDetailsEntity);
             verify(schedulerService, never()).register(any());
 
         }
 
         @Test
         @DisplayName("Job with key already exists")
-        void negative_job_with_same_key_exists() {
+        void negativeJobWithSameKeyExists() {
             APIJobDetails apiJobDetails = new APIJobDetails();
-            apiJobDetails.setKey(jobKey);
-            when(jobRepository.existsById(eq(jobKey))).thenReturn(true);
+            apiJobDetails.setKey(JOB_KEY);
+            when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
 
 
             GenericErrorHandlerException exception = assertThrows(GenericErrorHandlerException.class, () ->
                 jobService.createJob(apiJobDetails));
-            assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
-            assertEquals(APIHandleableException.Type.INFORMATIONAL, exception.getExceptionType());
-            assertNotNull(exception.getErrorObject());
-            assertEquals(KeyAlreadyInUseError.class, exception.getErrorObject().getClass());
+            assertEquals(HttpStatus.CONFLICT, exception.getStatusCode(), "Status must match");
+            assertEquals(APIHandleableException.Type.INFORMATIONAL, exception.getExceptionType(),
+                "Exception type must match");
+            assertNotNull(exception.getErrorObject(), "Error object must not be null");
+            assertEquals(KeyAlreadyInUseError.class, exception.getErrorObject().getClass(), "Class must match");
 
             verify(jobRepository, never()).save(any());
             verify(schedulerService, never()).register(any());
@@ -377,20 +385,20 @@ class JobServiceImplTest {
 
     @DisplayName("public APIJobDetailsEntity save(APIJobDetailsEntity jobDetailsEntity)")
     @Nested
-    class Save {
+    class SaveMethod {
         @Test
         @DisplayName("Job saved")
-        void positive_save_job_entity() {
+        void positiveSaveJobEntity() {
             APIJobDetailsEntity apiJobDetailsEntity = new APIJobDetailsEntity();
-            apiJobDetailsEntity.setKey(jobKey);
+            apiJobDetailsEntity.setKey(JOB_KEY);
             APIJobDetailsEntity savedApiJobDetailsEntity = new APIJobDetailsEntity();
-            savedApiJobDetailsEntity.setKey(jobKey);
+            savedApiJobDetailsEntity.setKey(JOB_KEY);
             savedApiJobDetailsEntity.setUrl("www.savedUrl.com");//This has no processing effect but rather is to
             // ensure the assertEquals has two unique objects to compare too
-            when(jobRepository.save(eq(apiJobDetailsEntity))).thenReturn(savedApiJobDetailsEntity);
-            Assertions.assertEquals(savedApiJobDetailsEntity, jobService.save(apiJobDetailsEntity));
+            when(jobRepository.save(apiJobDetailsEntity)).thenReturn(savedApiJobDetailsEntity);
+            assertEquals(savedApiJobDetailsEntity, jobService.save(apiJobDetailsEntity), "Saved entity must match");
 
-            verify(jobRepository, times(1)).save(eq(apiJobDetailsEntity));
+            verify(jobRepository, times(1)).save(apiJobDetailsEntity);
         }
     }
 
@@ -403,7 +411,7 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("No filter")
-        void positive_get_jobs_no_filter() {
+        void positiveGetJobsNoFilter() {
             List<APIJobDetailsEntity> jobs = new ArrayList<>();
             jobs.add(new APIJobDetailsEntity());
             jobs.add(new APIJobDetailsEntity());
@@ -418,14 +426,15 @@ class JobServiceImplTest {
                 try (MockedStatic<Specification> specificationMockedStatic = Mockito.mockStatic(Specification.class)) {
 
                     List<APIJobDetailsEntity> returnedJobs = jobService.getJobs(jobSearchFilter);
+                    assertEquals(jobs.size(), returnedJobs.size(), "Returned jobs size must match");
+                    assertThat("Returned Jobs should match", returnedJobs,
+                        hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
 
                     specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                     List<Specification<APIJobDetailsEntity>> specs = captor.getValue();
-                    assertNotNull(specs);
-                    assertEquals(0, specs.size());
-                    assertEquals(jobs.size(), returnedJobs.size());
-                    assertThat(returnedJobs, hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+                    assertNotNull(specs, "Specs should not be null");
+                    assertEquals(0, specs.size(), "Spec Size must be 0");
                 }
                 utilities.verify(() -> JobRepository.Specs.byJobKey(any()), never());
                 utilities.verify(() -> JobRepository.Specs.byTags(any()), never());
@@ -436,7 +445,7 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Job Key Filter")
-        void positive_get_jobs_kob_key_filter() {
+        void positiveGetJobsKobKeyFilter() {
             List<APIJobDetailsEntity> jobs = new ArrayList<>();
             jobs.add(new APIJobDetailsEntity());
             jobs.add(new APIJobDetailsEntity());
@@ -447,23 +456,23 @@ class JobServiceImplTest {
                 setupSpecificationMocks(utilities);
 
                 JobSearchFilter jobSearchFilter = JobSearchFilter.builder()
-                    .jobKey(jobKey).build();
+                    .jobKey(JOB_KEY).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic = Mockito.mockStatic(Specification.class)) {
 
                     List<APIJobDetailsEntity> returnedJobs = jobService.getJobs(jobSearchFilter);
 
+                    assertEquals(jobs.size(), returnedJobs.size(), "Returned jobs size must match");
+                    assertThat("Returned jobs match", returnedJobs, hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+
                     specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                     List<Specification<APIJobDetailsEntity>> specs = captor.getValue();
-                    assertNotNull(specs);
-                    assertEquals(1, specs.size());
-                    Assertions.assertEquals("byJobKey", ((TestSpecification) specs.get(0)).getName());
-
-                    assertEquals(jobs.size(), returnedJobs.size());
-                    assertThat(returnedJobs, hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+                    assertNotNull(specs, "Specs should not be null");
+                    assertEquals(1, specs.size(), "Spec size must match");
+                    assertEquals("byJobKey", ((TestSpecification) specs.get(0)).name(), "Spec name must match");
                 }
-                utilities.verify(() -> JobRepository.Specs.byJobKey(eq(jobKey)), times(1));
+                utilities.verify(() -> JobRepository.Specs.byJobKey(JOB_KEY), times(1));
                 utilities.verify(() -> JobRepository.Specs.byTags(any()), never());
                 utilities.verify(() -> JobRepository.Specs.byCreateDateGreaterThan(any()), never());
                 utilities.verify(() -> JobRepository.Specs.orderByCreatedOn(any()), times(1));
@@ -472,7 +481,7 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Single Tag Filter")
-        void positive_get_jobs_single_tag_filter() {
+        void positiveGetJobsSingleTagFilter() {
             List<APIJobDetailsEntity> jobs = new ArrayList<>();
             jobs.add(new APIJobDetailsEntity());
             jobs.add(new APIJobDetailsEntity());
@@ -491,18 +500,19 @@ class JobServiceImplTest {
 
                     List<APIJobDetailsEntity> returnedJobs = jobService.getJobs(jobSearchFilter);
 
+                    assertEquals(jobs.size(), returnedJobs.size(), "Returned job size must match");
+                    assertThat("Returned jobs should match", returnedJobs,
+                        hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+
                     specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                     List<Specification<APIJobDetailsEntity>> specs = captor.getValue();
-                    assertNotNull(specs);
-                    assertEquals(1, specs.size());
-                    assertEquals("byTags", ((TestSpecification) specs.get(0)).getName());
-
-                    assertEquals(jobs.size(), returnedJobs.size());
-                    assertThat(returnedJobs, hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+                    assertNotNull(specs, "Specs should not be null");
+                    assertEquals(1, specs.size(), "Size size must match");
+                    assertEquals("byTags", ((TestSpecification) specs.get(0)).name(), "Spec name must match");
                 }
                 utilities.verify(() -> JobRepository.Specs.byJobKey(any()), never());
-                utilities.verify(() -> JobRepository.Specs.byTags(eq(tags)), times(1));
+                utilities.verify(() -> JobRepository.Specs.byTags(tags), times(1));
                 utilities.verify(() -> JobRepository.Specs.byCreateDateGreaterThan(any()), never());
                 utilities.verify(() -> JobRepository.Specs.orderByCreatedOn(any()), times(1));
             }
@@ -510,7 +520,7 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Multiple Tag Filter")
-        void positive_get_jobs_multiple_tag_filter() {
+        void positiveGetJobsMultipleTagFilter() {
             List<APIJobDetailsEntity> jobs = new ArrayList<>();
             jobs.add(new APIJobDetailsEntity());
             jobs.add(new APIJobDetailsEntity());
@@ -531,18 +541,19 @@ class JobServiceImplTest {
 
                     List<APIJobDetailsEntity> returnedJobs = jobService.getJobs(jobSearchFilter);
 
+                    assertEquals(jobs.size(), returnedJobs.size(), "Returned jobs size must match");
+                    assertThat("Returned jobs should match", returnedJobs,
+                        hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+
                     specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                     List<Specification<APIJobDetailsEntity>> specs = captor.getValue();
-                    assertNotNull(specs);
-                    assertEquals(1, specs.size());
-                    assertEquals("byTags", ((TestSpecification) specs.get(0)).getName());
-
-                    assertEquals(jobs.size(), returnedJobs.size());
-                    assertThat(returnedJobs, hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+                    assertNotNull(specs, "Specs should not be null");
+                    assertEquals(1, specs.size(), "Spec size must match");
+                    assertEquals("byTags", ((TestSpecification) specs.get(0)).name(), "Spec name must match");
                 }
                 utilities.verify(() -> JobRepository.Specs.byJobKey(any()), never());
-                utilities.verify(() -> JobRepository.Specs.byTags(eq(tags)), times(1));
+                utilities.verify(() -> JobRepository.Specs.byTags(tags), times(1));
                 utilities.verify(() -> JobRepository.Specs.byCreateDateGreaterThan(any()), never());
                 utilities.verify(() -> JobRepository.Specs.orderByCreatedOn(any()), times(1));
             }
@@ -550,7 +561,7 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Get Jobs - Multiple filters")
-        void positive_get_jobs_multiple_filter_types() {
+        void positiveGetJobsMultipleFilterTypes() {
             List<APIJobDetailsEntity> jobs = new ArrayList<>();
             jobs.add(new APIJobDetailsEntity());
             jobs.add(new APIJobDetailsEntity());
@@ -565,26 +576,27 @@ class JobServiceImplTest {
                 tags.add("MyTag2");
                 tags.add("MyTag3");
                 JobSearchFilter jobSearchFilter = JobSearchFilter.builder()
-                    .jobKey(jobKey)
+                    .jobKey(JOB_KEY)
                     .tags(tags).build();
 
                 try (MockedStatic<Specification> specificationMockedStatic = Mockito.mockStatic(Specification.class)) {
 
                     List<APIJobDetailsEntity> returnedJobs = jobService.getJobs(jobSearchFilter);
 
+                    assertEquals(jobs.size(), returnedJobs.size(), "Returned job size must match");
+                    assertThat("Returned jobs should match", returnedJobs,
+                        hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+
                     specificationMockedStatic.verify(() -> Specification.allOf(captor.capture()));
 
                     List<Specification<APIJobDetailsEntity>> specs = captor.getValue();
-                    assertNotNull(specs);
-                    assertEquals(2, specs.size());
-                    assertEquals("byJobKey", ((TestSpecification) specs.get(0)).getName());
-                    assertEquals("byTags", ((TestSpecification) specs.get(1)).getName());
-
-                    assertEquals(jobs.size(), returnedJobs.size());
-                    assertThat(returnedJobs, hasItems(jobs.toArray(new APIJobDetailsEntity[0])));
+                    assertNotNull(specs, "Specs should not be null");
+                    assertEquals(2, specs.size(), "Spec size must match");
+                    assertEquals("byJobKey", ((TestSpecification) specs.get(0)).name(), "Spec name must match");
+                    assertEquals("byTags", ((TestSpecification) specs.get(1)).name(), "Spec name must match");
                 }
-                utilities.verify(() -> JobRepository.Specs.byJobKey(eq(jobKey)), times(1));
-                utilities.verify(() -> JobRepository.Specs.byTags(eq(tags)), times(1));
+                utilities.verify(() -> JobRepository.Specs.byJobKey(JOB_KEY), times(1));
+                utilities.verify(() -> JobRepository.Specs.byTags(tags), times(1));
                 utilities.verify(() -> JobRepository.Specs.byCreateDateGreaterThan(any()), never());
                 utilities.verify(() -> JobRepository.Specs.orderByCreatedOn(any()), times(1));
             }
@@ -592,18 +604,20 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("No Jobs found")
-        void negative_not_jobs_found() {
+        void negativeNotJobsFound() {
 
-            when(jobRepository.findAll(ArgumentMatchers.<Specification<APIJobDetailsEntity>>any())).thenReturn(Collections.emptyList());
+            when(jobRepository.findAll(ArgumentMatchers.<Specification<APIJobDetailsEntity>>any())).thenReturn(
+                Collections.emptyList());
             JobSearchFilter jobSearchFilter = JobSearchFilter.builder().build();
             NotFoundException exception = assertThrows(NotFoundException.class, () -> {
                 jobService.getJobs(jobSearchFilter);
             });
 
-            assertEquals("No Jobs found for the provided filter", exception.getMessage());
+            assertEquals("No Jobs found for the provided filter", exception.getMessage(),
+                "Message must match");
         }
 
-        private void setupSpecificationMocks(MockedStatic<JobRepository.Specs> utilities){
+        private void setupSpecificationMocks(MockedStatic<JobRepository.Specs> utilities) {
             utilities.when(() -> JobRepository.Specs.byJobKey(any()))
                 .thenReturn(new TestSpecification("byJobKey"));
             utilities.when(() -> JobRepository.Specs.byTags(any()))
@@ -621,47 +635,62 @@ class JobServiceImplTest {
     @Nested
     class UpdateJob {
 
+        @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
         private void triggerAndValidateUpdate(APIJobPatch apiJobPatch) {
             try {
                 final APIJobDetailsEntity baseApiJobDetailsEntity = TestUtil.generateAPIJobDetailsEntry();
                 APIJobDetailsEntity apiJobDetailsEntity = TestUtil.cloneAPIJobDetailsEntity(baseApiJobDetailsEntity);
 
-                when(jobRepository.findById(eq(jobKey))).thenReturn(Optional.of(apiJobDetailsEntity));
-                when(jobRepository.save(eq(apiJobDetailsEntity))).thenReturn(apiJobDetailsEntity);
+                when(jobRepository.findById(JOB_KEY)).thenReturn(Optional.of(apiJobDetailsEntity));
+                when(jobRepository.save(apiJobDetailsEntity)).thenReturn(apiJobDetailsEntity);
 
                 List<APIValidationEntity> convertedValidations = Collections.emptyList();
                 if (apiJobPatch.getValidations() != null) {
                     convertedValidations = TestUtil.convertValidations(apiJobPatch.getValidations());
-                    when(jobDetailsMapper.apiValidationEntityList(eq(apiJobPatch.getValidations()))).thenReturn(convertedValidations);
+                    when(jobDetailsMapper.apiValidationEntityList(apiJobPatch.getValidations())).thenReturn(
+                        convertedValidations);
                 }
-                APIJobDetailsEntity updateAPIApiJobDetails = jobService.updateJob(jobKey, apiJobPatch);
+                APIJobDetailsEntity updateAPIApiJobDetails = jobService.updateJob(JOB_KEY, apiJobPatch);
 
                 //Information
                 if (apiJobPatch.getInformation() != null) {
                     assertEquals(updateAPIApiJobDetails.getName(),
-                        Optional.ofNullable(apiJobPatch.getInformation().getName()).orElseGet(baseApiJobDetailsEntity::getName));
+                        Optional.ofNullable(apiJobPatch.getInformation().getName())
+                            .orElseGet(baseApiJobDetailsEntity::getName), "Name must match");
                     assertEquals(updateAPIApiJobDetails.getDescription(),
-                        Optional.ofNullable(apiJobPatch.getInformation().getDescription()).orElseGet(baseApiJobDetailsEntity::getDescription));
+                        Optional.ofNullable(apiJobPatch.getInformation().getDescription())
+                            .orElseGet(baseApiJobDetailsEntity::getDescription), "Description must match");
                     assertEquals(updateAPIApiJobDetails.getTags(),
-                        Optional.ofNullable(apiJobPatch.getInformation().getTags()).orElseGet(baseApiJobDetailsEntity::getTags));
+                        Optional.ofNullable(apiJobPatch.getInformation().getTags())
+                            .orElseGet(baseApiJobDetailsEntity::getTags), "Tags must match");
                 } else {
-                    assertEquals(updateAPIApiJobDetails.getName(), baseApiJobDetailsEntity.getName());
-                    assertEquals(updateAPIApiJobDetails.getDescription(), baseApiJobDetailsEntity.getDescription());
-                    assertEquals(updateAPIApiJobDetails.getTags(), baseApiJobDetailsEntity.getTags());
+                    assertEquals(updateAPIApiJobDetails.getName(), baseApiJobDetailsEntity.getName(),
+                        "Name must match");
+                    assertEquals(updateAPIApiJobDetails.getDescription(),
+                        baseApiJobDetailsEntity.getDescription(), "Description must match");
+                    assertEquals(updateAPIApiJobDetails.getTags(), baseApiJobDetailsEntity.getTags(),
+                        "Tags must match");
                 }
 
                 assertEquals(updateAPIApiJobDetails.getCronExpression(),
-                    Optional.ofNullable(apiJobPatch.getCronExpression()).orElseGet(baseApiJobDetailsEntity::getCronExpression));
+                    Optional.ofNullable(apiJobPatch.getCronExpression())
+                        .orElseGet(baseApiJobDetailsEntity::getCronExpression), "Cron expression must match");
                 assertEquals(updateAPIApiJobDetails.getMethod(),
-                    Optional.ofNullable(apiJobPatch.getMethod()).orElseGet(baseApiJobDetailsEntity::getMethod));
+                    Optional.ofNullable(apiJobPatch.getMethod()).orElseGet(baseApiJobDetailsEntity::getMethod),
+                    "Method must match");
                 assertEquals(updateAPIApiJobDetails.getUrl(),
-                    Optional.ofNullable(apiJobPatch.getUrl()).orElseGet(baseApiJobDetailsEntity::getUrl));
+                    Optional.ofNullable(apiJobPatch.getUrl()).orElseGet(baseApiJobDetailsEntity::getUrl),
+                    "Url must match");
                 assertEquals(updateAPIApiJobDetails.getHeaders(),
-                    Optional.ofNullable(apiJobPatch.getHeaders()).orElseGet(baseApiJobDetailsEntity::getHeaders));
+                    Optional.ofNullable(apiJobPatch.getHeaders()).orElseGet(baseApiJobDetailsEntity::getHeaders),
+                    "Headers must match");
                 assertEquals(updateAPIApiJobDetails.getAuthenticationDefault(),
-                    Optional.ofNullable(apiJobPatch.getAuthenticationDefault()).orElseGet(baseApiJobDetailsEntity::getAuthenticationDefault));
+                    Optional.ofNullable(apiJobPatch.getAuthenticationDefault())
+                        .orElseGet(baseApiJobDetailsEntity::getAuthenticationDefault),
+                    "Authentication default must match");
                 assertEquals(updateAPIApiJobDetails.getPayload(),
-                    Optional.ofNullable(apiJobPatch.getPayload()).orElseGet(baseApiJobDetailsEntity::getPayload));
+                    Optional.ofNullable(apiJobPatch.getPayload()).orElseGet(baseApiJobDetailsEntity::getPayload),
+                    "Payload must match");
 
                 if (apiJobPatch.getValidations() == null) {
                     validateValidations(baseApiJobDetailsEntity.getValidations(),
@@ -670,10 +699,10 @@ class JobServiceImplTest {
                     validateValidations(convertedValidations, updateAPIApiJobDetails.getValidations());
                 }
 
-                verify(jobRepository, times(1)).save(eq(apiJobDetailsEntity));
+                verify(jobRepository, times(1)).save(apiJobDetailsEntity);
                 if (apiJobPatch.getCronExpression() != null) {
-                    verify(schedulerService, times(1)).unregister(eq(jobKey));
-                    verify(schedulerService, times(1)).register(eq(apiJobDetailsEntity));
+                    verify(schedulerService, times(1)).unregister(JOB_KEY);
+                    verify(schedulerService, times(1)).register(apiJobDetailsEntity);
                 } else {
 
                     verify(schedulerService, never()).unregister(any());
@@ -688,7 +717,7 @@ class JobServiceImplTest {
 
         private void validateValidations(List<APIValidationEntity> expected, List<APIValidationEntity> actual) {
             int index = 0;
-            assertEquals(expected.size(), actual.size());
+            assertEquals(expected.size(), actual.size(), "Size must match");
             for (APIValidationEntity entity : expected) {
                 APIValidationEntity validationActual = actual.get(index++);
                 if (entity instanceof StatusCodeValidationEntity statusCodeAPIValidationExpected) {
@@ -696,21 +725,21 @@ class JobServiceImplTest {
                     StatusCodeValidationEntity statusCodeValidationActual =
                         (StatusCodeValidationEntity) validationActual;
                     assertEquals(statusCodeAPIValidationExpected.getExpectedStatusCode(),
-                        statusCodeValidationActual.getExpectedStatusCode());
+                        statusCodeValidationActual.getExpectedStatusCode(), "Status code must match");
                 } else if (entity instanceof MaxResponseTimeAPIValidationEntity maxResponseTimeAPIValidationExpected) {
                     assertInstanceOf(MaxResponseTimeAPIValidationEntity.class, maxResponseTimeAPIValidationExpected);
                     MaxResponseTimeAPIValidationEntity maxResponseTimeAPIValidationActual =
                         (MaxResponseTimeAPIValidationEntity) validationActual;
                     assertEquals(maxResponseTimeAPIValidationExpected.getMaxResponseTimeMS(),
-                        maxResponseTimeAPIValidationActual.getMaxResponseTimeMS());
+                        maxResponseTimeAPIValidationActual.getMaxResponseTimeMS(), "Max response time ms must match");
                 } else if (entity instanceof JsonPathAPIValidationEntity jsonPathAPIValidationExpected) {
                     assertInstanceOf(JsonPathAPIValidationEntity.class, validationActual);
                     JsonPathAPIValidationEntity jsonPathAPIValidationActual =
                         (JsonPathAPIValidationEntity) validationActual;
                     assertEquals(jsonPathAPIValidationExpected.getPath(),
-                        jsonPathAPIValidationActual.getPath());
+                        jsonPathAPIValidationActual.getPath(), "Path must match");
                     assertEquals(jsonPathAPIValidationExpected.getExpectedResponse(),
-                        jsonPathAPIValidationActual.getExpectedResponse());
+                        jsonPathAPIValidationActual.getExpectedResponse(), "Expected response must match");
                 } else {
                     fail("Unknown validation type: " + validationActual.getClass());
                 }
@@ -719,7 +748,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Information - Name")
-        void positive_update_information_name() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateInformationName() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .information(Information.builder()
                     .name("New Name").build())
@@ -728,7 +760,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Information - Description")
-        void positive_update_information_description() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateInformationDescription() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .information(Information.builder()
                     .description("New Desc").build())
@@ -738,7 +773,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Information - Tags")
-        void positive_update_information_tags() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateInformationTags() {
             Set<String> tags = new HashSet<>();
             tags.add("New Tag 1");
             tags.add("New Tag 2");
@@ -752,7 +790,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Cron Expression")
-        void positive_update_cron_expression() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateCronExpression() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .cronExpression("8 7 * * * ?")
                 .build());
@@ -760,7 +801,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Method")
-        void positive_update_method() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateMethod() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .method(APIMethod.TRACE)
                 .build());
@@ -769,7 +813,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("URL")
-        void positive_update_url() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateUrl() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .url("https://google.com")
                 .build());
@@ -777,7 +824,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Headers")
-        void positive_update_headers() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateHeaders() {
             HashMap<String, String> headers = new HashMap<>();
             headers.put("key1", "value1");
             headers.put("key2", "value2");
@@ -789,7 +839,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Authentication Default")
-        void positive_update_authentication_default() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateAuthenticationDefault() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .authenticationDefault(AuthenticationDefaults.NONE)
                 .build());
@@ -797,7 +850,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Payload")
-        void positive_update_payload() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdatePayload() {
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .payload("New Payload")
                 .build());
@@ -805,7 +861,10 @@ class JobServiceImplTest {
 
         @Test
         @DisplayName("Validations")
-        void positive_update_validations() {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdateValidations() {
             List<APIValidation> validationEntities = new ArrayList<>();
             validationEntities.add(new StatusCodeAPIValidation(499));
             validationEntities.add(new JsonPathAPIValidation("$.name", "jerry"));

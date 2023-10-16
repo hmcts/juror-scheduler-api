@@ -36,22 +36,25 @@ public abstract class EnumTest<T extends Enum<T>> {
 
     @ParameterizedTest(name = "positive_convert_valid_String: {0}")
     @MethodSource("validEnumOptionsProvider")
-    public void positive_convert_valid_String(T value) throws Throwable {
-        assertEquals(value, invokeForValuesMethod(value.name()));
+    void positiveConvertValidString(T value) throws Throwable {
+        assertEquals(value, invokeForValuesMethod(value.name()), "Value must match");
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"INVALID_", "09123_d%"})
     @NullAndEmptySource
-    public void negative_invalid_enum_value(String value) {
+    void negativeInvalidEnumValue(String value) {
         InvalidEnumValueException exception = assertThrows(InvalidEnumValueException.class,
             () -> invokeForValuesMethod(value));
 
-        assertEquals("Invalid " + getErrorPrefix() + " entered. Allowed values are: " + Arrays.toString(getEnumClass().getEnumConstants()),
-            exception.getMessage());
+        assertEquals("Invalid " + getErrorPrefix() + " entered. Allowed values are: " + Arrays.toString(
+                getEnumClass().getEnumConstants()),
+            exception.getMessage(),
+            "Value must match");
 
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     protected Object invokeForValuesMethod(String value) throws Throwable {
         try {
             return getForValuesMethod().invoke(null, value);
@@ -63,6 +66,7 @@ public abstract class EnumTest<T extends Enum<T>> {
         }
     }
 
+    @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
     protected Method getForValuesMethod() {
         try {
             return getEnumClass().getMethod("forValues", String.class);

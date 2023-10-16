@@ -6,6 +6,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
+import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobPatch;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
@@ -15,10 +19,6 @@ import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
-import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
-import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
 import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.BusinessRuleValidationException;
 import uk.gov.hmcts.juror.standard.service.exceptions.GenericErrorHandlerException;
@@ -158,7 +158,6 @@ public class JobServiceImpl implements JobService {
 
     @Override
     @Transactional
-//    @SuppressWarnings("PMD.NPathComplexity")
     public APIJobDetailsEntity updateJob(String jobKey, APIJobPatch jobPatch) {
         final APIJobDetailsEntity jobDetailsEntity = getJob(jobKey);
         AtomicBoolean requiresReschedule = new AtomicBoolean(false);

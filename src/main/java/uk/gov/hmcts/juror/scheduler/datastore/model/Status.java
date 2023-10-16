@@ -19,10 +19,11 @@ public enum Status {
     @JsonCreator
     @SuppressWarnings("PMD.PreserveStackTrace")
     public static Status forValues(String value) {
-        try{
+        try {
             return valueOf(value);
-        }catch (Exception e){
-            throw new InvalidEnumValueException("Invalid status entered. Allowed values are: " + Arrays.toString(Status.values()));
+        } catch (Exception e) {
+            throw new InvalidEnumValueException(
+                "Invalid status entered. Allowed values are: " + Arrays.toString(Status.values()));
         }
     }
 }

@@ -5,17 +5,17 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.text.ParseException;
 
-public class CronExpressionValidator  implements
+public class CronExpressionValidator implements
     ConstraintValidator<CronExpression, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if(value == null){
+        if (value == null) {
             return true;
         }
-        try{
+        try {
             new org.quartz.CronExpression(value);
             return true;
-        }catch (ParseException e){
+        } catch (ParseException e) {
             context.disableDefaultConstraintViolation();
             context
                 .buildConstraintViolationWithTemplate("Invalid Cron Expression: " + e.getMessage())

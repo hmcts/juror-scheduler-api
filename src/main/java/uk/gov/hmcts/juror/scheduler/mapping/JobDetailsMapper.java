@@ -19,13 +19,13 @@ import uk.gov.hmcts.juror.scheduler.datastore.entity.api.StatusCodeValidationEnt
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 @SuppressWarnings({
-        "PMD.TooManyMethods",
-        "PMD.AvoidDuplicateLiterals"
+    "PMD.TooManyMethods",
+    "PMD.AvoidDuplicateLiterals"
 })
+//TODO test
 public abstract class JobDetailsMapper {
 
     @Mapping(target = "lastUpdatedAt", ignore = true)
@@ -99,7 +99,7 @@ public abstract class JobDetailsMapper {
         if (CollectionUtils.isEmpty(validationList)) {
             return Collections.emptyList();
         }
-        return validationList.stream().map(this::apiValidationToEntry).collect(Collectors.toList());
+        return validationList.stream().map(this::apiValidationToEntry).toList();
     }
 
     public APIValidation apiValidationEntryToValidation(APIValidationEntity apiValidation) {
@@ -123,7 +123,7 @@ public abstract class JobDetailsMapper {
         if (CollectionUtils.isEmpty(validationList)) {
             return Collections.emptyList();
         }
-        return validationList.stream().map(this::apiValidationEntryToValidation).collect(Collectors.toList());
+        return validationList.stream().map(this::apiValidationEntryToValidation).toList();
     }
 
 }

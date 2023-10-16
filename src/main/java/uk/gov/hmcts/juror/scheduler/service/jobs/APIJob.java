@@ -37,7 +37,10 @@ public class APIJob implements Job {
     }
 
     @Override
-    @SuppressWarnings("PMD.AvoidInstanceofChecksInCatchClause")
+    @SuppressWarnings({
+        "PMD.LawOfDemeter",
+        "PMD.AvoidInstanceofChecksInCatchClause"
+    })
     public void execute(JobExecutionContext context) {
         String jobKey = null;
         TaskEntity task = null;

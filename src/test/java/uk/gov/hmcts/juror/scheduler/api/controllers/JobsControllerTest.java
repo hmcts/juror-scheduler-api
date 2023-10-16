@@ -1,7 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.api.controllers;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
@@ -31,11 +31,10 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.JobSearchFilter;
 import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
-import uk.gov.hmcts.juror.scheduler.testSupport.APIConstantsTest;
-import uk.gov.hmcts.juror.scheduler.testSupport.ControllerTestSupport;
-import uk.gov.hmcts.juror.scheduler.testSupport.TestUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.APIConstantsTest;
+import uk.gov.hmcts.juror.scheduler.testsupport.ControllerTestSupport;
+import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
-import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.GenericErrorHandlerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
@@ -44,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -78,6 +77,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     }
 )
 @DisplayName("Controller:  /jobs")
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals",
+    "PMD.ExcessiveImports",
+    "PMD.LawOfDemeter",
+    "PMD.TooManyMethods"
+})
 class JobsControllerTest {
 
     private static final String CONTROLLER_BASEURL = "/jobs";
@@ -105,7 +110,7 @@ class JobsControllerTest {
                                                   boolean jobServiceCalled) throws Exception {
 
             MockHttpServletRequestBuilder builder = post(CREATE_API_JOB_URL).contentType(MediaType.APPLICATION_JSON);
-            if (payload != null){
+            if (payload != null) {
                 builder.content(payload);
             }
             this.mockMvc
@@ -126,145 +131,132 @@ class JobsControllerTest {
         public static Stream<Arguments> invalidPayloadArgumentSource() {
             String postPayload = TestUtil.readResource("createAPIJobTypicalPOST.json", RESOURCE_PREFIX);
 
+            ArrayList<Map<String, Object>> tooManyValidationsList = new ArrayList<>();
+            for (int index = 0; index <= 250; index++) {
+                tooManyValidationsList.add(Map.of("type", "STATUS_CODE",
+                    "expected_status_code", 100 + index));
+            }
+
+            HashMap<String, Object> blankKey = new HashMap<>();
+            blankKey.put("", null);
+
             return Stream.of(
                 //type
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.type", "INVALID"),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.type", "INVALID"),
                     "Invalid job type entered. Allowed values are: [API]"),
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.type"),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.type"),
                     "type: must not be null"),
 
                 //cronExpression
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.cron_expression", "* * * * * * *"),
-                    "cronExpression: Invalid Cron Expression: Support for specifying both a day-of-week AND a " +
-                        "day-of-month parameter is not implemented."),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.cron_expression", "* * * * * * *"),
+                    "cronExpression: Invalid Cron Expression: Support for specifying both a day-of-week AND a "
+                        + "day-of-month parameter is not implemented."),
 
                 //key
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.key", ""),
-                    "key: must match \\\"[A-Z_]{3,50}\\\""),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.key", "-_':"),
-                    "key: must match \\\"[A-Z_]{3,50}\\\""),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.key", "AB"),
-                    "key: must match \\\"[A-Z_]{3,50}\\\""),
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.key"),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.key", ""),
+                    "key: must match \\\"[A-Z_0-9]{3,50}\\\""),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.key", "-_':"),
+                    "key: must match \\\"[A-Z_0-9]{3,50}\\\""),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.key", "AB"),
+                    "key: must match \\\"[A-Z_0-9]{3,50}\\\""),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.key"),
                     "key: must not be null"),
 
                 //information
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.information"),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.information"),
                     "information: must not be null"),
                 //Information.name
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.information.name"),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.information.name"),
                     "information.name: must not be blank"),
                 //Information.description
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.information.description",
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.information.description",
                         RandomStringUtils.randomAlphabetic(APIConstantsTest.DEFAULT_MAX_LENGTH_LONG)),
                     "information.description: length must be between 0 and 2500"),
                 //Information.tags
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.information.tags",
-                        new HashSet<>() {{
-                            add(RandomStringUtils.randomAlphabetic(APIConstantsTest.DEFAULT_MAX_LENGTH_SHORT));
-                        }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.information.tags",
+                        Set.of(RandomStringUtils.randomAlphabetic(APIConstantsTest.DEFAULT_MAX_LENGTH_SHORT))),
                     "information.tags[]: length must be between 0 and 250"),
 
                 //Method
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.method", "INVALID"),
-                    "Invalid method entered. Allowed values are: [POST, GET, PUT, PATCH, DELETE, HEAD, OPTIONS, " +
-                        "TRACE]"),
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.method"),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.method", "INVALID"),
+                    "Invalid method entered. Allowed values are: [POST, GET, PUT, PATCH, DELETE, HEAD, OPTIONS, "
+                        + "TRACE]"),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.method"),
                     "method: must not be null"),
                 //URL
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.url", "INVALID"),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.url", "INVALID"),
                     "url: must be a valid URL"),
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.url"),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.url"),
                     "url: must not be null"),
                 //Headers
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.headers", new HashMap<>() {{
-                        put("", null);
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.headers", blankKey),
                     "headers[]: length must be between 1 and 2500"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.headers", new HashMap<>() {{
-                        put("myKey", "");
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.headers", Map.of("myKey", "")),
                     "headers[myKey]: length must be between 1 and 2500"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.headers", new HashMap<>()),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.headers", new HashMap<>()),
                     "headers: size must be between 1 and 100"),
                 //authenticationDefault
-                Arguments.arguments(TestUtil.addJsonPath(postPayload, "$", "authentication_default", "INVALID"),
-                    "Invalid authentication default entered. Allowed values are: "+Arrays.toString(
-                            AuthenticationDefaults.values())),
+                arguments(TestUtil.addJsonPath(postPayload, "$", "authentication_default", "INVALID"),
+                    "Invalid authentication default entered. Allowed values are: " + Arrays.toString(
+                        AuthenticationDefaults.values())),
                 //payload
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.payload", ""),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.payload", ""),
                     "payload: length must be between 1 and 2500"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.payload", RandomStringUtils.randomAlphabetic(2501)),
+                arguments(
+                    TestUtil.replaceJsonPath(postPayload, "$.payload", RandomStringUtils.randomAlphabetic(2501)),
                     "payload: length must be between 1 and 2500"),
 
                 //validations
-                Arguments.arguments(TestUtil.deleteJsonPath(postPayload, "$.validations"),
+                arguments(TestUtil.deleteJsonPath(postPayload, "$.validations"),
                     "validations: must not be empty"),
-                Arguments.arguments(TestUtil.addJsonPath(TestUtil.deleteJsonPath(postPayload, "$.validations"),"$",
-                        "validations", new ArrayList<>(){{
-                            for(int index = 0; index <= 250;index++){
-                                int finalIndex = index;
-                                add(new HashMap<>() {{
-                                    put("type", "STATUS_CODE");
-                                    put("expected_status_code", 100 + finalIndex);
-                                }});
-                            }
-                        }}),
+                arguments(TestUtil.addJsonPath(TestUtil.deleteJsonPath(postPayload, "$.validations"), "$",
+                        "validations", tooManyValidationsList),
                     "validations: size must be between 1 and 250"),
 
                 //Wrong type
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "STATUS_CODE");
-                        put("max_response_time_ms", 1000);
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "STATUS_CODE",
+                            "max_response_time_ms", 1000)),
                     "validations[0].expectedStatusCode: must not be null"),
 
                 //StatusCode
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "STATUS_CODE");
-                        put("expected_status_code", 99);
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "STATUS_CODE",
+                            "expected_status_code", 99)),
                     "validations[0].expectedStatusCode: must be greater than or equal to 100"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "STATUS_CODE");
-                        put("expected_status_code", 600);
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "STATUS_CODE",
+                            "expected_status_code", 600)),
                     "validations[0].expectedStatusCode: must be less than or equal to 599"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "STATUS_CODE");
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "STATUS_CODE")),
                     "validations[0].expectedStatusCode: must not be null"),
                 //Max ResponseTime
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "MAX_RESPONSE_TIME");
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "MAX_RESPONSE_TIME")),
                     "validations[0].maxResponseTimeMS: must not be null"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "MAX_RESPONSE_TIME");
-                        put("max_response_time_ms", 0);
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "MAX_RESPONSE_TIME",
+                            "max_response_time_ms", 0)),
                     "validations[0].maxResponseTimeMS: must be greater than or equal to 1"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "MAX_RESPONSE_TIME");
-                        put("max_response_time_ms", 30001);
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "MAX_RESPONSE_TIME",
+                            "max_response_time_ms", 30_001)),
                     "validations[0].maxResponseTimeMS: must be less than or equal to 30000"),
                 //JsonPath
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "JSON_PATH");
-                        put("path", "$.status");
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "JSON_PATH",
+                            "path", "$.status")),
                     "validations[0].expectedResponse: must not be null"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "JSON_PATH");
-                        put("expected_response", "UP");
-                    }}),
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "JSON_PATH",
+                            "expected_response", "UP")),
                     "validations[0].path: must not be null"),
-                Arguments.arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]", new HashMap<>() {{
-                        put("type", "JSON_PATH");
-                        put("path", "$[[$");
-                        put("expected_response", "UP");
-                    }}),
+
+                arguments(TestUtil.replaceJsonPath(postPayload, "$.validations[0]",
+                        Map.of("type", "JSON_PATH",
+                            "path", "$[[$",
+                            "expected_response", "UP")),
                     "validations[0].path: Invalid JsonPath")
             );
         }
@@ -272,12 +264,12 @@ class JobsControllerTest {
 
         public static Stream<Arguments> validPayloadArgumentSource() {
             String postPayload = TestUtil.readResource("createAPIJobTypicalPOST.json", RESOURCE_PREFIX);
-
+            HashMap<String, Object> headerMapNullValue = new HashMap<>();
+            headerMapNullValue.put("myKey", null);
             return Stream.of(
-                Arguments.arguments("Null Header Key", TestUtil.replaceJsonPath(postPayload, "$.headers", new HashMap<>() {{
-                    put("myKey", null);
-                }})),
-                Arguments.arguments("With Authentication Default", TestUtil.addJsonPath(postPayload, "$",
+                arguments("Null Header Key",
+                    TestUtil.replaceJsonPath(postPayload, "$.headers", headerMapNullValue)),
+                arguments("With Authentication Default", TestUtil.addJsonPath(postPayload, "$",
                     "authentication_default",
                     AuthenticationDefaults.JUROR_API_SERVICE))
             );
@@ -286,8 +278,7 @@ class JobsControllerTest {
 
         @ParameterizedTest(name = ": {0}")
         @MethodSource("validPayloadArgumentSource")
-        void positive_create_api_job_valid_payload(String testName, String payload) throws Exception {
-
+        void positiveCreateApiJobValidPayload(String testName, String payload) throws Exception {
             this.mockMvc
                 .perform(
                     post(CREATE_API_JOB_URL)
@@ -301,29 +292,40 @@ class JobsControllerTest {
 
         @ParameterizedTest(name = "Expect error message: {1}")
         @MethodSource("invalidPayloadArgumentSource")
-        void negative_create_api_job_invalid_payload(String payload, String expectedErrorMessage) throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeCreateApiJobInvalidPayload(String payload, String expectedErrorMessage) throws Exception {
             callAndExpectErrorResponse(payload, "INVALID_PAYLOAD", expectedErrorMessage, HttpStatus.BAD_REQUEST, false);
         }
+
         @Test
-        void negative_no_payload() throws Exception {
-            callAndExpectErrorResponse(null ,"INVALID_PAYLOAD", "Unable to read payload content",
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeNoPayload() throws Exception {
+            callAndExpectErrorResponse(null, "INVALID_PAYLOAD", "Unable to read payload content",
                 HttpStatus.BAD_REQUEST, false);
         }
 
 
         @Test
-        void negative_create_api_job_key_already_in_use() throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeCreateApiJobKeyAlreadyInUse() throws Exception {
             doThrow(new GenericErrorHandlerException(APIHandleableException.Type.INFORMATIONAL,
                 new KeyAlreadyInUseError(), HttpStatus.CONFLICT))
                 .when(jobService).createJob(any());
             String postPayload = TestUtil.readResource("createAPIJobTypicalPOST.json", RESOURCE_PREFIX);
 
-            callAndExpectErrorResponse(postPayload, "KEY_ALREADY_IN_USE", "The key you have provided is already in " +
-                "use. Please choice a unique key.", HttpStatus.CONFLICT, true);
+            callAndExpectErrorResponse(postPayload, "KEY_ALREADY_IN_USE",
+                "The key you have provided is already in use. Please choice a unique key.",
+                HttpStatus.CONFLICT, true);
         }
 
         @Test
-        void positive_create_api_job_get() throws Exception {
+        void positiveCreateApiJobGet() throws Exception {
             this.mockMvc
                 .perform(
                     post(CREATE_API_JOB_URL)
@@ -340,19 +342,19 @@ class JobsControllerTest {
 
             final APIJobDetails apiJobDetails = captor.getValue();
 
-            Assertions.assertEquals("* 5 * * * ?", apiJobDetails.getCronExpression());
+            assertEquals("* 5 * * * ?", apiJobDetails.getCronExpression(),"Cron expression must match");
 
 
-            Assertions.assertEquals("HEALTH", apiJobDetails.getKey());
-            Assertions.assertEquals(APIMethod.GET, apiJobDetails.getMethod());
-            Assertions.assertEquals(JobType.API, apiJobDetails.getType());
-            assertEquals("http://localhost:8080/health", apiJobDetails.getUrl());
+            assertEquals("HEALTH", apiJobDetails.getKey(),"Key must match");
+            assertEquals(APIMethod.GET, apiJobDetails.getMethod(),"Method must match");
+            assertEquals(JobType.API, apiJobDetails.getType(),"Type must match");
+            assertEquals("http://localhost:8080/health", apiJobDetails.getUrl(),"Url must match");
             validateDefaultCreateJob(apiJobDetails);
-            assertNull(apiJobDetails.getPayload());
+            assertNull(apiJobDetails.getPayload(),"Payload must be null");
         }
 
         @Test
-        void positive_create_api_job_post() throws Exception {
+        void positiveCreateApiJobPost() throws Exception {
             this.mockMvc
                 .perform(
                     post(CREATE_API_JOB_URL)
@@ -369,78 +371,80 @@ class JobsControllerTest {
 
             final APIJobDetails apiJobDetails = captor.getValue();
 
-            Assertions.assertEquals("* 5 * * * ?", apiJobDetails.getCronExpression());
+            assertEquals("* 5 * * * ?", apiJobDetails.getCronExpression(),"Cron expression must match");
 
 
-            Assertions.assertEquals("HEALTH_CHECK", apiJobDetails.getKey());
-            Assertions.assertEquals(APIMethod.POST, apiJobDetails.getMethod());
-            Assertions.assertEquals(JobType.API, apiJobDetails.getType());
-            assertEquals("http://localhost:8080/health", apiJobDetails.getUrl());
+            assertEquals("HEALTH_CHECK", apiJobDetails.getKey(),"Key must match");
+            assertEquals(APIMethod.POST, apiJobDetails.getMethod(),"Method must match");
+            assertEquals(JobType.API, apiJobDetails.getType(),"Type must match");
+            assertEquals("http://localhost:8080/health", apiJobDetails.getUrl(),"Url must match");
             validateDefaultCreateJob(apiJobDetails);
-            assertEquals("{\"value\":\"key1\",\"value2\":\"key2\",\"value3\":\"key3\"," +
-                "\"value4\":{\"value1\":\"key1\"," +
-                "\"value2\":\"key2\"}}", apiJobDetails.getPayload());
+            assertEquals("{\"value\":\"key1\",\"value2\":\"key2\",\"value3\":\"key3\","
+                + "\"value4\":{\"value1\":\"key1\","
+                + "\"value2\":\"key2\"}}", apiJobDetails.getPayload(),"Payload must match");
         }
 
         private void validateDefaultCreateJob(APIJobDetails apiJobDetails) {
             Information information = apiJobDetails.getInformation();
-            assertNotNull(information);
-            assertEquals("Health Check", information.getName());
-            assertEquals("Checks to ensure the health of the application is okay", information.getDescription());
-            assertThat(information.getTags(), hasItems("Health Check"));
-            assertEquals(1, information.getTags().size());
+            assertNotNull(information,"Information must not be null");
+            assertEquals("Health Check", information.getName(),"Name must match");
+            assertEquals("Checks to ensure the health of the application is okay", information.getDescription(),
+                "Description must match");
+            assertThat("Tags should match",information.getTags(), hasItems("Health Check"));
+            assertEquals(1, information.getTags().size(),"Tag size must match");
             //Headers
 
-            assertEquals(2, apiJobDetails.getHeaders().size());
-            assertEquals("testHeaderValue", apiJobDetails.getHeaders().get("testHeader"));
-            assertEquals("testHeaderValue2", apiJobDetails.getHeaders().get("testHeader2"));
+            assertEquals(2, apiJobDetails.getHeaders().size(),"Header size must match");
+            assertEquals("testHeaderValue", apiJobDetails.getHeaders().get("testHeader"),
+                "Header value must match");
+            assertEquals("testHeaderValue2", apiJobDetails.getHeaders().get("testHeader2"),
+                "Header value must match");
             //Validations
-            assertEquals(6, apiJobDetails.getValidations().size());
+            assertEquals(6, apiJobDetails.getValidations().size(),"Validation size must match");
             assertInstanceOf(StatusCodeAPIValidation.class, apiJobDetails.getValidations().get(0));
             StatusCodeAPIValidation statusCodeAPIValidation =
                 (StatusCodeAPIValidation) apiJobDetails.getValidations().get(0);
-            Assertions.assertEquals(ValidationType.STATUS_CODE, statusCodeAPIValidation.getType());
-            assertEquals(201, statusCodeAPIValidation.getExpectedStatusCode());
+            assertEquals(ValidationType.STATUS_CODE, statusCodeAPIValidation.getType(),"Type must match");
+            assertEquals(201, statusCodeAPIValidation.getExpectedStatusCode(),"Status code must match");
 
             assertInstanceOf(MaxResponseTimeAPIValidation.class, apiJobDetails.getValidations().get(1));
             MaxResponseTimeAPIValidation maxResponseTimeAPIValidation =
                 (MaxResponseTimeAPIValidation) apiJobDetails.getValidations().get(1);
-            Assertions.assertEquals(ValidationType.MAX_RESPONSE_TIME, maxResponseTimeAPIValidation.getType());
-            assertEquals(1000, maxResponseTimeAPIValidation.getMaxResponseTimeMS());
+            assertEquals(ValidationType.MAX_RESPONSE_TIME, maxResponseTimeAPIValidation.getType(),"Type must match");
+            assertEquals(1000, maxResponseTimeAPIValidation.getMaxResponseTimeMS(),"Max response time must match");
 
             assertInstanceOf(JsonPathAPIValidation.class, apiJobDetails.getValidations().get(2));
             JsonPathAPIValidation jsonPathAPIValidation = (JsonPathAPIValidation) apiJobDetails.getValidations().get(2);
-            Assertions.assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidation.getType());
-            assertEquals("status", jsonPathAPIValidation.getPath());
-            assertEquals("UP", jsonPathAPIValidation.getExpectedResponse());
+            assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidation.getType(),"Type must match");
+            assertEquals("status", jsonPathAPIValidation.getPath(),"Path must match");
+            assertEquals("UP", jsonPathAPIValidation.getExpectedResponse(),"Expected response must match");
 
             assertInstanceOf(JsonPathAPIValidation.class, apiJobDetails.getValidations().get(3));
             JsonPathAPIValidation jsonPathAPIValidationDB =
                 (JsonPathAPIValidation) apiJobDetails.getValidations().get(3);
-            Assertions.assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidationDB.getType());
-            assertEquals("components.db.status", jsonPathAPIValidationDB.getPath());
-            assertEquals("UP", jsonPathAPIValidationDB.getExpectedResponse());
+            assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidationDB.getType(),"Type must match");
+            assertEquals("components.db.status", jsonPathAPIValidationDB.getPath(),"Path must match");
+            assertEquals("UP", jsonPathAPIValidationDB.getExpectedResponse(),"Expected response must match");
 
             assertInstanceOf(JsonPathAPIValidation.class, apiJobDetails.getValidations().get(4));
             JsonPathAPIValidation jsonPathAPIValidationDiskSpace =
                 (JsonPathAPIValidation) apiJobDetails.getValidations().get(4);
-            Assertions.assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidationDiskSpace.getType());
-            assertEquals("components.diskspace.status", jsonPathAPIValidationDiskSpace.getPath());
-            assertEquals("UP", jsonPathAPIValidationDiskSpace.getExpectedResponse());
+            assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidationDiskSpace.getType(),"Type must match");
+            assertEquals("components.diskspace.status", jsonPathAPIValidationDiskSpace.getPath(),"Path must match");
+            assertEquals("UP", jsonPathAPIValidationDiskSpace.getExpectedResponse(),"Expected response must match");
 
             assertInstanceOf(JsonPathAPIValidation.class, apiJobDetails.getValidations().get(5));
             JsonPathAPIValidation jsonPathAPIValidationPing =
                 (JsonPathAPIValidation) apiJobDetails.getValidations().get(5);
-            Assertions.assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidationPing.getType());
-            assertEquals("components.ping.status", jsonPathAPIValidationPing.getPath());
-            assertEquals("UP", jsonPathAPIValidationPing.getExpectedResponse());
+            assertEquals(ValidationType.JSON_PATH, jsonPathAPIValidationPing.getType(),"Type must match");
+            assertEquals("components.ping.status", jsonPathAPIValidationPing.getPath(),"Path must match");
+            assertEquals("UP", jsonPathAPIValidationPing.getExpectedResponse(),"Expected response must match");
         }
     }
 
     @Nested
     @DisplayName("GET " + SEARCH_API_JOB_URL)
     class SearchJob extends ControllerTestSupport {
-
 
 
         protected void callAndExpectInvalidPayloadErrorResponse(Map<String, String[]> queryParams,
@@ -455,7 +459,8 @@ class JobsControllerTest {
                                                   HttpStatus status,
                                                   boolean jobServiceCalled) throws Exception {
 
-            MockHttpServletRequestBuilder requestBuilder = get(SEARCH_API_JOB_URL).contentType(MediaType.APPLICATION_JSON);
+            MockHttpServletRequestBuilder requestBuilder =
+                get(SEARCH_API_JOB_URL).contentType(MediaType.APPLICATION_JSON);
             for (Map.Entry<String, String[]> entry : queryParams.entrySet()) {
                 requestBuilder.queryParam(entry.getKey(), entry.getValue());
             }
@@ -469,7 +474,9 @@ class JobsControllerTest {
 
             if (jobServiceCalled) {
                 verify(jobService, times(1)).getJobs(any());
-                verify(jobDetailsMapper, times(status == HttpStatus.NOT_FOUND ? 0 : 1)).toJobDetailsJobDetailsList(any());
+                verify(jobDetailsMapper, times(status == HttpStatus.NOT_FOUND
+                    ? 0
+                    : 1)).toJobDetailsJobDetailsList(any());
             } else {
                 verify(jobService, never()).getJobs(any());
                 verify(jobDetailsMapper, never()).toJobDetailsJobDetailsList(any());
@@ -478,7 +485,8 @@ class JobsControllerTest {
 
         protected void callAndExpectValidResponse(Map<String, String[]> queryParams) throws Exception {
 
-            MockHttpServletRequestBuilder requestBuilder = get(SEARCH_API_JOB_URL).contentType(MediaType.APPLICATION_JSON);
+            MockHttpServletRequestBuilder requestBuilder =
+                get(SEARCH_API_JOB_URL).contentType(MediaType.APPLICATION_JSON);
             for (Map.Entry<String, String[]> entry : queryParams.entrySet()) {
                 requestBuilder.queryParam(entry.getKey(), entry.getValue());
             }
@@ -507,78 +515,97 @@ class JobsControllerTest {
             final JobSearchFilter jobSearchFilter = captor.getValue();
 
             if (queryParams.containsKey("job_key")) {
-                assertEquals(queryParams.get("job_key")[0], jobSearchFilter.getJobKey());
+                assertEquals(queryParams.get("job_key")[0], jobSearchFilter.getJobKey(),"Key must match");
             } else {
-                assertNull(jobSearchFilter.getJobKey());
+                assertNull(jobSearchFilter.getJobKey(),"Job Key should be null");
             }
 
             if (queryParams.containsKey("tag")) {
                 String[] expectedTags = queryParams.get("tag");
                 Set<String> actualTags = jobSearchFilter.getTags();
-                assertEquals(expectedTags.length, actualTags.size());
-                assertThat(actualTags, hasItems(expectedTags));
+                assertEquals(expectedTags.length, actualTags.size(),"Tag size must match");
+                assertThat("Tags should match",actualTags, hasItems(expectedTags));
             } else {
-                assertNull(jobSearchFilter.getTags());
+                assertNull(jobSearchFilter.getTags(),"Tags should be null");
             }
         }
 
         @Test
-        void negative_not_found() throws Exception {
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeNotFound() throws Exception {
             when(jobService.getJobs(any())).thenThrow(new NotFoundException("No Jobs found for the provided filter"));
-            callAndExpectErrorResponse(Collections.emptyMap(), "NOT_FOUND", "The requested resource could not be " +
-                    "located.",
+            callAndExpectErrorResponse(Collections.emptyMap(), "NOT_FOUND",
+                "The requested resource could not be located.",
                 HttpStatus.NOT_FOUND, true);
         }
 
         @Test
-        void negative_invalid_job_key() throws Exception {
-            callAndExpectInvalidPayloadErrorResponse(new HashMap<>() {{
-                put("job_key", new String[]{"IN"});
-            }}, "getJobs.jobKey: must match \\\"[A-Z_]{3,50}\\\"");
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeInvalidJobKey() throws Exception {
+            callAndExpectInvalidPayloadErrorResponse(
+                Map.of("job_key", new String[]{"IN"}),
+                "getJobs.jobKey: must match \\\"[A-Z_0-9]{3,50}\\\"");
         }
 
         @Test
-        void negative_too_long_tags() throws Exception {
-            callAndExpectInvalidPayloadErrorResponse(new HashMap<>() {{
-                put("tag", new String[]{RandomStringUtils.random(APIConstantsTest.DEFAULT_MAX_LENGTH_SHORT)});
-            }}, "getJobs.tags[].<iterable element>: length must be between 0 and 250");
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeTooLongTags() throws Exception {
+            callAndExpectInvalidPayloadErrorResponse(
+                Map.of("tag", new String[]{RandomStringUtils.random(APIConstantsTest.DEFAULT_MAX_LENGTH_SHORT)}),
+                "getJobs.tags[].<iterable element>: length must be between 0 and 250");
         }
 
         @Test
-        void negative_blank_tags() throws Exception {
-            callAndExpectInvalidPayloadErrorResponse(new HashMap<>() {{
-                put("tag", new String[]{" "});
-            }}, "getJobs.tags[].<iterable element>: must not be blank");
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void negativeBlankTags() throws Exception {
+            callAndExpectInvalidPayloadErrorResponse(
+                Map.of("tag", new String[]{" "}),
+                "getJobs.tags[].<iterable element>: must not be blank");
         }
 
 
         @Test
-        void positive_one_tag() throws Exception {
-            callAndExpectValidResponse(new HashMap<>() {{
-                put("tag", new String[]{"ValidTag"});
-            }});
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveOneTag() throws Exception {
+            callAndExpectValidResponse(Map.of("tag", new String[]{"ValidTag"}));
         }
 
         @Test
-        void positive_multiple_tag() throws Exception {
-            callAndExpectValidResponse(new HashMap<>() {{
-                put("tag", new String[]{"ValidTag", "ValidTag2", "ValidTag3", "ValidTag4"});
-            }});
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveMultipleTag() throws Exception {
+            callAndExpectValidResponse(Map.of("tag", new String[]{"ValidTag", "ValidTag2", "ValidTag3", "ValidTag4"}));
         }
 
         @Test
-        void positive_job_key() throws Exception {
-            callAndExpectValidResponse(new HashMap<>() {{
-                put("job_key", new String[]{"ABC"});
-            }});
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveJobKey() throws Exception {
+            callAndExpectValidResponse(Map.of("job_key", new String[]{"ABC"}));
         }
 
         @Test
-        void positive_job_key_with_tags() throws Exception {
-            callAndExpectValidResponse(new HashMap<>() {{
-                put("job_key", new String[]{"ABC"});
-                put("tag", new String[]{"ValidTag", "ValidTag2", "ValidTag3", "ValidTag4"});
-            }});
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveJobKeyWithTags() throws Exception {
+            callAndExpectValidResponse(
+                Map.of(
+                    "job_key", new String[]{"ABC"},
+                    "tag", new String[]{"ValidTag", "ValidTag2", "ValidTag3", "ValidTag4"}
+                ));
         }
     }
 }

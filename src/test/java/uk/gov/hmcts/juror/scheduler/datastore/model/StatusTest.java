@@ -1,6 +1,9 @@
 package uk.gov.hmcts.juror.scheduler.datastore.model;
 
-class StatusTest extends EnumTest<Status>{
+@SuppressWarnings({
+    "PMD.TestClassWithoutTestCases" //False positive done via inheritance
+})
+class StatusTest extends EnumTest<Status> {
     @Override
     protected Class<Status> getEnumClass() {
         return Status.class;

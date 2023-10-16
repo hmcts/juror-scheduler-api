@@ -37,17 +37,17 @@ class StatusCodeValidationEntityTest {
 
     public static Stream<Arguments> statusCodeValidationTestDataProvider() {
         return Stream.of(
-            arguments("positive_validate_correct_code_200",200, 200, true),
-            arguments("positive_validate_correct_code_201",201, 201, true),
-            arguments("negative_validate_incorrect_code_just_above",200, 201, false),
-            arguments("negative_validate_incorrect_code_just_below",200, 199, false),
-            arguments("negative_validate_incorrect_code",200, 404, false)
+            arguments("positive_validate_correct_code_200", 200, 200, true),
+            arguments("positive_validate_correct_code_201", 201, 201, true),
+            arguments("negative_validate_incorrect_code_just_above", 200, 201, false),
+            arguments("negative_validate_incorrect_code_just_below", 200, 199, false),
+            arguments("negative_validate_incorrect_code", 200, 404, false)
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("statusCodeValidationTestDataProvider")
-    public void testRunner(String name,int statusCode, int actualStatusCode,
+    void testRunner(String name, int statusCode, int actualStatusCode,
                            boolean expectPass) {
         validationEntity.setExpectedStatusCode(statusCode);
         when(response.statusCode()).thenReturn(actualStatusCode);
@@ -55,13 +55,15 @@ class StatusCodeValidationEntityTest {
         APIValidationEntity.Result result = validationEntity.validate(response, jobData);
 
         if (expectPass) {
-            assertNotNull(result);
-            assertTrue(result.isPassed());
-            assertNull(result.getMessage());
+            assertNotNull(result,"Result should not be null");
+            assertTrue(result.isPassed(),"Result should be passed");
+            assertNull(result.getMessage(),"Result must not have message");
         } else {
-            assertNotNull(result);
-            assertFalse(result.isPassed());
-            assertEquals(  "Expected status code of " + statusCode + " but got " + actualStatusCode, result.getMessage());
+            assertNotNull(result,"Result must not be null");
+            assertFalse(result.isPassed(),"Result must not be passed");
+            assertEquals("Expected status code of " + statusCode + " but got "
+                + actualStatusCode, result.getMessage(),
+                "Message must match");
         }
     }
 }

@@ -13,15 +13,17 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface TaskRepository  extends JpaRepository<TaskEntity,Long>, JpaSpecificationExecutor<TaskEntity> {
+public interface TaskRepository extends JpaRepository<TaskEntity, Long>, JpaSpecificationExecutor<TaskEntity> {
 
 
     void deleteAllByJobKey(String jobKey);
+
     List<TaskEntity> findAllByJobKey(String jobKey);
 
     TaskEntity findFirstByJobKeyOrderByCreatedAt(String jobKey);
 
     Optional<TaskEntity> findByJobKeyAndTaskId(String jobKey, long taskId);
+
     interface Specs {
 
         static Specification<TaskEntity> byJobKey(String jobKey) {
@@ -33,6 +35,7 @@ public interface TaskRepository  extends JpaRepository<TaskEntity,Long>, JpaSpec
             return (root, query, builder) ->
                 builder.in(root.get("status")).value(statuses);
         }
+
         static Specification<TaskEntity> byCreateDateGreaterThan(LocalDateTime fromDate) {
             return (root, query, builder) ->
                 builder.greaterThanOrEqualTo(root.get("createdAt"), fromDate);

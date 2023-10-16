@@ -44,22 +44,10 @@ public class SchedulerSecurityDataCreator implements ApplicationRunner {
         permissionService.getOrCreatePermission(PermissionConstants.Job.VIEW_STATUS, Set.of(externalAPIRole));
 
         permissionService.getOrCreatePermission(PermissionConstants.Task.VIEW, userSet);
-        permissionService.getOrCreatePermission(PermissionConstants.Task.STATUS_UPDATE, Set.of(userRole,externalAPIRole));
+        permissionService.getOrCreatePermission(PermissionConstants.Task.STATUS_UPDATE,
+            Set.of(userRole, externalAPIRole));
         permissionService.getOrCreatePermission(PermissionConstants.Task.SEARCH, userSet);
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

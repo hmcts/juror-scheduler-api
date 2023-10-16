@@ -1,4 +1,4 @@
-package uk.gov.hmcts.juror.scheduler.testSupport.controller;
+package uk.gov.hmcts.juror.scheduler.testsupport.controller;
 
 import org.springframework.http.HttpStatus;
 

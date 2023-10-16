@@ -31,7 +31,7 @@ public enum AuthenticationDefaults {
     private BiConsumer<APIJobDetailsEntity, RequestSpecification> authenticationProvider;
 
     private void setAuthenticationProvider(
-            BiConsumer<APIJobDetailsEntity, RequestSpecification> authenticationProvider) {
+        BiConsumer<APIJobDetailsEntity, RequestSpecification> authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
     }
 
@@ -46,8 +46,8 @@ public enum AuthenticationDefaults {
             return valueOf(value);
         } catch (Exception e) {
             throw new InvalidEnumValueException(
-                    "Invalid authentication default entered. Allowed values are: " + Arrays.toString(
-                            AuthenticationDefaults.values()));
+                "Invalid authentication default entered. Allowed values are: " + Arrays.toString(
+                    AuthenticationDefaults.values()));
         }
     }
 
@@ -103,14 +103,15 @@ public enum AuthenticationDefaults {
             }
         }
 
-        private BiConsumer<APIJobDetailsEntity, RequestSpecification> getApiJobExecutionServiceAuthenticationProvider() {
+        private BiConsumer<APIJobDetailsEntity, RequestSpecification>
+            getApiJobExecutionServiceAuthenticationProvider() {
             return (apiJobDetailsEntity, requestSpecification) -> {
                 final Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(apiJobExecutionServiceJwtSecret));
 
                 final String token = jwtService.generateJwtToken(null, apiJobExecutionServiceJwtIssuer,
-                        apiJobExecutionServiceJwtSubject,
-                        apiJobExecutionServiceJwtTokenValidity, key,
-                        Map.of("permissions", new String[]{"job::trigger"})
+                    apiJobExecutionServiceJwtSubject,
+                    apiJobExecutionServiceJwtTokenValidity, key,
+                    Map.of("permissions", new String[]{"job::trigger"})
                 );
                 requestSpecification.header("Authorization", "Bearer " + token);
             };
@@ -134,8 +135,8 @@ public enum AuthenticationDefaults {
                 claims.put("staff", staff);
 
                 final String token = jwtService.generateJwtToken(jurorApiServiceJwtId, jurorApiServiceJwtIssuer,
-                        jurorApiServiceJwtSubject,
-                        jurorApiServiceJwtTokenValidity, key, claims);
+                    jurorApiServiceJwtSubject,
+                    jurorApiServiceJwtTokenValidity, key, claims);
                 requestSpecification.header("Authorization", token);
             };
         }

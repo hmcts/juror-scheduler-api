@@ -14,15 +14,15 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @Setter
 @NoArgsConstructor
 @Schema(oneOf = {
-        JsonPathAPIValidation.class,
-        StatusCodeAPIValidation.class,
-        MaxResponseTimeAPIValidation.class
+    JsonPathAPIValidation.class,
+    StatusCodeAPIValidation.class,
+    MaxResponseTimeAPIValidation.class
 })
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(JsonPathAPIValidation.class),
-        @JsonSubTypes.Type(StatusCodeAPIValidation.class),
-        @JsonSubTypes.Type(MaxResponseTimeAPIValidation.class)
+    @JsonSubTypes.Type(JsonPathAPIValidation.class),
+    @JsonSubTypes.Type(StatusCodeAPIValidation.class),
+    @JsonSubTypes.Type(MaxResponseTimeAPIValidation.class)
 })
 @Slf4j
 public abstract class APIValidation {

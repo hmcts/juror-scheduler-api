@@ -1,7 +1,8 @@
-package uk.gov.hmcts.juror.scheduler.testSupport.controller;
+package uk.gov.hmcts.juror.scheduler.testsupport.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class ControllerTest {
 
     @Autowired
@@ -47,12 +49,13 @@ public abstract class ControllerTest {
         return requestBuilder;
     }
 
-    protected void callAndValidate(RequestArgument requestArgument) throws Exception {
+    @SneakyThrows
+    protected void callAndValidate(RequestArgument requestArgument) {
         MockHttpServletRequestBuilder requestBuilder = buildRequest(requestArgument);
         requestArgument.runPreActions(requestBuilder, this);
         ResultActions resultActions = this.mockMvc
-                .perform(requestBuilder)
-                .andDo(print());
+            .perform(requestBuilder)
+            .andDo(print());
         requestArgument.runPostActions(resultActions, this);
     }
 

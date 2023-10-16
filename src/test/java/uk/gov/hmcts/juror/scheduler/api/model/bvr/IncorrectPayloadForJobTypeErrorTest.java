@@ -4,6 +4,9 @@ package uk.gov.hmcts.juror.scheduler.api.model.bvr;
 import uk.gov.hmcts.juror.scheduler.api.model.GenericErrorTest;
 import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.IncorrectPayloadForJobTypeError;
 
+@SuppressWarnings({
+    "PMD.TestClassWithoutTestCases" //False positive done via inheritance
+})
 class IncorrectPayloadForJobTypeErrorTest extends GenericErrorTest<IncorrectPayloadForJobTypeError> {
     @Override
     protected String getErrorCode() {

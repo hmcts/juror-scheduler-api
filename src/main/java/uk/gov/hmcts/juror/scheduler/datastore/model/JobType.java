@@ -26,10 +26,11 @@ public enum JobType {
     @JsonCreator
     @SuppressWarnings("PMD.PreserveStackTrace")
     public static JobType forValues(String value) {
-        try{
+        try {
             return valueOf(value);
-        }catch (Exception e){
-            throw new InvalidEnumValueException("Invalid job type entered. Allowed values are: " + Arrays.toString(JobType.values()));
+        } catch (Exception e) {
+            throw new InvalidEnumValueException(
+                "Invalid job type entered. Allowed values are: " + Arrays.toString(JobType.values()));
         }
     }
 }

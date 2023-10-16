@@ -102,13 +102,12 @@ task smoke(type: Test) {
 }
 
 checkstyle {
-  maxWarnings = 1000
+  maxWarnings = 0
   toolVersion = '10.12.4'
   getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
 pmd {
-  ignoreFailures = true
   toolVersion = "6.55.0"
   sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
   reportsDir = file("$project.buildDir/reports/pmd")
@@ -189,7 +188,6 @@ ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
-// Juror bespoke library
   implementation files('lib/spring-support-library-0.1.2-plain.jar')
 
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
@@ -219,10 +217,9 @@ dependencies {
   // Documentation, logging
   implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
+  testImplementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
+  testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
   implementation 'org.jetbrains:annotations:20.1.0'
-  
-  testImplementation 'com.h2database:h2:2.2.224'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
   testImplementation 'junit:junit:4.13.2'
 
   // Data Mapping

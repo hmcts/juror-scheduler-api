@@ -40,7 +40,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class APIJobDetailsEntity  {
+public class APIJobDetailsEntity {
 
     @Id
     @NotNull
@@ -81,7 +81,7 @@ public class APIJobDetailsEntity  {
     @CollectionTable(name = "apijob_headers",
         joinColumns = {@JoinColumn(name = "job_key", referencedColumnName = "key")})
     @MapKeyColumn(name = "key", length = APIConstants.DEFAULT_MAX_LENGTH_LONG)
-    @Column(name = "value",length = APIConstants.DEFAULT_MAX_LENGTH_LONG)
+    @Column(name = "value", length = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private Map<@NotNull String, String> headers;
 
 
@@ -91,18 +91,19 @@ public class APIJobDetailsEntity  {
     private List<APIValidationEntity> validations;
 
 
-    public void addValidations(List<APIValidationEntity> validations){
+    public void addValidations(List<APIValidationEntity> validations) {
         validations.forEach(this::addValidation);
     }
-    public void addValidation(APIValidationEntity validation){
-        if(validations == null){
+
+    public void addValidation(APIValidationEntity validation) {
+        if (validations == null) {
             validations = new ArrayList<>();
         }
         validations.add(validation);
         validation.setJob(this);
     }
 
-    public void setValidations(List<APIValidationEntity> validations){
+    public void setValidations(List<APIValidationEntity> validations) {
         this.validations.clear();
         addValidations(validations);
     }

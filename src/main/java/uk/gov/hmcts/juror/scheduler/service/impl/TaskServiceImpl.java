@@ -5,14 +5,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
-import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
-import uk.gov.hmcts.juror.scheduler.datastore.repository.TaskRepository;
-import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.StatusUpdate;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
+import uk.gov.hmcts.juror.scheduler.datastore.repository.TaskRepository;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
+import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
 import java.time.LocalDateTime;
@@ -46,14 +46,6 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskEntity saveTask(TaskEntity task) {
         return taskRepository.save(task);
-    }
-
-    @Override
-    public List<TaskEntity> getTasks(String jobKey) {
-        if (!jobService.doesJobExist(jobKey)) {
-            throw new NotFoundException("Job with key '" + jobKey + "' not found");
-        }
-        return taskRepository.findAllByJobKey(jobKey);
     }
 
     @Override
@@ -108,14 +100,20 @@ public class TaskServiceImpl implements TaskService {
         if (searchFilter.getStatuses() != null) {
             specifications.add(TaskRepository.Specs.byStatus(searchFilter.getStatuses()));
         }
-        List<TaskEntity> taskEntities = taskRepository.findAll(TaskRepository.Specs.orderByCreatedOn(Specification.allOf(
-            specifications
-        )));
+        List<TaskEntity> taskEntities = taskRepository.findAll(
+            TaskRepository.Specs.orderByCreatedOn(Specification.allOf(specifications))
+        );
         if (taskEntities.isEmpty()) {
             throw new NotFoundException("No tasks found for the provided filter");
         }
         return taskEntities;
     }
 
-
+    @Override
+    public List<TaskEntity> getTasks(String jobKey) {
+        if (!jobService.doesJobExist(jobKey)) {
+            throw new NotFoundException("Job with key '" + jobKey + "' not found");
+        }
+        return taskRepository.findAllByJobKey(jobKey);
+    }
 }

@@ -12,9 +12,9 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.JobPatch;
 import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
 import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
-import uk.gov.hmcts.juror.scheduler.api.model.job.details.JobPatch;
 
 import java.util.List;
 import java.util.Map;
@@ -40,11 +40,13 @@ public class APIJobPatch extends JobPatch {
         @NotNull @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String,
         @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String> headers;
 
-    @Schema(description = "If present an authentication token will automatically be added to your API request based on the selected system.")
+    @Schema(description = "If present an authentication token will automatically be "
+        + "added to your API request based on the selected system.")
     @JsonProperty("authentication_default")
     private AuthenticationDefaults authenticationDefault;
 
-    @Schema(description = "The payload to include along with the request (Note this should not be present for GET requests)")
+    @Schema(description = "The payload to include along with the request "
+        + "(Note this should not be present for GET requests)")
     @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String payload;
 

@@ -7,30 +7,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-import javax.sql.DataSource;
 import java.util.Properties;
+import javax.sql.DataSource;
 
 /**
  * Configuration of properties.
  */
 @Configuration
 public class SchedulerConfig {
-	@Bean
-	public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
+    @Bean
+    public SchedulerFactoryBean schedulerFactoryBean(DataSource dataSource,
                                                      ApplicationContext applicationContext,
                                                      QuartzProperties quartzProperties) {
-		SpringBeanJobFactory jobFactory = new SpringBeanJobFactory();
-		jobFactory.setApplicationContext(applicationContext);
+        SpringBeanJobFactory jobFactory = new SpringBeanJobFactory();
+        jobFactory.setApplicationContext(applicationContext);
 
-		Properties properties = new Properties();
-		properties.putAll(quartzProperties.getProperties());
+        Properties properties = new Properties();
+        properties.putAll(quartzProperties.getProperties());
         properties.put("org.quartz.jobStore.driverDelegateClass", "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
 
-		SchedulerFactoryBean factory = new SchedulerFactoryBean();
-		factory.setOverwriteExistingJobs(true);
-		factory.setDataSource(dataSource);
-		factory.setQuartzProperties(properties);
-		factory.setJobFactory(jobFactory);
-		return factory;
-	}
+        SchedulerFactoryBean factory = new SchedulerFactoryBean();
+        factory.setOverwriteExistingJobs(true);
+        factory.setDataSource(dataSource);
+        factory.setQuartzProperties(properties);
+        factory.setJobFactory(jobFactory);
+        return factory;
+    }
 }

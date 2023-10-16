@@ -30,7 +30,8 @@ public enum ValidationType {
         try {
             return valueOf(value);
         } catch (Exception e) {
-            throw new InvalidEnumValueException("Invalid validation type entered. Allowed values are: " + Arrays.toString(ValidationType.values()));
+            throw new InvalidEnumValueException("Invalid validation type entered. Allowed values are: "
+                + Arrays.toString(ValidationType.values()));
         }
     }
 

@@ -37,16 +37,16 @@ class MaxResponseTimeAPIValidationEntityTest {
 
     public static Stream<Arguments> maxResponseTimeValidationTestDataProvider() {
         return Stream.of(
-            arguments("positive_validate_on_max",300, 300L, true),
-            arguments("positive_validate_just_below_max",300, 299L, true),
-            arguments("negative_validate_just_over_max",300, 301L, false),
-            arguments("negative_validate_well_over_max",100, 3000L, false)
+            arguments("positive_validate_on_max", 300, 300L, true),
+            arguments("positive_validate_just_below_max", 300, 299L, true),
+            arguments("negative_validate_just_over_max", 300, 301L, false),
+            arguments("negative_validate_well_over_max", 100, 3000L, false)
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("maxResponseTimeValidationTestDataProvider")
-    public void testRunner(String name,int maxResponseTime, long actualResponseTime,
+    void testRunner(String name, int maxResponseTime, long actualResponseTime,
                            boolean expectPass) {
         validationEntity.setMaxResponseTimeMS(maxResponseTime);
         when(response.getTime()).thenReturn(actualResponseTime);
@@ -54,14 +54,17 @@ class MaxResponseTimeAPIValidationEntityTest {
         APIValidationEntity.Result result = validationEntity.validate(response, jobData);
 
         if (expectPass) {
-            assertNotNull(result);
-            assertTrue(result.isPassed());
-            assertNull(result.getMessage());
+            assertNotNull(result,"Result should not be null");
+            assertTrue(result.isPassed(),"Result should be passed");
+            assertNull(result.getMessage(),"Result must not have message");
         } else {
-            assertNotNull(result);
-            assertFalse(result.isPassed());
-            assertEquals( "API call took longer then the max response time allowed. Max response time: " + maxResponseTime + " ms" +
-                " but took: " + actualResponseTime + " ms", result.getMessage());
+            assertNotNull(result,"Result must not be null");
+            assertFalse(result.isPassed(),"Result must not be passed");
+            assertEquals(
+                "API call took longer then the max response time allowed. Max response time: "
+                    + maxResponseTime + " ms but took: " + actualResponseTime + " ms",
+                result.getMessage(),
+                "Message must match");
         }
     }
 }

@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -36,18 +35,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("SchedulerServiceImpl")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 class SchedulerServiceImplTest {
 
 
     private Scheduler scheduler;
 
     private SchedulerServiceImpl schedulerService;
-    private static final String jobKey = "ABC123";
-    private static final String cronExpression = "* 5 * * * ?";
+    private static final String JOB_KEY = "ABC123";
+    private static final String CRON_EXPRESSION = "* 5 * * * ?";
 
 
     @BeforeEach
-    public void beforeEach(){
+    public void beforeEach() {
         this.scheduler = mock(Scheduler.class);
         this.schedulerService = new SchedulerServiceImpl(this.scheduler);
     }
@@ -65,12 +65,12 @@ class SchedulerServiceImplTest {
 
         @Test
         @DisplayName("Scheduler starts with exception")
-        void postConstruct_exception() throws SchedulerException {
+        void postConstructException() throws SchedulerException {
             try (MockedStatic<SystemUtil> systemUtilMockedStatic = Mockito.mockStatic(SystemUtil.class)) {
                 doThrow(new RuntimeException()).when(scheduler).start();
                 schedulerService.postConstruct();
-                verify(scheduler,times(1)).start();
-                systemUtilMockedStatic.verify(() -> SystemUtil.exit(1),times(1));
+                verify(scheduler, times(1)).start();
+                systemUtilMockedStatic.verify(() -> SystemUtil.exit(1), times(1));
                 systemUtilMockedStatic.verifyNoMoreInteractions();
             }
         }
@@ -88,7 +88,7 @@ class SchedulerServiceImplTest {
 
         @Test
         @DisplayName("Scheduler shutdown -  Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).shutdown();
             InternalServerException exception = assertThrows(
@@ -97,8 +97,9 @@ class SchedulerServiceImplTest {
                     schedulerService.preDestroy();
                 }
             );
-            assertEquals("Failed to shutdown scheduler", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to shutdown scheduler", exception.getMessage(),
+                "Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -109,7 +110,7 @@ class SchedulerServiceImplTest {
         @DisplayName("Register scheduled Job")
         void scheduledJob() throws SchedulerException {
             APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
-                .key(jobKey)
+                .key(JOB_KEY)
                 .cronExpression("* 5 * * * ?")
                 .build();
 
@@ -121,24 +122,24 @@ class SchedulerServiceImplTest {
 
 
             JobDetail jobDetail = jobDetailCaptor.getValue();
-            assertEquals(jobKey, jobDetail.getKey().getName());
-            assertEquals(APIJob.class, jobDetail.getJobClass());
-            assertEquals(1, jobDetail.getJobDataMap().size());
-            assertEquals(jobKey, jobDetail.getJobDataMap().getString("key"));
+            assertEquals(JOB_KEY, jobDetail.getKey().getName(),"Name must match");
+            assertEquals(APIJob.class, jobDetail.getJobClass(),"Class must match");
+            assertEquals(1, jobDetail.getJobDataMap().size(),"Size must match");
+            assertEquals(JOB_KEY, jobDetail.getJobDataMap().getString("key"),"Key must match");
 
             Trigger trigger = triggerCaptor.getValue();
 
-            assertEquals(jobKey, trigger.getKey().getName());
-            assertThat(trigger, instanceOf(CronTriggerImpl.class));
+            assertEquals(JOB_KEY, trigger.getKey().getName(),"Name must match");
+            assertThat("Trigger should be instance of cronTriggerImpl",trigger, instanceOf(CronTriggerImpl.class));
             CronTriggerImpl cronTrigger = (CronTriggerImpl) trigger;
-            assertEquals(cronExpression, cronTrigger.getCronExpression());
+            assertEquals(CRON_EXPRESSION, cronTrigger.getCronExpression(),"Cron expression must match");
         }
 
         @Test
         @DisplayName("Register unscheduled Job")
         void unscheduledJob() throws SchedulerException {
             APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
-                .key(jobKey)
+                .key(JOB_KEY)
                 .build();
 
             schedulerService.register(apiJobDetailsEntity);
@@ -149,23 +150,23 @@ class SchedulerServiceImplTest {
 
 
             JobDetail jobDetail = jobDetailCaptor.getValue();
-            assertEquals(jobKey, jobDetail.getKey().getName());
-            assertEquals(APIJob.class, jobDetail.getJobClass());
-            assertEquals(1, jobDetail.getJobDataMap().size());
-            assertEquals(jobKey, jobDetail.getJobDataMap().getString("key"));
+            assertEquals(JOB_KEY, jobDetail.getKey().getName(),"Name must match");
+            assertEquals(APIJob.class, jobDetail.getJobClass(),"Class must match");
+            assertEquals(1, jobDetail.getJobDataMap().size(),"Size must match");
+            assertEquals(JOB_KEY, jobDetail.getJobDataMap().getString("key"),"Key must match");
 
             Trigger trigger = triggerCaptor.getValue();
 
-            assertEquals(jobKey, trigger.getKey().getName());
-            assertThat(trigger, instanceOf(SimpleTriggerImpl.class));
+            assertEquals(JOB_KEY, trigger.getKey().getName(),"Name must match");
+            assertThat("Trigger should be instance of simpleTriggerImpl",trigger, instanceOf(SimpleTriggerImpl.class));
 
         }
 
         @Test
         @DisplayName("Register Job -  Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
-                .key(jobKey)
+                .key(JOB_KEY)
                 .build();
 
             Exception thrownException = new RuntimeException("Some Reason");
@@ -176,8 +177,9 @@ class SchedulerServiceImplTest {
                 InternalServerException.class,
                 () -> schedulerService.register(apiJobDetailsEntity)
             );
-            assertEquals("Failed to register Job", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to register Job", exception.getMessage(),
+                "Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -188,40 +190,40 @@ class SchedulerServiceImplTest {
         @DisplayName("Execute Job")
         void executeJob() throws SchedulerException {
             when(scheduler.getTrigger(any())).thenReturn(new CronTriggerImpl());
-            schedulerService.executeJob(jobKey);
+            schedulerService.executeJob(JOB_KEY);
             final ArgumentCaptor<JobKey> jobKeyCaptor = ArgumentCaptor.forClass(JobKey.class);
 
             verify(scheduler, times(1)).triggerJob(jobKeyCaptor.capture());
-            assertEquals(jobKey, jobKeyCaptor.getValue().getName());
+            assertEquals(JOB_KEY, jobKeyCaptor.getValue().getName(),"Key must match");
         }
 
         @Test
         @DisplayName("Execute Job - Manual")
         void executeJobManual() throws SchedulerException {
             when(scheduler.getTrigger(any())).thenReturn(null);
-            schedulerService.executeJob(jobKey);
+            schedulerService.executeJob(JOB_KEY);
             final ArgumentCaptor<JobDetail> jobDetailsCaptor = ArgumentCaptor.forClass(JobDetail.class);
             final ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
 
             verify(scheduler, times(1)).scheduleJob(jobDetailsCaptor.capture(), triggerCaptor.capture());
-            assertEquals(jobKey, jobDetailsCaptor.getValue().getKey().getName());
-            assertEquals(jobKey, triggerCaptor.getValue().getKey().getName());
+            assertEquals(JOB_KEY, jobDetailsCaptor.getValue().getKey().getName(),"Key must match");
+            assertEquals(JOB_KEY, triggerCaptor.getValue().getKey().getName(),"Key must match");
         }
 
         @Test
         @DisplayName("Execute Job - Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             when(scheduler.getTrigger(any())).thenReturn(new CronTriggerImpl());
             final ArgumentCaptor<JobKey> jobKeyCaptor = ArgumentCaptor.forClass(JobKey.class);
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).triggerJob(any());
             InternalServerException exception = assertThrows(InternalServerException.class, () -> {
-                schedulerService.executeJob(jobKey);
+                schedulerService.executeJob(JOB_KEY);
             });
             verify(scheduler, times(1)).triggerJob(jobKeyCaptor.capture());
-            assertEquals(jobKey, jobKeyCaptor.getValue().getName());
-            assertEquals("Failed to execute Job", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals(JOB_KEY, jobKeyCaptor.getValue().getName(),"Name must match");
+            assertEquals("Failed to execute Job", exception.getMessage(),"Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -230,43 +232,43 @@ class SchedulerServiceImplTest {
     class IsScheduled {
         @Test
         @DisplayName("Is Scheduled")
-        void positive_is_scheduled_job() throws SchedulerException {
+        void positiveIsScheduledJob() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
-                when(scheduler.getTrigger(eq(triggerKey))).thenReturn(new CronTriggerImpl());
-                assertTrue(schedulerService.isScheduled(jobKey));
+                when(scheduler.getTrigger(triggerKey)).thenReturn(new CronTriggerImpl());
+                assertTrue(schedulerService.isScheduled(JOB_KEY),"Job should be scheduled");
             }
         }
 
         @Test
         @DisplayName("Is not Scheduled")
-        void positive_is_not_scheduled_job() throws SchedulerException {
+        void positiveIsNotScheduledJob() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
 
-                when(scheduler.getTrigger(eq(triggerKey))).thenReturn(new SimpleTriggerImpl());
-                assertFalse(schedulerService.isScheduled(jobKey));
+                when(scheduler.getTrigger(triggerKey)).thenReturn(new SimpleTriggerImpl());
+                assertFalse(schedulerService.isScheduled(JOB_KEY),"Job should not be should");
             }
         }
 
         @Test
         @DisplayName("Trigger not found")
-        void negative_trigger_not_found() throws SchedulerException {
+        void negativeTriggerNotFound() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
-                when(scheduler.getTrigger(eq(triggerKey))).thenReturn(null);
+                when(scheduler.getTrigger(triggerKey)).thenReturn(null);
 
 
                 NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                    assertFalse(schedulerService.isScheduled(jobKey)));
-                assertEquals("Trigger from Job Key: " + jobKey + " not found", exception.getMessage());
-
+                    assertFalse(schedulerService.isScheduled(JOB_KEY),"Job should not be scheduled"));
+                assertEquals("Trigger from Job Key: " + JOB_KEY + " not found",
+                    exception.getMessage(),"Message must match");
             }
         }
     }
@@ -276,39 +278,40 @@ class SchedulerServiceImplTest {
     class IsEnabled {
         @Test
         @DisplayName("Is Enabled")
-        void positive_job_is_enabled() throws SchedulerException {
+        void positiveJobIsEnabled() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(eq(triggerKey))).thenReturn(Trigger.TriggerState.NORMAL);
-                assertTrue(schedulerService.isEnabled(jobKey));
+                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.NORMAL);
+                assertTrue(schedulerService.isEnabled(JOB_KEY),"Job should be enabled");
             }
         }
 
         @Test
         @DisplayName("Is Disabled")
-        void negative_job_is_disabled() throws SchedulerException {
+        void negativeJobIsDisabled() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(eq(triggerKey))).thenReturn(Trigger.TriggerState.PAUSED);
-                assertFalse(schedulerService.isEnabled(jobKey));
+                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.PAUSED);
+                assertFalse(schedulerService.isEnabled(JOB_KEY),"Job should not be enabled");
             }
         }
 
         @Test
         @DisplayName("Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).getTriggerState(any());
             InternalServerException exception = assertThrows(
                 InternalServerException.class,
-                () -> schedulerService.isEnabled(jobKey)
+                () -> schedulerService.isEnabled(JOB_KEY)
             );
-            assertEquals("Failed to get trigger state", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to get trigger state",
+                exception.getMessage(),"Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -317,39 +320,40 @@ class SchedulerServiceImplTest {
     class IsDisabled {
         @Test
         @DisplayName("Is Enabled")
-        void positive_job_is_enabled() throws SchedulerException {
+        void positiveJobIsEnabled() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(eq(triggerKey))).thenReturn(Trigger.TriggerState.NORMAL);
-                assertFalse(schedulerService.isDisabled(jobKey));
+                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.NORMAL);
+                assertFalse(schedulerService.isDisabled(JOB_KEY),"Job should not be disabled");
             }
         }
 
         @Test
         @DisplayName("Is Disabled")
-        void negative_job_is_disabled() throws SchedulerException {
+        void negativeJobIsDisabled() throws SchedulerException {
             try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(jobKey);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(eq(jobKey)))
+                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
+                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(eq(triggerKey))).thenReturn(Trigger.TriggerState.PAUSED);
-                assertTrue(schedulerService.isDisabled(jobKey));
+                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.PAUSED);
+                assertTrue(schedulerService.isDisabled(JOB_KEY),"Job should be disabled");
             }
         }
 
         @Test
         @DisplayName("Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).getTriggerState(any());
             InternalServerException exception = assertThrows(
                 InternalServerException.class,
-                () -> schedulerService.isEnabled(jobKey)
+                () -> schedulerService.isEnabled(JOB_KEY)
             );
-            assertEquals("Failed to get trigger state", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to get trigger state",
+                exception.getMessage(),"Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -359,27 +363,28 @@ class SchedulerServiceImplTest {
     class UnRegister {
         @Test
         @DisplayName("Successful")
-        void positive_unregister_success() throws SchedulerException {
+        void positiveUnregisterSuccess() throws SchedulerException {
             try (MockedStatic<JobKey> jobKeyUtilities = Mockito.mockStatic(JobKey.class)) {
-                JobKey jobKeyObj = new JobKey(jobKey);
-                jobKeyUtilities.when(() -> JobKey.jobKey(eq(jobKey)))
+                JobKey jobKeyObj = new JobKey(JOB_KEY);
+                jobKeyUtilities.when(() -> JobKey.jobKey(JOB_KEY))
                     .thenReturn(jobKeyObj);
-                schedulerService.unregister(jobKey);
-                verify(scheduler, times(1)).deleteJob(eq(jobKeyObj));
+                schedulerService.unregister(JOB_KEY);
+                verify(scheduler, times(1)).deleteJob(jobKeyObj);
             }
         }
 
         @Test
         @DisplayName("Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).deleteJob(any());
             InternalServerException exception = assertThrows(
                 InternalServerException.class,
-                () -> schedulerService.unregister(jobKey)
+                () -> schedulerService.unregister(JOB_KEY)
             );
-            assertEquals("Failed to unregister Job", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to unregister Job",
+                exception.getMessage(),"Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -388,27 +393,28 @@ class SchedulerServiceImplTest {
     class Disable {
         @Test
         @DisplayName("Successful")
-        void positive_disable_success() throws SchedulerException {
+        void positiveDisableSuccess() throws SchedulerException {
             try (MockedStatic<JobKey> jobKeyUtilities = Mockito.mockStatic(JobKey.class)) {
-                JobKey jobKeyObj = new JobKey(jobKey);
-                jobKeyUtilities.when(() -> JobKey.jobKey(eq(jobKey)))
+                JobKey jobKeyObj = new JobKey(JOB_KEY);
+                jobKeyUtilities.when(() -> JobKey.jobKey(JOB_KEY))
                     .thenReturn(jobKeyObj);
-                schedulerService.disable(jobKey);
-                verify(scheduler, times(1)).pauseJob(eq(jobKeyObj));
+                schedulerService.disable(JOB_KEY);
+                verify(scheduler, times(1)).pauseJob(jobKeyObj);
             }
         }
 
         @Test
         @DisplayName("Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).pauseJob(any());
             InternalServerException exception = assertThrows(
                 InternalServerException.class,
-                () -> schedulerService.disable(jobKey)
+                () -> schedulerService.disable(JOB_KEY)
             );
-            assertEquals("Failed to disable Job '" + jobKey + "'", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to disable Job '" + JOB_KEY + "'",
+                exception.getMessage(),"Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 
@@ -417,27 +423,28 @@ class SchedulerServiceImplTest {
     class Enable {
         @Test
         @DisplayName("Successful")
-        void positive_enable_success() throws SchedulerException {
+        void positiveEnableSuccess() throws SchedulerException {
             try (MockedStatic<JobKey> jobKeyUtilities = Mockito.mockStatic(JobKey.class)) {
-                JobKey jobKeyObj = new JobKey(jobKey);
-                jobKeyUtilities.when(() -> JobKey.jobKey(eq(jobKey)))
+                JobKey jobKeyObj = new JobKey(JOB_KEY);
+                jobKeyUtilities.when(() -> JobKey.jobKey(JOB_KEY))
                     .thenReturn(jobKeyObj);
-                schedulerService.enable(jobKey);
-                verify(scheduler, times(1)).resumeJob(eq(jobKeyObj));
+                schedulerService.enable(JOB_KEY);
+                verify(scheduler, times(1)).resumeJob(jobKeyObj);
             }
         }
 
         @Test
         @DisplayName("Unexpected Exception")
-        void negative_unexpected_exception() throws SchedulerException {
+        void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
             doThrow(thrownException).when(scheduler).resumeJob(any());
             InternalServerException exception = assertThrows(
                 InternalServerException.class,
-                () -> schedulerService.enable(jobKey)
+                () -> schedulerService.enable(JOB_KEY)
             );
-            assertEquals("Failed to enable Job '" + jobKey + "'", exception.getMessage());
-            assertEquals(thrownException, exception.getCause());
+            assertEquals("Failed to enable Job '" + JOB_KEY + "'",
+                exception.getMessage(),"Message must match");
+            assertEquals(thrownException, exception.getCause(),"Cause must match");
         }
     }
 }

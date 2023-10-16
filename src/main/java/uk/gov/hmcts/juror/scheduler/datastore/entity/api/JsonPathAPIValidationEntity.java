@@ -36,7 +36,8 @@ public class JsonPathAPIValidationEntity extends APIValidationEntity {
         boolean passed = returnedString != null && returnedString.equals(expectedResponse);
 
         String message = passed ? null :
-            "Expected response to return '" + expectedResponse + "' for json path '" + path + "' but got '" + returnedString + "'";
+            "Expected response to return '" + expectedResponse + "' for json path '" + path
+                + "' but got '" + returnedString + "'";
         return Result.builder()
             .passed(passed)
             .message(message)
