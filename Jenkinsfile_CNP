@@ -98,6 +98,15 @@ withPipeline(type, product, component) {
       reportFiles          : "main.html",
       reportName           : "PMD Report"
     ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/pmd",
+      reportFiles          : "smokeTest.html",
+      reportName           : "PMD SmokeTest Report"
+    ]
   }
 
   afterFailure('test') {
