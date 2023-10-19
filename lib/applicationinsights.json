@@ -1,0 +1,23 @@
+{
+  "connectionString": "${file:/mnt/secrets/juror/app-insights-connection-string}",
+  "role": {
+    "name": "juror-scheduler-api"
+  },
+  "preview": {
+    "sampling": {
+      "overrides": [
+        {
+          "telemetryType": "request",
+          "attributes": [
+            {
+              "key": "http.url",
+              "value": "https?://[^/]+/health.*",
+              "matchType": "regexp"
+            }
+          ],
+          "percentage": 1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,43 @@
+version: '2.1'
+
+services:
+#  juror-scheduler-api:
+#    build:
+#      context: .
+#      args:
+#        - http_proxy
+#        - https_proxy
+#        - no_proxy
+#    image: hmctspublic.azurecr.io/spring-boot/template
+#    environment:
+#      # these environment variables are used by java-logging library
+#      - ROOT_APPENDER
+#      - JSON_CONSOLE_PRETTY_PRINT
+#      - ROOT_LOGGING_LEVEL
+#      - JUROR_SERVICE_TYPE
+#      - JUROR_SERVICE_NAME
+#      - JUROR_TEAM
+#      - JUROR_ENVIRONMENT
+#      - LOGBACK_DATE_FORMAT
+#      - LOGBACK_REQUIRE_THREAD
+#      - LOGBACK_REQUIRE_ALERT_LEVEL=false
+#      - LOGBACK_REQUIRE_ERROR_CODE=false
+#    ports:
+#      - $SERVER_PORT:$SERVER_PORT
+  postgres_db_latest:
+    image: postgres:latest
+    restart: unless-stopped
+    network_mode: "bridge"
+    container_name: ${POSTGRESQL_CONTAINER_NAME}
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER_NAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: ${POSTGRESQL_DATA}
+    ports:
+      - "5433:5432"
+    volumes:
+      - ${POSTGRESQL_VOLUME}
+volumes:
+  scheduler:
+    external: true

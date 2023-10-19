@@ -1,0 +1,19 @@
+{
+  "email":"admin@scheduler.cgi.com",
+  "add": {
+    "permissions": [
+      "user::create"
+    ],
+    "roles": [
+      "ROLE_ADMIN"
+    ]
+  },
+  "remove": {
+    "roles": [
+      "ROLE_USER"
+    ],
+    "permissions": [
+      "job::disable"
+    ]
+  }
+}

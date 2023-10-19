@@ -1,0 +1,48 @@
+{
+  "cron_expression": "* 5 * * * ?",
+  "key": "HEALTH",
+  "method": "GET",
+  "type": "API",
+  "url": "http://localhost:8080/health",
+  "information":{
+    "name": "Health Check",
+    "description": "Checks to ensure the health of the application is okay",
+    "tags": [
+      "Health Check"
+    ]
+  },
+  "headers": {
+    "testHeader": "testHeaderValue",
+    "testHeader2": "testHeaderValue2"
+  },
+  "validations": [
+    {
+      "type": "STATUS_CODE" ,
+      "expected_status_code": 201
+    },
+    {
+      "type": "MAX_RESPONSE_TIME" ,
+      "max_response_time_ms": 1000
+    },
+    {
+      "type": "JSON_PATH" ,
+      "path": "status",
+      "expected_response": "UP"
+    },
+    {
+      "type": "JSON_PATH" ,
+      "path": "components.db.status",
+      "expected_response": "UP"
+    },
+    {
+      "type": "JSON_PATH" ,
+      "path": "components.diskspace.status",
+      "expected_response": "UP"
+    },
+    {
+      "type": "JSON_PATH" ,
+      "path": "components.ping.status",
+      "expected_response": "UP"
+    }
+  ]
+}

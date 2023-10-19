@@ -1,0 +1,115 @@
+#!groovy
+
+@Library("Infrastructure")
+
+import uk.gov.hmcts.contino.GradleBuilder
+
+def type = "java"
+def product = "juror"
+def component = "scheduler-api"
+
+def branchesToSync = []
+
+def secrets = [
+  'juror-${env}': [
+    secret('app-insights-connection-string', 'app-insights-connection-string'),
+    secret('AppInsightsInstrumentationKey', 'azure.application-insights.instrumentation-key'),
+    secret('scheduler-api-POSTGRES-HOST', 'DB_HOST'),
+    secret('scheduler-api-POSTGRES-PORT', 'DB_PORT'),
+    secret('scheduler-api-POSTGRES-DATABASE', 'DB_NAME'),
+    secret('scheduler-api-POSTGRES-USER', 'DB_USER_NAME'),
+    secret('scheduler-api-POSTGRES-PASS', 'DB_PASSWORD'),
+    secret('scheduler-api-SECRET', 'SECRET'),
+    secret('scheduler-api-API-SECRET', 'JUROR_API_SERVICE_AUTHENTICATION_SECRET'),
+    secret('scheduler-api-JOB-SECRET', 'API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET')
+    ],
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [$class     : 'AzureKeyVaultSecret',
+   secretType : 'Secret',
+   name       : secretName,
+   version    : '',
+   envVariable: envVar
+  ]
+}
+
+GradleBuilder builder = new GradleBuilder(this, product)
+
+withPipeline(type, product, component) {
+  //enableDbMigration(product)
+  loadVaultSecrets(secrets)
+  enableSlackNotifications('#juror-build-notices')
+  syncBranchesWithMaster(branchesToSync)
+
+  afterAlways('test') {
+    builder.gradle('jacocoTestReport')
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/checkstyle",
+      reportFiles          : "main.html",
+      reportName           : "Checkstyle Main Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/checkstyle",
+      reportFiles          : "test.html",
+      reportName           : "Checkstyle Test Report"
+    ]
+
+//    publishHTML target: [
+//      allowMissing         : true,
+//      alwaysLinkToLastBuild: true,
+//      keepAll              : true,
+//      reportDir            : "build/reports/checkstyle",
+//      reportFiles          : "functionalTest.html",
+//      reportName           : "Checkstyle Functional Test Report"
+//    ]
+
+//    publishHTML target: [
+//      allowMissing         : true,
+//      alwaysLinkToLastBuild: true,
+//      keepAll              : true,
+//      reportDir            : "build/reports/checkstyle",
+//      reportFiles          : "integrationTest.html",
+//      reportName           : "Checkstyle Integration Test Report"
+//    ]
+
+//    publishHTML target: [
+//      allowMissing         : true,
+//      alwaysLinkToLastBuild: true,
+//      keepAll              : true,
+//      reportDir            : "build/reports/tests/test",
+//      reportFiles          : "index.html",
+//      reportName           : "Unit Tests Report"
+//    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/pmd",
+      reportFiles          : "main.html",
+      reportName           : "PMD Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/pmd",
+      reportFiles          : "smokeTest.html",
+      reportName           : "PMD SmokeTest Report"
+    ]
+  }
+
+  afterFailure('test') {
+    junit '**/test-results/integration/*.xml'
+  }
+}
