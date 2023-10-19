@@ -240,7 +240,7 @@ dependencies {
 
 
   // Web requests
-  implementation 'org.springframework:spring-webflux:6.0.12'
+  implementation 'org.springframework:spring-webflux:6.0.13'
 
   testImplementation(platform('org.junit:junit-bom:5.10.0'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
