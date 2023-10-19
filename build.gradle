@@ -187,6 +187,14 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 
 dependencies {
+  //Dependency overrides
+
+  //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
+  implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.15'
+  //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
+  implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.15'
+
+  //End
 
   implementation files('lib/spring-support-library-0.1.2-plain.jar')
 
@@ -199,7 +207,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
 
-  implementation group: 'org.springframework.data', name: 'spring-data-commons', version: springVersion
+  implementation group: 'org.springframework.data', name: 'spring-data-commons', version: '3.1.5'
 
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
