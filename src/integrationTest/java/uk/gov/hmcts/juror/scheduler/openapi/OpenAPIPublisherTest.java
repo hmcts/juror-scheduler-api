@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@ActiveProfiles({"intTest", "h2db", "test"})
+@ActiveProfiles({"h2db", "test"})
 class OpenAPIPublisherTest {
 
     @Autowired

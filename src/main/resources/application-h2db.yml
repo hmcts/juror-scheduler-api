@@ -4,3 +4,8 @@ spring:
     url: jdbc:h2:mem:mydb
     username: sa
     password: password
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    generate-ddl: true

@@ -112,16 +112,3 @@ scheduler:
   quartz:
     jdbc:
       initialize-schema: always
----
-spring:
-  config:
-    activate:
-      on-profile:  test
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: false
-    generate-ddl: true
-  quartz:
-    jdbc:
-      initialize-schema: always
