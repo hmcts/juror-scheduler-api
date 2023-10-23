@@ -13,6 +13,7 @@ java:
     DB_NAME: "pr-${CHANGE_ID}-juror-scheduler-api"
     DB_USER_NAME: "hmcts"
     DB_PORT: 5432
+    spring.profiles.active: dev
   secrets:
     DB_PASSWORD:
       secretRef: "postgres"
