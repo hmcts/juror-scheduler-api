@@ -11,7 +11,7 @@ java:
     RUN_DB_MIGRATION_ON_STARTUP: true
     DB_HOST: "juror-dev.postgres.database.azure.com"
     DB_NAME: "pr-${CHANGE_ID}-juror-scheduler-api"
-    DB_USERNAME: "hmcts"
+    DB_USER_NAME: "hmcts"
     DB_PORT: 5432
   secrets:
     DB_PASSWORD:
