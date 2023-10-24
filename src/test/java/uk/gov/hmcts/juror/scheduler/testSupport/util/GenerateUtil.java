@@ -136,4 +136,73 @@ public final class GenerateUtil {
         return values[RANDOM.nextInt(values.length)];
     }
 
+    public static TaskEntity generateTaskEntity() {
+        return TaskEntity.builder()
+            .taskId(ThreadLocalRandom.current().nextInt(1, 30_000))
+            .job(generateAPIJobDetailsEntrySimple())
+            .message(RandomStringUtils.randomAlphabetic(1, 2500))
+            .postActionsMessage(RandomStringUtils.randomAlphabetic(1, 2500))
+            .metaData(Map.of(
+                RandomStringUtils.randomAlphabetic(1, 250), RandomStringUtils.randomAlphabetic(1, 250),
+                RandomStringUtils.randomAlphabetic(1, 250), RandomStringUtils.randomAlphabetic(1, 250),
+                RandomStringUtils.randomAlphabetic(1, 250), RandomStringUtils.randomAlphabetic(1, 250)
+            ))
+            .status(getRandomEnumValue(Status.class))
+            .createdAt(LocalDateTime.now())
+            .lastUpdatedAt(LocalDateTime.now().plusHours(1))
+            .build();
+    }
+
+    private static APIJobDetailsEntity generateAPIJobDetailsEntrySimple() {
+        return APIJobDetailsEntity.builder()
+            .key(RandomStringUtils.randomAlphabetic(3, 25))
+            .build();
+    }
+
+    public static StatusCodeAPIValidation generateStatusCodeAPIValidation() {
+        return new StatusCodeAPIValidation(RandomUtils.nextInt(100, 600));
+    }
+
+    public static StatusCodeValidationEntity generateStatusCodeValidationEntity() {
+        return (StatusCodeValidationEntity) new StatusCodeValidationEntity(RandomUtils.nextInt(100, 600))
+            .setJob(generateAPIJobDetailsEntrySimple());
+    }
+
+
+    public static MaxResponseTimeAPIValidation generateMaxResponseTimeAPIValidation() {
+        return new MaxResponseTimeAPIValidation(RandomUtils.nextInt(1, 30_001));
+    }
+
+    public static MaxResponseTimeAPIValidationEntity generateMaxResponseTimeAPIValidationEntity() {
+        return (MaxResponseTimeAPIValidationEntity) new MaxResponseTimeAPIValidationEntity(
+            RandomUtils.nextInt(1, 30_001))
+            .setJob(generateAPIJobDetailsEntrySimple());
+    }
+
+    public static JsonPathAPIValidation generateJsonPathAPIValidation() {
+        return new JsonPathAPIValidation(
+            RandomStringUtils.randomAlphabetic(250),
+            RandomStringUtils.randomAlphabetic(250));
+    }
+
+    public static JsonPathAPIValidationEntity generateJsonPathAPIValidationEntity() {
+        return (JsonPathAPIValidationEntity) new JsonPathAPIValidationEntity(
+            RandomStringUtils.randomAlphabetic(250),
+            RandomStringUtils.randomAlphabetic(250))
+            .setJob(generateAPIJobDetailsEntrySimple());
+    }
+
+    public static RunJobAction generateRunJobAction() {
+        return (RunJobAction) new RunJobAction(RandomStringUtils.randomAlphabetic(3, 25))
+            .setJobKey(RandomStringUtils.randomAlphabetic(3, 25))
+            .setCondition(getRandomEnumValue(ConditionType.class));
+    }
+
+
+    public static RunJobActionEntity generateRunJobActionEntity() {
+        return (RunJobActionEntity) new RunJobActionEntity(RandomStringUtils.randomAlphabetic(3, 25))
+            .setJobKey(RandomStringUtils.randomAlphabetic(3, 25))
+            .setJob(generateAPIJobDetailsEntrySimple())
+            .setCondition(getRandomEnumValue(ConditionType.class));
+    }
 }
