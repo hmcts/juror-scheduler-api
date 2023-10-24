@@ -1,16 +1,24 @@
 package uk.gov.hmcts.juror.scheduler.testsupport.util;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.RunJobAction;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.JsonPathAPIValidation;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.MaxResponseTimeAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.task.TaskDetail;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.action.RunJobActionEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.api.JsonPathAPIValidationEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.api.MaxResponseTimeAPIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.StatusCodeValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.APIMethod;
 import uk.gov.hmcts.juror.scheduler.datastore.model.AuthenticationDefaults;
+import uk.gov.hmcts.juror.scheduler.datastore.model.ConditionType;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 
 import java.time.LocalDateTime;
@@ -22,7 +30,8 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings({
-    "PMD.AvoidThrowingRawExceptionTypes"
+    "PMD.AvoidThrowingRawExceptionTypes",
+    "PMD.TooManyMethods"
 })
 public final class GenerateUtil {
     private static final Random RANDOM;
@@ -110,6 +119,7 @@ public final class GenerateUtil {
             .build();
     }
 
+
     public static TaskDetail generateTask() {
         return TaskDetail.builder()
             .jobKey(RandomStringUtils.randomAlphabetic(3, 25))
@@ -125,4 +135,5 @@ public final class GenerateUtil {
         T[] values = enumClass.getEnumConstants();
         return values[RANDOM.nextInt(values.length)];
     }
+
 }

@@ -659,7 +659,7 @@ class JobServiceImplTest {
                 List<ActionEntity> convertedPostActions = Collections.emptyList();
                 if (apiJobPatch.getPostExecutionActions() != null) {
                     convertedPostActions = ConvertUtil.convertPostActions(apiJobPatch.getPostExecutionActions());
-                    when(jobDetailsMapper.actionsList(apiJobPatch.getPostExecutionActions())).thenReturn(
+                    when(jobDetailsMapper.actionEntityList(apiJobPatch.getPostExecutionActions())).thenReturn(
                         convertedPostActions);
                 }
 

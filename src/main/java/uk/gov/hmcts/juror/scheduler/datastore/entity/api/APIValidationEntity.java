@@ -15,6 +15,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.envers.Audited;
 import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
@@ -24,6 +25,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(discriminatorType = DiscriminatorType.STRING, name = "type")
+@Accessors(chain = true)
 public abstract class APIValidationEntity {
 
     @Id

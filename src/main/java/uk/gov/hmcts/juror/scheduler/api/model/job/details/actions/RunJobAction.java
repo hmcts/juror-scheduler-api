@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import uk.gov.hmcts.juror.scheduler.datastore.model.ActionType;
 
 @Getter
@@ -16,10 +17,10 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ActionType;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonTypeName("RUN_JOB")
+@Accessors(chain = true)
 public class RunJobAction extends Action {
     @JsonProperty("job_key")
     @NotBlank
-    //TODO validate job_key exists
     private String jobKey;
 
     @Schema(type = "string", allowableValues = "RUN_JOB")

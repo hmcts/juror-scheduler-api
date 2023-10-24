@@ -29,7 +29,6 @@ import java.util.List;
     "PMD.TooManyMethods",
     "PMD.AvoidDuplicateLiterals"
 })
-//TODO test
 public abstract class JobDetailsMapper {
 
     @Mapping(target = "lastUpdatedAt", ignore = true)
@@ -55,8 +54,6 @@ public abstract class JobDetailsMapper {
 
     public abstract List<APIJobDetailsResponse> toJobDetailsJobDetailsList(List<APIJobDetailsEntity> jobs);
 
-
-    //Validations
 
     @Mapping(target = "job", ignore = true)
     public abstract StatusCodeValidationEntity toEntity(StatusCodeAPIValidation statusCodeValidation);
@@ -87,6 +84,8 @@ public abstract class JobDetailsMapper {
     public void assignJobs(@MappingTarget APIJobDetailsEntity apiJobDetailsEntity) {
         if (!CollectionUtils.isEmpty(apiJobDetailsEntity.getValidations())) {
             apiJobDetailsEntity.getValidations().forEach(validation -> validation.setJob(apiJobDetailsEntity));
+        }
+        if (!CollectionUtils.isEmpty(apiJobDetailsEntity.getPostExecutionActions())) {
             apiJobDetailsEntity.getPostExecutionActions().forEach(action -> action.setJob(apiJobDetailsEntity));
         }
     }
@@ -147,7 +146,7 @@ public abstract class JobDetailsMapper {
         throw new UnsupportedOperationException("Unknown action type: " + action.getClass());
     }
 
-    public List<ActionEntity> actionsList(List<? extends Action> actions) {
+    public List<ActionEntity> actionEntityList(List<? extends Action> actions) {
         if (CollectionUtils.isEmpty(actions)) {
             return Collections.emptyList();
         }

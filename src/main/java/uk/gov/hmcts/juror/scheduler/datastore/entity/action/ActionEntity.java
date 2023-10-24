@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.envers.Audited;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.ActionType;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ConditionType;
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(discriminatorType = DiscriminatorType.STRING, name = "type")
+@Accessors(chain = true)
 public abstract class ActionEntity {
 
     @Id

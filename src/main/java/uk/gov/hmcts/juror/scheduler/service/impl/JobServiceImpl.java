@@ -183,7 +183,7 @@ public class JobServiceImpl implements JobService {
             validations -> jobDetailsEntity.setValidations(jobDetailsMapper.apiValidationEntityList(validations)));
 
         Optional.ofNullable(jobPatch.getPostExecutionActions()).ifPresent(
-            postActions -> jobDetailsEntity.setPostExecutionActions(jobDetailsMapper.actionsList(postActions)));
+            postActions -> jobDetailsEntity.setPostExecutionActions(jobDetailsMapper.actionEntityList(postActions)));
 
         APIJobDetailsEntity updatedJobDetailsEntity = save(jobDetailsEntity);
         if (requiresReschedule.get()) {
