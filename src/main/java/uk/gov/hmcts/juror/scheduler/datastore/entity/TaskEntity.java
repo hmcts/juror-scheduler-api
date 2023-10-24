@@ -1,5 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.datastore.entity;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -17,11 +18,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Getter
@@ -46,6 +51,9 @@ public class TaskEntity {
     @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String postActionsMessage;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Map<String, String> metaData;
+
     @NotNull
     private Status status;
 
@@ -61,5 +69,23 @@ public class TaskEntity {
         } else {
             this.postActionsMessage += ", " + message;
         }
+    }
+
+    private Map<String, String> getMetaDataInternal() {
+        if (this.metaData == null) {
+            this.metaData = new HashMap<>();
+        }
+        return this.metaData;
+    }
+
+    public Map<String, String> getMetaData() {
+        return Collections.unmodifiableMap(getMetaDataInternal());
+    }
+
+    public void addMetaData(Map<String, String> metaDataValues) {
+        if (CollectionUtils.isEmpty(metaDataValues)) {
+            return;
+        }
+        this.getMetaDataInternal().putAll(metaDataValues);
     }
 }

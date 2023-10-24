@@ -31,10 +31,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -98,8 +100,8 @@ class TaskServiceImplTest {
             assertEquals(apiJobDetailsEntity, taskEntity.getJob(), "Job must match");
             assertEquals(Status.PENDING, taskEntity.getStatus(), "Status must match");
 
-            verify(actionService,times(1)).taskUpdated(any());
-            verify(taskRepository,times(1)).save(any());
+            verify(actionService, times(1)).taskUpdated(any());
+            verify(taskRepository, times(1)).save(any());
         }
     }
 
@@ -116,8 +118,8 @@ class TaskServiceImplTest {
             when(actionService.taskUpdated(taskEntityProvided)).thenReturn(savedTaskEntity);
             assertEquals(savedTaskEntity, taskService.saveTask(taskEntityProvided), "Task must match");
 
-            verify(actionService,times(1)).taskUpdated(taskEntityProvided);
-            verify(taskRepository,times(1)).save(savedTaskEntity);
+            verify(actionService, times(1)).taskUpdated(taskEntityProvided);
+            verify(taskRepository, times(1)).save(savedTaskEntity);
         }
     }
 
@@ -263,6 +265,67 @@ class TaskServiceImplTest {
             verify(taskRepository, times(1)).save(taskEntity);
             assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
             assertEquals("New Message", taskEntity.getMessage(), "Message must match");
+        }
+
+        @Test
+        @DisplayName("Success - Status and meta_data")
+        void positiveUpdateStatusAndMetaData() {
+            long taskId = 1L;
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
+            TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
+            Optional<TaskEntity> optional = Optional.of(taskEntity);
+            when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
+            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
+            when(actionService.taskUpdated(taskEntity)).thenReturn(taskEntity);
+
+            StatusUpdate statusUpdate = new StatusUpdate();
+            statusUpdate.setStatus(Status.VALIDATION_PASSED);
+            statusUpdate.setMetaData(Map.of("MyKey", "MyValue"));
+
+            taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
+
+            verify(taskRepository, times(1)).save(taskEntity);
+            assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
+            assertEquals("Msg", taskEntity.getMessage(), "Message must not be updated");
+
+            assertEquals(1, taskEntity.getMetaData().size(), "Size must match");
+            assertThat("Meta_data must match", taskEntity.getMetaData(), hasEntry("MyKey", "MyValue"));
+        }
+
+        @Test
+        @DisplayName("Success - Status and meta_data. Multiple updates - Meta_data should append")
+        void positiveUpdateStatusAndMetaDataMultiple() {
+            long taskId = 1L;
+            when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
+            TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
+            Optional<TaskEntity> optional = Optional.of(taskEntity);
+            when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
+            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
+            when(actionService.taskUpdated(taskEntity)).thenReturn(taskEntity);
+
+            StatusUpdate statusUpdate = new StatusUpdate();
+            statusUpdate.setStatus(Status.VALIDATION_PASSED);
+            statusUpdate.setMetaData(Map.of("MyKey", "MyValue"));
+
+            taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
+
+            verify(taskRepository, times(1)).save(taskEntity);
+            assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
+            assertEquals("Msg", taskEntity.getMessage(), "Message must not be updated");
+
+            assertEquals(1, taskEntity.getMetaData().size(), "Size must match");
+            assertThat("Meta_data must match", taskEntity.getMetaData(), hasEntry("MyKey", "MyValue"));
+
+            statusUpdate.setMetaData(Map.of("NewKey", "NewValue"));
+            taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
+
+            verify(taskRepository, times(2)).save(taskEntity);
+            assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
+            assertEquals("Msg", taskEntity.getMessage(), "Message must not be updated");
+
+            assertEquals(2, taskEntity.getMetaData().size(), "Size must match");
+            assertThat("Meta_data must match", taskEntity.getMetaData(), hasEntry("MyKey", "MyValue"));
+            assertThat("Meta_data must match", taskEntity.getMetaData(), hasEntry("NewKey", "NewValue"));
         }
     }
 

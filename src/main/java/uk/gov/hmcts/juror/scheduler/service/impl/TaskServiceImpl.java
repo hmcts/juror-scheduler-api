@@ -1,5 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.service.impl;
 
+import io.jsonwebtoken.lang.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
@@ -80,6 +81,9 @@ public class TaskServiceImpl implements TaskService {
         taskEntity.setStatus(statusUpdate.getStatus());
         if (statusUpdate.getMessage() != null) {
             taskEntity.setMessage(statusUpdate.getMessage());
+        }
+        if (!Collections.isEmpty(statusUpdate.getMetaData())) {
+            taskEntity.addMetaData(statusUpdate.getMetaData());
         }
         saveTask(taskEntity);
     }
