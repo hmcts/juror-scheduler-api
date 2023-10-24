@@ -9,20 +9,18 @@ import java.util.Arrays;
 
 @Slf4j
 @Getter
-public enum ValidationType {
-    JSON_PATH,
-    STATUS_CODE,
-    MAX_RESPONSE_TIME;
+public enum ActionType {
+    RUN_JOB;
 
     @JsonCreator
     @SuppressWarnings("PMD.PreserveStackTrace")
-    public static ValidationType forValues(String value) {
+    public static ActionType forValues(String value) {
         try {
             return valueOf(value);
         } catch (Exception e) {
-            throw new InvalidEnumValueException("Invalid validation type entered. Allowed values are: "
-                + Arrays.toString(ValidationType.values()));
+            throw new InvalidEnumValueException(
+                "Invalid action type entered. Allowed values are: "
+                    + Arrays.toString(ActionType.values()));
         }
     }
-
 }

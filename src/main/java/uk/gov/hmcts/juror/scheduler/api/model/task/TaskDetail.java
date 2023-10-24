@@ -42,4 +42,7 @@ public class TaskDetail {
 
     @Length(min = 1,max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String message;
+
+    @JsonProperty("post_actions_message")
+    private String postActionsMessage;
 }

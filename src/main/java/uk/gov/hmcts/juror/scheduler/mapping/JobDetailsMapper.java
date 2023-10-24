@@ -5,12 +5,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.springframework.util.CollectionUtils;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.Action;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.RunJobAction;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetailsResponse;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.JsonPathAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.MaxResponseTimeAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValidation;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.action.ActionEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.action.RunJobActionEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.JsonPathAPIValidationEntity;
@@ -51,35 +55,43 @@ public abstract class JobDetailsMapper {
 
     public abstract List<APIJobDetailsResponse> toJobDetailsJobDetailsList(List<APIJobDetailsEntity> jobs);
 
+
+    //Validations
+
     @Mapping(target = "job", ignore = true)
     public abstract StatusCodeValidationEntity toEntity(StatusCodeAPIValidation statusCodeValidation);
-
-    @Mapping(target = "type", ignore = true)
-    public abstract StatusCodeAPIValidation toEntity(StatusCodeValidationEntity statusCodeValidation);
-
 
     @Mapping(target = "job", ignore = true)
     public abstract MaxResponseTimeAPIValidationEntity toEntity(MaxResponseTimeAPIValidation statusCodeValidation);
 
-    @Mapping(target = "type", ignore = true)
-    public abstract MaxResponseTimeAPIValidation toEntity(MaxResponseTimeAPIValidationEntity statusCodeValidation);
-
-
     @Mapping(target = "job", ignore = true)
     public abstract JsonPathAPIValidationEntity toEntity(JsonPathAPIValidation statusCodeValidation);
 
+    @Mapping(target = "job", ignore = true)
+    public abstract RunJobActionEntity toEntity(RunJobAction runJobAction);
+
     @Mapping(target = "type", ignore = true)
-    public abstract JsonPathAPIValidation toEntity(JsonPathAPIValidationEntity statusCodeValidation);
+    public abstract StatusCodeAPIValidation fromEntity(StatusCodeValidationEntity statusCodeValidation);
+
+    @Mapping(target = "type", ignore = true)
+    public abstract MaxResponseTimeAPIValidation fromEntity(MaxResponseTimeAPIValidationEntity statusCodeValidation);
+
+
+    @Mapping(target = "type", ignore = true)
+    public abstract JsonPathAPIValidation fromEntity(JsonPathAPIValidationEntity statusCodeValidation);
+
+    @Mapping(target = "type", ignore = true)
+    public abstract RunJobAction fromEntity(RunJobActionEntity runJobActionEntity);
 
     @AfterMapping
-    public void updateValidationsJobs(@MappingTarget APIJobDetailsEntity apiJobDetailsEntity) {
+    public void assignJobs(@MappingTarget APIJobDetailsEntity apiJobDetailsEntity) {
         if (!CollectionUtils.isEmpty(apiJobDetailsEntity.getValidations())) {
             apiJobDetailsEntity.getValidations().forEach(validation -> validation.setJob(apiJobDetailsEntity));
+            apiJobDetailsEntity.getPostExecutionActions().forEach(action -> action.setJob(apiJobDetailsEntity));
         }
     }
 
     public APIValidationEntity apiValidationToEntry(APIValidation apiValidation) {
-        //TODO make dynamic
         if (apiValidation == null) {
             return null;
         }
@@ -103,18 +115,17 @@ public abstract class JobDetailsMapper {
     }
 
     public APIValidation apiValidationEntryToValidation(APIValidationEntity apiValidation) {
-        //TODO make dynamic
         if (apiValidation == null) {
             return null;
         }
         if (apiValidation instanceof StatusCodeValidationEntity statusCodeValidation) {
-            return toEntity(statusCodeValidation);
+            return fromEntity(statusCodeValidation);
         }
         if (apiValidation instanceof MaxResponseTimeAPIValidationEntity maxResponseTimeAPIValidation) {
-            return toEntity(maxResponseTimeAPIValidation);
+            return fromEntity(maxResponseTimeAPIValidation);
         }
         if (apiValidation instanceof JsonPathAPIValidationEntity jsonPathAPIValidation) {
-            return toEntity(jsonPathAPIValidation);
+            return fromEntity(jsonPathAPIValidation);
         }
         throw new UnsupportedOperationException("Unknown validation type: " + apiValidation.getClass());
     }
@@ -126,4 +137,37 @@ public abstract class JobDetailsMapper {
         return validationList.stream().map(this::apiValidationEntryToValidation).toList();
     }
 
+    public ActionEntity actionToEntry(Action action) {
+        if (action == null) {
+            return null;
+        }
+        if (action instanceof RunJobAction runJobAction) {
+            return toEntity(runJobAction);
+        }
+        throw new UnsupportedOperationException("Unknown action type: " + action.getClass());
+    }
+
+    public List<ActionEntity> actionsList(List<? extends Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return Collections.emptyList();
+        }
+        return actions.stream().map(this::actionToEntry).toList();
+    }
+
+    public Action actionEntryToAction(ActionEntity actionEntity) {
+        if (actionEntity == null) {
+            return null;
+        }
+        if (actionEntity instanceof RunJobActionEntity runJobActionEntity) {
+            return fromEntity(runJobActionEntity);
+        }
+        throw new UnsupportedOperationException("Unknown Action type: " + actionEntity.getClass());
+    }
+
+    public List<Action> actionList(List<? extends ActionEntity> actionEntities) {
+        if (CollectionUtils.isEmpty(actionEntities)) {
+            return Collections.emptyList();
+        }
+        return actionEntities.stream().map(this::actionEntryToAction).toList();
+    }
 }

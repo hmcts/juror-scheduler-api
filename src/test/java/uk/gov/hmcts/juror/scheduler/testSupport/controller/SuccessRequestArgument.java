@@ -7,7 +7,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.TestUtil;
 
 import java.util.function.Consumer;
 

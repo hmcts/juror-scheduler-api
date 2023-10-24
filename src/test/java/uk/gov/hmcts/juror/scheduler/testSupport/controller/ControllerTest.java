@@ -33,7 +33,6 @@ public abstract class ControllerTest {
         this.successStatus = successStatus;
     }
 
-    //TODO replace with manual converter
     protected <T> String createResponseStringFromObject(T apiJobDetailsResponses) throws JsonProcessingException {
         return objectMapper.writeValueAsString(apiJobDetailsResponses);
     }

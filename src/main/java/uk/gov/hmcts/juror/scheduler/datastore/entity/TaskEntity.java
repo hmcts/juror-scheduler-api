@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.logging.log4j.util.Strings;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
@@ -39,8 +40,11 @@ public class TaskEntity {
     @Setter
     protected APIJobDetailsEntity job;
 
-    @Length(min = 1,max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
+    @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String message;
+
+    @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
+    private String postActionsMessage;
 
     @NotNull
     private Status status;
@@ -51,4 +55,11 @@ public class TaskEntity {
     @UpdateTimestamp
     private LocalDateTime lastUpdatedAt;
 
+    public void appendPostActionsMessage(String message) {
+        if (Strings.isBlank(this.postActionsMessage)) {
+            this.postActionsMessage = message;
+        } else {
+            this.postActionsMessage += ", " + message;
+        }
+    }
 }

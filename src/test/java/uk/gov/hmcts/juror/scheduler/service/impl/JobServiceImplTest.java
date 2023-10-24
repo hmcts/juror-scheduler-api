@@ -20,12 +20,16 @@ import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
 import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyEnabledError;
 import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.NotAScheduledJobError;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.Information;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.Action;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.RunJobAction;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobPatch;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.JsonPathAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.MaxResponseTimeAPIValidation;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.StatusCodeAPIValidation;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.action.ActionEntity;
+import uk.gov.hmcts.juror.scheduler.datastore.entity.action.RunJobActionEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.JsonPathAPIValidationEntity;
@@ -39,7 +43,9 @@ import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.testsupport.TestSpecification;
-import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.CloneUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.ConvertUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.GenerateUtil;
 import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.BusinessRuleValidationException;
 import uk.gov.hmcts.juror.standard.service.exceptions.GenericErrorHandlerException;
@@ -638,18 +644,26 @@ class JobServiceImplTest {
         @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
         private void triggerAndValidateUpdate(APIJobPatch apiJobPatch) {
             try {
-                final APIJobDetailsEntity baseApiJobDetailsEntity = TestUtil.generateAPIJobDetailsEntry();
-                APIJobDetailsEntity apiJobDetailsEntity = TestUtil.cloneAPIJobDetailsEntity(baseApiJobDetailsEntity);
+                final APIJobDetailsEntity baseApiJobDetailsEntity = GenerateUtil.generateAPIJobDetailsEntry();
+                APIJobDetailsEntity apiJobDetailsEntity = CloneUtil.cloneAPIJobDetailsEntity(baseApiJobDetailsEntity);
 
                 when(jobRepository.findById(JOB_KEY)).thenReturn(Optional.of(apiJobDetailsEntity));
                 when(jobRepository.save(apiJobDetailsEntity)).thenReturn(apiJobDetailsEntity);
 
                 List<APIValidationEntity> convertedValidations = Collections.emptyList();
                 if (apiJobPatch.getValidations() != null) {
-                    convertedValidations = TestUtil.convertValidations(apiJobPatch.getValidations());
+                    convertedValidations = ConvertUtil.convertValidations(apiJobPatch.getValidations());
                     when(jobDetailsMapper.apiValidationEntityList(apiJobPatch.getValidations())).thenReturn(
                         convertedValidations);
                 }
+                List<ActionEntity> convertedPostActions = Collections.emptyList();
+                if (apiJobPatch.getPostExecutionActions() != null) {
+                    convertedPostActions = ConvertUtil.convertPostActions(apiJobPatch.getPostExecutionActions());
+                    when(jobDetailsMapper.actionsList(apiJobPatch.getPostExecutionActions())).thenReturn(
+                        convertedPostActions);
+                }
+
+
                 APIJobDetailsEntity updateAPIApiJobDetails = jobService.updateJob(JOB_KEY, apiJobPatch);
 
                 //Information
@@ -699,6 +713,13 @@ class JobServiceImplTest {
                     validateValidations(convertedValidations, updateAPIApiJobDetails.getValidations());
                 }
 
+                if (apiJobPatch.getPostExecutionActions() == null) {
+                    validatePostActions(baseApiJobDetailsEntity.getPostExecutionActions(),
+                        updateAPIApiJobDetails.getPostExecutionActions());
+                } else {
+                    validatePostActions(convertedPostActions, updateAPIApiJobDetails.getPostExecutionActions());
+                }
+
                 verify(jobRepository, times(1)).save(apiJobDetailsEntity);
                 if (apiJobPatch.getCronExpression() != null) {
                     verify(schedulerService, times(1)).unregister(JOB_KEY);
@@ -711,6 +732,23 @@ class JobServiceImplTest {
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        private void validatePostActions(List<ActionEntity> expected, List<ActionEntity> actual) {
+            int index = 0;
+            assertEquals(expected.size(), actual.size(), "Size must match");
+            for (ActionEntity entity : expected) {
+                ActionEntity validationActual = actual.get(index++);
+                if (entity instanceof RunJobActionEntity runJobActionExpected) {
+                    assertInstanceOf(RunJobActionEntity.class, validationActual);
+                    RunJobActionEntity runJobActionActual =
+                        (RunJobActionEntity) validationActual;
+                    assertEquals(runJobActionExpected.getJobKey(), runJobActionActual.getJobKey(),
+                        "Job Key must match");
+                } else {
+                    fail("Unknown action type: " + validationActual.getClass());
+                }
             }
         }
 
@@ -871,6 +909,21 @@ class JobServiceImplTest {
             validationEntities.add(new MaxResponseTimeAPIValidation(2000));
             triggerAndValidateUpdate(APIJobPatch.builder()
                 .validations(validationEntities)
+                .build());
+        }
+
+        @Test
+        @DisplayName("Post Actions")
+        @SuppressWarnings({
+            "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+        })
+        void positiveUpdatePostActions() {
+            List<Action> actionEntities = new ArrayList<>();
+            actionEntities.add(new RunJobAction("JOB_1"));
+            actionEntities.add(new RunJobAction("JOB_2"));
+            actionEntities.add(new RunJobAction("JOB_3"));
+            triggerAndValidateUpdate(APIJobPatch.builder()
+                .postExecutionActions(actionEntities)
                 .build());
         }
     }

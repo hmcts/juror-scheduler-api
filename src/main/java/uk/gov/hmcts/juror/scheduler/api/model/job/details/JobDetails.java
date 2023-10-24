@@ -10,9 +10,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.juror.scheduler.api.APIConstants;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.Action;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.api.APIJobDetails;
 import uk.gov.hmcts.juror.scheduler.api.validation.CronExpression;
 import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,7 +42,10 @@ public class JobDetails {
 
     @JsonProperty("cron_expression")
     @CronExpression
-    @Schema(description = "The cron expression that should be use to schedule this Job. "
+    @Schema(description = "The cron expression that should be used to schedule this Job. "
         + "If none is provided the Job will be unscheduled as such will only run if manually triggered.")
     private String cronExpression;
+
+    @JsonProperty("post_execution_actions")
+    private List<@Valid ? extends Action> postExecutionActions;
 }

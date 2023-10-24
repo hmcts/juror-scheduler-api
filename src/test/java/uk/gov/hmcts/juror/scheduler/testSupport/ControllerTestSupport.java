@@ -17,8 +17,6 @@ public abstract class ControllerTestSupport {
     @Autowired
     protected ObjectMapper objectMapper;
 
-
-    //TODO replace with manual converter
     protected <T> String createResponseStringFromObject(T apiJobDetailsResponses) throws JsonProcessingException {
         return objectMapper.writeValueAsString(apiJobDetailsResponses);
     }

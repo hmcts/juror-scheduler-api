@@ -104,11 +104,3 @@ scheduler:
       subject: scheduler@scheduler.cgi.com
       token-validity: 1600000
       secret: ${API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    generate-ddl: true
-  quartz:
-    jdbc:
-      initialize-schema: always

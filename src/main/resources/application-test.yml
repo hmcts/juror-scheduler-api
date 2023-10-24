@@ -1,10 +1,12 @@
 spring:
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create
     show-sql: false
     generate-ddl: true
+  quartz:
+    jdbc:
+      initialize-schema: always
 uk:
   gov:
     hmcts:
@@ -12,12 +14,12 @@ uk:
         security:
           use-database: true
           token-validity: 1800000
-          secret: VGhpc0lzQUR1bW15U2VjcmV0S2V5VGhhdE5vT25lS25vd3NUaGVWYWx1ZXNJdENvbnRhaW5z
+          secret: ${SECRET:WW91clZlcnlWZXJ5VmVyeVNlY3JldEtleVRoYXRJc1NvU2VjcmV0SURvbnRFdmVuS25vd0l0}
           admin-user:
-            email: dummy@email.com
-            password: password
-            firstname: firstname
-            lastname: lastname
+            email: ${ADMIN_EMAIL:admin@scheduler.cgi.com}
+            password: ${ADMIN_PASSWORD:kj3TXdvYqmFTXXTq!9nA7ZUmDgiQ&W7Z&v7mnFyp2bvM&BZ#nPosFfL8zNvw}
+            firstname: ${ADMIN_FIRSTNAME:Admin}
+            lastname: ${ADMIN_LASTNAME:Admin}
 scheduler:
   security:
     juror-api-service-authentication:
@@ -25,9 +27,9 @@ scheduler:
       issuer: Scheduler Service
       subject: Cron
       token-validity: 1600000
-      secret: W3N1cGVyLXNlY3JldC1vbmUtYnVyZWF1XVtzdXBlci1zZWNyZXQtb25lLWJ1cmVhdV1bc3VwZXItc2VjcmV0LW9uZS1idXJlYXVd
+      secret: ${JUROR_API_SERVICE_AUTHENTICATION_SECRET:W3N1cGVyLXNlY3JldC1rZXktYnVyZWF1XVtzdXBlci1zZWNyZXQta2V5LWJ1cmVhdV1bc3VwZXItc2VjcmV0LWtleS1idXJlYXVd}
     api-job-execution-service-authentication:
       issuer: Scheduler Service
       subject: scheduler@scheduler.cgi.com
       token-validity: 1600000
-      secret: VGhpc0lzQUR1bW15U2VjcmV0S2V5VGhhdE5vT25lS25vd3NUaGVWYWx1ZXNJdENvbnRhaW5zQnV0Rm9yVGhlRXhlY3V0aW9uTGF5ZXJUaGlzVGltZQ==
+      secret: ${API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET:WW91clZlcnlWZXJ5VmVyeVNlY3JldEtleVRoYXRJc1NvU2VjcmV0SURvbnRFdmVuS25vd0l0QnV0Rm9yVGhlRXhlY3V0aW9uTGF5ZXJUaGlzVGltZQ}

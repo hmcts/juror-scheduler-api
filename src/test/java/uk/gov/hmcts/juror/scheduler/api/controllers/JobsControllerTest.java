@@ -33,7 +33,8 @@ import uk.gov.hmcts.juror.scheduler.mapping.JobDetailsMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.testsupport.APIConstantsTest;
 import uk.gov.hmcts.juror.scheduler.testsupport.ControllerTestSupport;
-import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.GenerateUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.TestUtil;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.service.exceptions.APIHandleableException;
 import uk.gov.hmcts.juror.standard.service.exceptions.GenericErrorHandlerException;
@@ -494,9 +495,9 @@ class JobsControllerTest {
 
             List<APIJobDetailsResponse> responseList = new ArrayList<>();
 
-            responseList.add(TestUtil.generateAPIJobDetailsResponse());
-            responseList.add(TestUtil.generateAPIJobDetailsResponse());
-            responseList.add(TestUtil.generateAPIJobDetailsResponse());
+            responseList.add(GenerateUtil.generateAPIJobDetailsResponse());
+            responseList.add(GenerateUtil.generateAPIJobDetailsResponse());
+            responseList.add(GenerateUtil.generateAPIJobDetailsResponse());
 
             when(jobDetailsMapper.toJobDetailsJobDetailsList(any())).thenReturn(responseList);
 

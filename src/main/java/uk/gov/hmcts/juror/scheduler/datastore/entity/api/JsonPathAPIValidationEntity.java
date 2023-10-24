@@ -48,6 +48,4 @@ public class JsonPathAPIValidationEntity extends APIValidationEntity {
     public ValidationType getType() {
         return ValidationType.JSON_PATH;
     }
-
-
 }
