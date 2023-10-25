@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +30,10 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 public abstract class APIValidationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "apivalidation_entity_id_seqgen",
+        sequenceName = "apivalidation_entity_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "apivalidation_entity_id_seqgen",
+        strategy = GenerationType.SEQUENCE)
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)

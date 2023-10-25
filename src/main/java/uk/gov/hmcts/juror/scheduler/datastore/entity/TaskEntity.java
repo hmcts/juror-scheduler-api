@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,7 +38,10 @@ import java.util.Map;
 @Builder
 public class TaskEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "task_entity_task_id_seq_gen",
+        sequenceName = "task_entity_task_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "task_entity_task_id_seq_gen",
+        strategy = GenerationType.SEQUENCE)
     private long taskId;
 
     @ManyToOne(fetch = FetchType.EAGER)

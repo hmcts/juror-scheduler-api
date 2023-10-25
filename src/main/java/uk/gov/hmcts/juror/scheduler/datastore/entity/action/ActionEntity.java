@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,7 +30,8 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ConditionType;
 public abstract class ActionEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "action_entity_id_seq_gen", sequenceName = "action_entity_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "action_entity_id_seq_gen", strategy = GenerationType.SEQUENCE)
     private long id;
 
     @NotNull

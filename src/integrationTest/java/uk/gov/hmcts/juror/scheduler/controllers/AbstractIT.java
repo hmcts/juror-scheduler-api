@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -19,6 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.loginRequest;
 import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.resetPasswordRequest;
 
+
+@ActiveProfiles({"test"})
 public abstract class AbstractIT {
     public static final String API_DUMMY_CRON_JOB_JSON = "apiDummyCronJob.json";
     public static final String ADMIN_EMAIL = "admin@scheduler.cgi.com";
@@ -57,10 +60,10 @@ public abstract class AbstractIT {
 
     public String generateJwt(String loginRequest) throws Exception {
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders
-                                  .post("/auth/login")
-                                  .content(loginRequest)
-                                  .contentType(MediaType.APPLICATION_JSON)
-                                  .accept(MediaType.APPLICATION_JSON))
+                .post("/auth/login")
+                .content(loginRequest)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.jwt").isNotEmpty())
             .andReturn();

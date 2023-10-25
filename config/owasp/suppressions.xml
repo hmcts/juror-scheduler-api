@@ -7,7 +7,7 @@
     </notes>
     <cve>CVE-2016-1000027</cve>
   </suppress>
-    <suppress>
+  <suppress>
     <notes>Disputed</notes>
     <cve>CVE-2023-39017</cve>
   </suppress>

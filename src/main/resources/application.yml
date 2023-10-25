@@ -35,10 +35,17 @@ spring:
       #poolName: {to-be-defined}HikariCP
       maxLifetime: 7200000
       connectionTimeout: 30000
+      schema: scheduler_application
+# Flyway must align with build.gradle
+  flyway:
+    default-schema: ${spring.datasource.hikari.schema}
+    table: schema_history
+    user: ${DB_USER_NAME}
+    password: ${DB_PASSWORD}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         jdbc:
@@ -51,7 +58,7 @@ spring:
   quartz:
     job-store-type: jdbc
     jdbc:
-      initialize-schema: never
+      initialize-schema: always
     properties:
       org:
         quartz:

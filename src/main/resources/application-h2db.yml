@@ -1,14 +1,14 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:scheduler_application
+    url: jdbc:h2:mem:scheduler_application;
     username: scheduler
+    password: scheduler
+  flyway:
+    user: scheduler
     password: scheduler
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create
-    generate-ddl: true
   quartz:
     jdbc:
       initialize-schema: always
