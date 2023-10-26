@@ -63,40 +63,30 @@ withPipeline(type, product, component) {
       reportName           : "Checkstyle Test Report"
     ]
 
-//    publishHTML target: [
-//      allowMissing         : true,
-//      alwaysLinkToLastBuild: true,
-//      keepAll              : true,
-//      reportDir            : "build/reports/checkstyle",
-//      reportFiles          : "functionalTest.html",
-//      reportName           : "Checkstyle Functional Test Report"
-//    ]
-
-//    publishHTML target: [
-//      allowMissing         : true,
-//      alwaysLinkToLastBuild: true,
-//      keepAll              : true,
-//      reportDir            : "build/reports/checkstyle",
-//      reportFiles          : "integrationTest.html",
-//      reportName           : "Checkstyle Integration Test Report"
-//    ]
-
-//    publishHTML target: [
-//      allowMissing         : true,
-//      alwaysLinkToLastBuild: true,
-//      keepAll              : true,
-//      reportDir            : "build/reports/tests/test",
-//      reportFiles          : "index.html",
-//      reportName           : "Unit Tests Report"
-//    ]
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/checkstyle",
+      reportFiles          : "integrationTest.html",
+      reportName           : "Checkstyle Integration Test Report"
+    ]
 
     publishHTML target: [
       allowMissing         : true,
       alwaysLinkToLastBuild: true,
       keepAll              : true,
-      reportDir            : "build/reports/pmd",
-      reportFiles          : "main.html",
-      reportName           : "PMD Report"
+      reportDir            : "build/reports/checkstyle",
+      reportFiles          : "smokeTest.html",
+      reportName           : "Checkstyle Smoke Test Report"
+    
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/checkstyle",
+      reportFiles          : "functionalTest.html",
+      reportName           : "Checkstyle Functional Test Report"
     ]
 
     publishHTML target: [
@@ -104,8 +94,71 @@ withPipeline(type, product, component) {
       alwaysLinkToLastBuild: true,
       keepAll              : true,
       reportDir            : "build/reports/pmd",
+      reportFiles          : "main.html",
+      reportName           : "PMD Main Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/pmd",
+      reportFiles          : "integrationTest.html",
+      reportName           : "PMD Integration Test Report"
+    ]  
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/pmd",
       reportFiles          : "smokeTest.html",
-      reportName           : "PMD SmokeTest Report"
+      reportName           : "PMD Smoke Test Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/pmd",
+      reportFiles          : "functionalTest.html",
+      reportName           : "PMD Functional Test Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/test",
+      reportFiles          : "index.html",
+      reportName           : "Unit Test Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/integrationTest",
+      reportFiles          : "index.html",
+      reportName           : "Integration Test Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/functionalTest",
+      reportFiles          : "index.html",
+      reportName           : "Functional Test Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/smokeTest",
+      reportFiles          : "index.html",
+      reportName           : "Smoke Test Report"
     ]
   }
 
