@@ -31,8 +31,6 @@ spring:
       minimumIdle: 2
       maximumPoolSize: 10
       idleTimeout: 10000
-      #Taherah commented out x1
-      #poolName: {to-be-defined}HikariCP
       maxLifetime: 7200000
       connectionTimeout: 30000
       schema: scheduler_application
@@ -40,8 +38,8 @@ spring:
   flyway:
     default-schema: ${spring.datasource.hikari.schema}
     table: schema_history
-    user: ${DB_USER_NAME}
-    password: ${DB_PASSWORD}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
