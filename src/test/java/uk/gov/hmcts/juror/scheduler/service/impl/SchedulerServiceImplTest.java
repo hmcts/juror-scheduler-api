@@ -17,7 +17,6 @@ import org.quartz.impl.triggers.CronTriggerImpl;
 import org.quartz.impl.triggers.SimpleTriggerImpl;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.service.jobs.APIJob;
-import uk.gov.hmcts.juror.standard.components.SystemUtil;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
@@ -66,13 +65,16 @@ class SchedulerServiceImplTest {
         @Test
         @DisplayName("Scheduler starts with exception")
         void postConstructException() throws SchedulerException {
-            try (MockedStatic<SystemUtil> systemUtilMockedStatic = Mockito.mockStatic(SystemUtil.class)) {
-                doThrow(new RuntimeException()).when(scheduler).start();
-                schedulerService.postConstruct();
-                verify(scheduler, times(1)).start();
-                systemUtilMockedStatic.verify(() -> SystemUtil.exit(1), times(1));
-                systemUtilMockedStatic.verifyNoMoreInteractions();
-            }
+            Exception cause = new RuntimeException("I am the cause");
+            doThrow(cause).when(scheduler).start();
+            InternalServerException actualExpcetion = assertThrows(InternalServerException.class,
+                () -> schedulerService.postConstruct(),
+                "Should throw InternalServerException whene schedular fails to start");
+            verify(scheduler, times(1)).start();
+            assertEquals(cause, actualExpcetion.getCause(),
+                "Exception cause must match");
+            assertEquals("Failed to start scheduler", actualExpcetion.getMessage(), "Exception message must match");
+
         }
     }
 
@@ -99,7 +101,7 @@ class SchedulerServiceImplTest {
             );
             assertEquals("Failed to shutdown scheduler", exception.getMessage(),
                 "Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -122,17 +124,17 @@ class SchedulerServiceImplTest {
 
 
             JobDetail jobDetail = jobDetailCaptor.getValue();
-            assertEquals(JOB_KEY, jobDetail.getKey().getName(),"Name must match");
-            assertEquals(APIJob.class, jobDetail.getJobClass(),"Class must match");
-            assertEquals(1, jobDetail.getJobDataMap().size(),"Size must match");
-            assertEquals(JOB_KEY, jobDetail.getJobDataMap().getString("key"),"Key must match");
+            assertEquals(JOB_KEY, jobDetail.getKey().getName(), "Name must match");
+            assertEquals(APIJob.class, jobDetail.getJobClass(), "Class must match");
+            assertEquals(1, jobDetail.getJobDataMap().size(), "Size must match");
+            assertEquals(JOB_KEY, jobDetail.getJobDataMap().getString("key"), "Key must match");
 
             Trigger trigger = triggerCaptor.getValue();
 
-            assertEquals(JOB_KEY, trigger.getKey().getName(),"Name must match");
-            assertThat("Trigger should be instance of cronTriggerImpl",trigger, instanceOf(CronTriggerImpl.class));
+            assertEquals(JOB_KEY, trigger.getKey().getName(), "Name must match");
+            assertThat("Trigger should be instance of cronTriggerImpl", trigger, instanceOf(CronTriggerImpl.class));
             CronTriggerImpl cronTrigger = (CronTriggerImpl) trigger;
-            assertEquals(CRON_EXPRESSION, cronTrigger.getCronExpression(),"Cron expression must match");
+            assertEquals(CRON_EXPRESSION, cronTrigger.getCronExpression(), "Cron expression must match");
         }
 
         @Test
@@ -150,15 +152,15 @@ class SchedulerServiceImplTest {
 
 
             JobDetail jobDetail = jobDetailCaptor.getValue();
-            assertEquals(JOB_KEY, jobDetail.getKey().getName(),"Name must match");
-            assertEquals(APIJob.class, jobDetail.getJobClass(),"Class must match");
-            assertEquals(1, jobDetail.getJobDataMap().size(),"Size must match");
-            assertEquals(JOB_KEY, jobDetail.getJobDataMap().getString("key"),"Key must match");
+            assertEquals(JOB_KEY, jobDetail.getKey().getName(), "Name must match");
+            assertEquals(APIJob.class, jobDetail.getJobClass(), "Class must match");
+            assertEquals(1, jobDetail.getJobDataMap().size(), "Size must match");
+            assertEquals(JOB_KEY, jobDetail.getJobDataMap().getString("key"), "Key must match");
 
             Trigger trigger = triggerCaptor.getValue();
 
-            assertEquals(JOB_KEY, trigger.getKey().getName(),"Name must match");
-            assertThat("Trigger should be instance of simpleTriggerImpl",trigger, instanceOf(SimpleTriggerImpl.class));
+            assertEquals(JOB_KEY, trigger.getKey().getName(), "Name must match");
+            assertThat("Trigger should be instance of simpleTriggerImpl", trigger, instanceOf(SimpleTriggerImpl.class));
 
         }
 
@@ -179,7 +181,7 @@ class SchedulerServiceImplTest {
             );
             assertEquals("Failed to register Job", exception.getMessage(),
                 "Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -194,7 +196,7 @@ class SchedulerServiceImplTest {
             final ArgumentCaptor<JobKey> jobKeyCaptor = ArgumentCaptor.forClass(JobKey.class);
 
             verify(scheduler, times(1)).triggerJob(jobKeyCaptor.capture());
-            assertEquals(JOB_KEY, jobKeyCaptor.getValue().getName(),"Key must match");
+            assertEquals(JOB_KEY, jobKeyCaptor.getValue().getName(), "Key must match");
         }
 
         @Test
@@ -206,8 +208,8 @@ class SchedulerServiceImplTest {
             final ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
 
             verify(scheduler, times(1)).scheduleJob(jobDetailsCaptor.capture(), triggerCaptor.capture());
-            assertEquals(JOB_KEY, jobDetailsCaptor.getValue().getKey().getName(),"Key must match");
-            assertEquals(JOB_KEY, triggerCaptor.getValue().getKey().getName(),"Key must match");
+            assertEquals(JOB_KEY, jobDetailsCaptor.getValue().getKey().getName(), "Key must match");
+            assertEquals(JOB_KEY, triggerCaptor.getValue().getKey().getName(), "Key must match");
         }
 
         @Test
@@ -221,9 +223,9 @@ class SchedulerServiceImplTest {
                 schedulerService.executeJob(JOB_KEY);
             });
             verify(scheduler, times(1)).triggerJob(jobKeyCaptor.capture());
-            assertEquals(JOB_KEY, jobKeyCaptor.getValue().getName(),"Name must match");
-            assertEquals("Failed to execute Job", exception.getMessage(),"Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+            assertEquals(JOB_KEY, jobKeyCaptor.getValue().getName(), "Name must match");
+            assertEquals("Failed to execute Job", exception.getMessage(), "Message must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -238,7 +240,7 @@ class SchedulerServiceImplTest {
                 TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
                 when(scheduler.getTrigger(triggerKey)).thenReturn(new CronTriggerImpl());
-                assertTrue(schedulerService.isScheduled(JOB_KEY),"Job should be scheduled");
+                assertTrue(schedulerService.isScheduled(JOB_KEY), "Job should be scheduled");
             }
         }
 
@@ -251,7 +253,7 @@ class SchedulerServiceImplTest {
                     .thenReturn(triggerKey);
 
                 when(scheduler.getTrigger(triggerKey)).thenReturn(new SimpleTriggerImpl());
-                assertFalse(schedulerService.isScheduled(JOB_KEY),"Job should not be should");
+                assertFalse(schedulerService.isScheduled(JOB_KEY), "Job should not be should");
             }
         }
 
@@ -266,9 +268,9 @@ class SchedulerServiceImplTest {
 
 
                 NotFoundException exception = assertThrows(NotFoundException.class, () ->
-                    assertFalse(schedulerService.isScheduled(JOB_KEY),"Job should not be scheduled"));
+                    assertFalse(schedulerService.isScheduled(JOB_KEY), "Job should not be scheduled"));
                 assertEquals("Trigger from Job Key: " + JOB_KEY + " not found",
-                    exception.getMessage(),"Message must match");
+                    exception.getMessage(), "Message must match");
             }
         }
     }
@@ -284,7 +286,7 @@ class SchedulerServiceImplTest {
                 TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
                 when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.NORMAL);
-                assertTrue(schedulerService.isEnabled(JOB_KEY),"Job should be enabled");
+                assertTrue(schedulerService.isEnabled(JOB_KEY), "Job should be enabled");
             }
         }
 
@@ -296,7 +298,7 @@ class SchedulerServiceImplTest {
                 TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
                 when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.PAUSED);
-                assertFalse(schedulerService.isEnabled(JOB_KEY),"Job should not be enabled");
+                assertFalse(schedulerService.isEnabled(JOB_KEY), "Job should not be enabled");
             }
         }
 
@@ -310,8 +312,8 @@ class SchedulerServiceImplTest {
                 () -> schedulerService.isEnabled(JOB_KEY)
             );
             assertEquals("Failed to get trigger state",
-                exception.getMessage(),"Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+                exception.getMessage(), "Message must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -326,7 +328,7 @@ class SchedulerServiceImplTest {
                 TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
                 when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.NORMAL);
-                assertFalse(schedulerService.isDisabled(JOB_KEY),"Job should not be disabled");
+                assertFalse(schedulerService.isDisabled(JOB_KEY), "Job should not be disabled");
             }
         }
 
@@ -338,7 +340,7 @@ class SchedulerServiceImplTest {
                 TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
                     .thenReturn(triggerKey);
                 when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.PAUSED);
-                assertTrue(schedulerService.isDisabled(JOB_KEY),"Job should be disabled");
+                assertTrue(schedulerService.isDisabled(JOB_KEY), "Job should be disabled");
             }
         }
 
@@ -352,8 +354,8 @@ class SchedulerServiceImplTest {
                 () -> schedulerService.isEnabled(JOB_KEY)
             );
             assertEquals("Failed to get trigger state",
-                exception.getMessage(),"Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+                exception.getMessage(), "Message must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -383,8 +385,8 @@ class SchedulerServiceImplTest {
                 () -> schedulerService.unregister(JOB_KEY)
             );
             assertEquals("Failed to unregister Job",
-                exception.getMessage(),"Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+                exception.getMessage(), "Message must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -413,8 +415,8 @@ class SchedulerServiceImplTest {
                 () -> schedulerService.disable(JOB_KEY)
             );
             assertEquals("Failed to disable Job '" + JOB_KEY + "'",
-                exception.getMessage(),"Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+                exception.getMessage(), "Message must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 
@@ -443,8 +445,8 @@ class SchedulerServiceImplTest {
                 () -> schedulerService.enable(JOB_KEY)
             );
             assertEquals("Failed to enable Job '" + JOB_KEY + "'",
-                exception.getMessage(),"Message must match");
-            assertEquals(thrownException, exception.getCause(),"Cause must match");
+                exception.getMessage(), "Message must match");
+            assertEquals(thrownException, exception.getCause(), "Cause must match");
         }
     }
 }

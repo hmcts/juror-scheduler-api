@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
 import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
-import uk.gov.hmcts.juror.standard.components.SystemUtil;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 

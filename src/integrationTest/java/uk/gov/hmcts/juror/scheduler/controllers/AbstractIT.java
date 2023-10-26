@@ -2,7 +2,6 @@ package uk.gov.hmcts.juror.scheduler.controllers;
 
 import com.jayway.jsonpath.JsonPath;
 import jakarta.validation.constraints.NotNull;
-import org.flywaydb.core.Flyway;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -12,7 +11,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.net.URI;
 
