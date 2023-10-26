@@ -223,7 +223,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.6.0'
     implementation 'org.hibernate.orm:hibernate-envers:6.3.1.Final'
     implementation 'org.flywaydb:flyway-core:9.22.3'
-    integrationTestImplementation 'org.testcontainers:postgresql:1.19.1'
+    testImplementation 'org.testcontainers:postgresql:1.19.1'
 
     // Documentation, logging
     implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
@@ -285,7 +285,7 @@ wrapper {
 //Flyway must align with application.yml
 flyway {
     def dbHost = System.getenv("DB_HOST") ?: "localhost"
-    def dbPort = System.getenv("DB_PORT") ?: "5433"
+    def dbPort = System.getenv("DB_PORT") ?: "5432"
     def dbName = System.getenv("DB_NAME") ?: "scheduler_application"
     def dbUserName = System.getenv("DB_USER_NAME") ?: "postgres"
     def dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
