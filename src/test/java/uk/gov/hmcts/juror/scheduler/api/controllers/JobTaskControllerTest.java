@@ -25,10 +25,12 @@ import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.testsupport.APIConstantsTest;
 import uk.gov.hmcts.juror.scheduler.testsupport.ControllerTestSupport;
-import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.GenerateUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.TestUtil;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(controllers = JobTaskController.class,
-    excludeAutoConfiguration = {SecurityAutoConfiguration.class})
+            excludeAutoConfiguration = {SecurityAutoConfiguration.class})
 @ContextConfiguration(
     classes = {
         JobTaskController.class,
@@ -105,7 +107,7 @@ class JobTaskControllerTest {
         void positiveGetTask() throws Exception {
             final String jobKey = "ABC";
             final long taskId = 1L;
-            TaskDetail taskDetail = TestUtil.generateTask();
+            TaskDetail taskDetail = GenerateUtil.generateTask();
             when(taskMapper.toTask(any())).thenReturn(taskDetail);
 
             this.mockMvc
@@ -164,8 +166,7 @@ class JobTaskControllerTest {
                 Arguments.arguments(null, "Unable to read payload content"),
                 //Status
                 Arguments.arguments(TestUtil.replaceJsonPath(payload, "$.status", "INVALID"),
-                    "Invalid status entered. Allowed values are: [PENDING, VALIDATION_PASSED, VALIDATION_FAILED, "
-                        + "FAILED_UNEXPECTED_EXCEPTION, SUCCESS, FAILED, INDETERMINATE]"),
+                    "Invalid status entered. Allowed values are: " + Arrays.toString(Status.values())),
                 Arguments.arguments(TestUtil.deleteJsonPath(payload, "$.status"), "status: must not be null"),
                 //Message
 

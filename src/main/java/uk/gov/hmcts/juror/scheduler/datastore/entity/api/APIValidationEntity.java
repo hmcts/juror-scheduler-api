@@ -11,10 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.envers.Audited;
 import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
@@ -24,10 +26,14 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @Audited
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(discriminatorType = DiscriminatorType.STRING, name = "type")
+@Accessors(chain = true)
 public abstract class APIValidationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "apivalidation_entity_id_seqgen",
+        sequenceName = "apivalidation_entity_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "apivalidation_entity_id_seqgen",
+        strategy = GenerationType.SEQUENCE)
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -40,7 +46,6 @@ public abstract class APIValidationEntity {
 
     public abstract ValidationType getType();
 
-    @Setter
     @Getter
     @Builder
     public static class Result {

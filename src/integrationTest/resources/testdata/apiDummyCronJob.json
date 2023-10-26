@@ -1,0 +1,25 @@
+{
+  "cron_expression": "* * * * * ?",
+  "key": "HEALTH",
+  "method": "GET",
+  "type": "API",
+  "url": "http://localhost:8080",
+  "information": {
+    "name": "Schedular Service Health Check",
+    "description": "Performs health checks on the schedular service every 30 seconds.",
+    "tags": [
+      "HEALTH_CHECK",
+      "SCHEDULAR"
+    ]
+  },
+  "headers": {
+    "testHeader": "testHeaderValue",
+    "testHeader2": "testHeaderValue2"
+  },
+  "validations": [
+    {
+      "type": "STATUS_CODE",
+      "expected_status_code": 200
+    }
+  ]
+}

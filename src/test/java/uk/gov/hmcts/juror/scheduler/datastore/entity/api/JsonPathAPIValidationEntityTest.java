@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
 import java.util.stream.Stream;
 
@@ -40,16 +41,16 @@ class JsonPathAPIValidationEntityTest {
 
     public static Stream<Arguments> jsonPathValidationTestDataProvider() {
         return Stream.of(
-            arguments("positive_validate_typical","$.status", "UP", "UP", true),
-            arguments("negative_validate_invalid_value","$.status", "UP", "DOWN", false),
-            arguments("negative_validate_null_value","$.status", "UP", null, false)
+            arguments("positive_validate_typical", "$.status", "UP", "UP", true),
+            arguments("negative_validate_invalid_value", "$.status", "UP", "DOWN", false),
+            arguments("negative_validate_null_value", "$.status", "UP", null, false)
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("jsonPathValidationTestDataProvider")
     void testRunner(String name, String path, String expectedValue, String returnedValue,
-                           boolean expectPass) {
+                    boolean expectPass) {
         final JsonPath jsonPath = mock(JsonPath.class);
         validationEntity.setPath(path);
         validationEntity.setExpectedResponse(expectedValue);
@@ -57,16 +58,16 @@ class JsonPathAPIValidationEntityTest {
         when(jsonPath.getString(path)).thenReturn(returnedValue);
 
         APIValidationEntity.Result result = validationEntity.validate(response, jobData);
-
+        assertEquals(ValidationType.JSON_PATH, validationEntity.getType(), "Type must be JSON_PATH");
         if (expectPass) {
-            assertNotNull(result,"Result should not be null");
-            assertTrue(result.isPassed(),"Result should be passed");
-            assertNull(result.getMessage(),"Result must not have message");
+            assertNotNull(result, "Result should not be null");
+            assertTrue(result.isPassed(), "Result should be passed");
+            assertNull(result.getMessage(), "Result must not have message");
         } else {
-            assertNotNull(result,"Result must not be null");
-            assertFalse(result.isPassed(),"Result must not be passed");
+            assertNotNull(result, "Result must not be null");
+            assertFalse(result.isPassed(), "Result must not be passed");
             assertEquals("Expected response to return '" + expectedValue + "' for json path '"
-                + path + "' but got '" + returnedValue + "'", result.getMessage(),
+                    + path + "' but got '" + returnedValue + "'", result.getMessage(),
                 "Message must match");
         }
     }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
 import java.util.stream.Stream;
 
@@ -48,21 +49,21 @@ class StatusCodeValidationEntityTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("statusCodeValidationTestDataProvider")
     void testRunner(String name, int statusCode, int actualStatusCode,
-                           boolean expectPass) {
+                    boolean expectPass) {
         validationEntity.setExpectedStatusCode(statusCode);
         when(response.statusCode()).thenReturn(actualStatusCode);
 
         APIValidationEntity.Result result = validationEntity.validate(response, jobData);
-
+        assertEquals(ValidationType.STATUS_CODE, validationEntity.getType(), "Type must be STATUS_CODE");
         if (expectPass) {
-            assertNotNull(result,"Result should not be null");
-            assertTrue(result.isPassed(),"Result should be passed");
-            assertNull(result.getMessage(),"Result must not have message");
+            assertNotNull(result, "Result should not be null");
+            assertTrue(result.isPassed(), "Result should be passed");
+            assertNull(result.getMessage(), "Result must not have message");
         } else {
-            assertNotNull(result,"Result must not be null");
-            assertFalse(result.isPassed(),"Result must not be passed");
+            assertNotNull(result, "Result must not be null");
+            assertFalse(result.isPassed(), "Result must not be passed");
             assertEquals("Expected status code of " + statusCode + " but got "
-                + actualStatusCode, result.getMessage(),
+                    + actualStatusCode, result.getMessage(),
                 "Message must match");
         }
     }

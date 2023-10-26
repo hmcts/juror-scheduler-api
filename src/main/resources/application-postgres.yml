@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:scheduler_application}
+    username: ${DB_USER_NAME:postgres}
+    password: ${DB_PASSWORD:postgres}

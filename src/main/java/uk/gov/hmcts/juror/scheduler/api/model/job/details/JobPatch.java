@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import uk.gov.hmcts.juror.scheduler.api.model.job.details.actions.Action;
 import uk.gov.hmcts.juror.scheduler.api.validation.CronExpression;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,4 +26,7 @@ public class JobPatch {
     @Schema(description = "The information about the Job")
     @Valid
     private Information information;
+
+    @JsonProperty("post_execution_actions")
+    private List<@Valid ? extends Action> postExecutionActions;
 }

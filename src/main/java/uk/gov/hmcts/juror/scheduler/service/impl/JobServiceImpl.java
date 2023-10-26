@@ -116,11 +116,11 @@ public class JobServiceImpl implements JobService {
     public void createJob(APIJobDetails jobDetails) {
         if (doesJobExist(jobDetails.getKey())) {
             throw new GenericErrorHandlerException(APIHandleableException.Type.INFORMATIONAL,
-                    new KeyAlreadyInUseError(), HttpStatus.CONFLICT);
+                new KeyAlreadyInUseError(), HttpStatus.CONFLICT);
         }
 
         APIJobDetailsEntity jobDetailsEntity = jobDetailsMapper.toAPIJobDetailsEntity(jobDetails);
-        jobDetailsMapper.updateValidationsJobs(jobDetailsEntity);
+        jobDetailsMapper.assignJobs(jobDetailsEntity);
         jobDetailsEntity = this.save(jobDetailsEntity);
         if (jobDetailsEntity.getCronExpression() != null) {
             schedulerService.register(jobDetailsEntity);
@@ -146,9 +146,9 @@ public class JobServiceImpl implements JobService {
             specifications.add(JobRepository.Specs.byTags(searchFilter.getTags()));
         }
         List<APIJobDetailsEntity> foundJobs =
-                jobRepository.findAll(JobRepository.Specs.orderByCreatedOn(Specification.allOf(
-                        specifications
-                )));
+            jobRepository.findAll(JobRepository.Specs.orderByCreatedOn(Specification.allOf(
+                specifications
+            )));
 
         if (foundJobs.isEmpty()) {
             throw new NotFoundException("No Jobs found for the provided filter");
@@ -178,16 +178,18 @@ public class JobServiceImpl implements JobService {
         Optional.ofNullable(jobPatch.getHeaders()).ifPresent(jobDetailsEntity::setHeaders);
         Optional.ofNullable(jobPatch.getAuthenticationDefault()).ifPresent(jobDetailsEntity::setAuthenticationDefault);
         Optional.ofNullable(jobPatch.getPayload()).ifPresent(jobDetailsEntity::setPayload);
+
         Optional.ofNullable(jobPatch.getValidations()).ifPresent(
-                validations -> jobDetailsEntity.setValidations(jobDetailsMapper.apiValidationEntityList(validations)));
+            validations -> jobDetailsEntity.setValidations(jobDetailsMapper.apiValidationEntityList(validations)));
+
+        Optional.ofNullable(jobPatch.getPostExecutionActions()).ifPresent(
+            postActions -> jobDetailsEntity.setPostExecutionActions(jobDetailsMapper.actionEntityList(postActions)));
 
         APIJobDetailsEntity updatedJobDetailsEntity = save(jobDetailsEntity);
         if (requiresReschedule.get()) {
-            //TODO improve
             schedulerService.unregister(jobKey);
             schedulerService.register(updatedJobDetailsEntity);
         }
         return updatedJobDetailsEntity;
     }
-
 }

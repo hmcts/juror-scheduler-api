@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
 import java.util.stream.Stream;
 
@@ -52,6 +53,7 @@ class MaxResponseTimeAPIValidationEntityTest {
         when(response.getTime()).thenReturn(actualResponseTime);
 
         APIValidationEntity.Result result = validationEntity.validate(response, jobData);
+        assertEquals(ValidationType.MAX_RESPONSE_TIME, validationEntity.getType(), "Type must be MAX_RESPONSE_TIME");
 
         if (expectPass) {
             assertNotNull(result,"Result should not be null");

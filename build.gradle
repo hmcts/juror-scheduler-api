@@ -1,282 +1,305 @@
 plugins {
-  id 'application'
-  id 'checkstyle'
-  id 'pmd'
-  id 'jacoco'
-  id 'io.spring.dependency-management' version '1.1.3'
-  id 'org.springframework.boot' version '3.1.4'
-  id 'org.owasp.dependencycheck' version '8.4.0'
-  id 'com.github.ben-manes.versions' version '0.49.0'
-  id 'org.sonarqube' version '4.4.1.3373'
+    id 'application'
+    id 'checkstyle'
+    id 'pmd'
+    id 'jacoco'
+    id 'io.spring.dependency-management' version '1.1.3'
+    id 'org.springframework.boot' version '3.1.5'
+    id 'org.owasp.dependencycheck' version '8.4.2'
+    id 'com.github.ben-manes.versions' version '0.49.0'
+    id 'org.sonarqube' version '4.4.1.3373'
+    id "org.flywaydb.flyway" version "9.22.3"
 }
 
 group = 'uk.gov.hmcts.juror.scheduler'
 version = '0.0.1'
 
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
-  }
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 sourceSets {
-  functionalTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/functionalTest/java')
+    functionalTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/functionalTest/java')
+        }
+        resources.srcDir file('src/functionalTest/resources')
     }
-    resources.srcDir file('src/functionalTest/resources')
-  }
 
-  integrationTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/integrationTest/java')
+    integrationTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/integrationTest/java')
+        }
+        resources.srcDir file('src/integrationTest/resources')
     }
-    resources.srcDir file('src/integrationTest/resources')
-  }
 
-  smokeTest {
-    java {
-      compileClasspath += main.output
-      runtimeClasspath += main.output
-      srcDir file('src/smokeTest/java')
+    smokeTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/smokeTest/java')
+        }
+        resources.srcDir file('src/smokeTest/resources')
     }
-    resources.srcDir file('src/smokeTest/resources')
-  }
 }
 
 configurations {
-  functionalTestImplementation.extendsFrom testImplementation
-  functionalTestRuntimeOnly.extendsFrom runtimeOnly
+    functionalTestImplementation.extendsFrom testImplementation
+    functionalTestRuntimeOnly.extendsFrom runtimeOnly
 
-  integrationTestImplementation.extendsFrom testImplementation
-  integrationTestRuntimeOnly.extendsFrom runtimeOnly
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom runtimeOnly
 
-  smokeTestImplementation.extendsFrom testImplementation
-  smokeTestRuntimeOnly.extendsFrom runtimeOnly
+    smokeTestImplementation.extendsFrom testImplementation
+    smokeTestRuntimeOnly.extendsFrom runtimeOnly
 }
 
 tasks.withType(JavaCompile) {
-  options.compilerArgs << "-Xlint:unchecked" << "-Werror"
+    options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
 
 // https://github.com/gradle/gradle/issues/16791
 tasks.withType(JavaExec).configureEach {
-  javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
+    javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
 tasks.withType(Test) {
-  useJUnitPlatform()
+    useJUnitPlatform()
 
-  testLogging {
-    exceptionFormat = 'full'
-  }
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 test {
-  failFast = false
+    failFast = true
 }
 
 task functional(type: Test) {
-  description = "Runs functional tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.functionalTest.output.classesDirs
-  classpath = sourceSets.functionalTest.runtimeClasspath
+    description = "Runs functional tests"
+    group = "Verification"
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
 task integration(type: Test) {
-  description = "Runs integration tests"
-  group = "Verification"
-  testClassesDirs = sourceSets.integrationTest.output.classesDirs
-  classpath = sourceSets.integrationTest.runtimeClasspath
-  failFast = true
+    description = "Runs integration tests"
+    group = "Verification"
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    failFast = true
 }
 
 task smoke(type: Test) {
-  description = "Runs Smoke Tests"
-  testClassesDirs = sourceSets.smokeTest.output.classesDirs
-  classpath = sourceSets.smokeTest.runtimeClasspath
+    description = "Runs Smoke Tests"
+    testClassesDirs = sourceSets.smokeTest.output.classesDirs
+    classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
 checkstyle {
-  maxWarnings = 0
-  toolVersion = '10.12.4'
-  getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
+    maxWarnings = 0
+    toolVersion = '10.12.4'
+    getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
 pmd {
-  toolVersion = "6.55.0"
-  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
-  reportsDir = file("$project.buildDir/reports/pmd")
-  // https://github.com/pmd/pmd/issues/876
-  ruleSets = []
-  ruleSetFiles = files("config/pmd/ruleset.xml")
+    maxFailures = 60
+    toolVersion = "6.55.0"
+    sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
+    reportsDir = file("$project.buildDir/reports/pmd")
+    // https://github.com/pmd/pmd/issues/876
+    ruleSets = []
+    ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
 jacocoTestReport {
-  executionData(test, integration)
-  reports {
-    xml.required = true
-    csv.required = false
-    html.required = true
-  }
+    executionData(test, integration)
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 sonarqube {
-  properties {
-    property "sonar.projectName", "Juror :: juror-scheduler-api"
-    property "sonar.projectKey", "uk.gov.hmcts.juror:juror-scheduler-api"
-    property "sonar.cpd.exclusions", "src/main/java/uk/gov/hmcts/juror/scheduler/api/model/error/**"
-  }
+    properties {
+        property "sonar.projectName", "Juror :: juror-scheduler-api"
+        property "sonar.projectKey", "uk.gov.hmcts.juror:juror-scheduler-api"
+    }
 }
 
 // before committing a change, make sure task still works
 dependencyUpdates {
-  def isNonStable = { String version ->
-    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier -> version.toUpperCase().contains(qualifier) }
-    def regex = /^[0-9,.v-]+$/
-    return !stableKeyword && !(version ==~ regex)
-  }
-  rejectVersionIf { selection -> // <---- notice how the closure argument is named
-    return isNonStable(selection.candidate.version) && !isNonStable(selection.currentVersion)
-  }
+    def isNonStable = { String version ->
+        def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { qualifier -> version.toUpperCase().contains(qualifier) }
+        def regex = /^[0-9,.v-]+$/
+        return !stableKeyword && !(version ==~ regex)
+    }
+    rejectVersionIf { selection -> // <---- notice how the closure argument is named
+        return isNonStable(selection.candidate.version) && !isNonStable(selection.currentVersion)
+    }
 }
 
 // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
-  // Specifies if the build should be failed if a CVSS score above a specified level is identified.
-  // range of 0-10 fails the build, anything greater and it doesn't fail the build
-  failBuildOnCVSS = 0
-  suppressionFile = 'config/owasp/suppressions.xml'
+    // Specifies if the build should be failed if a CVSS score above a specified level is identified.
+    // range of 0-10 fails the build, anything greater and it doesn't fail the build
+    failBuildOnCVSS = 0
+    suppressionFile = 'config/owasp/suppressions.xml'
 
-  analyzers {
-    // Disable scanning of .NET related binaries
-    assemblyEnabled = false
-  }
-  skipConfigurations = [
-    "checkstyle",
-    "compileOnly",
-    "pmd",
-    "integrationTest",
-    "functionalTest",
-    "smokeTest",
-    "contractTestRuntimeClasspath",
-    "contractTestCompileClasspath"
-  ]
+    analyzers {
+        // Disable scanning of .NET related binaries
+        assemblyEnabled = false
+    }
+    skipConfigurations = [
+            "checkstyle",
+            "compileOnly",
+            "pmd",
+            "integrationTest",
+            "functionalTest",
+            "smokeTest",
+            "contractTestRuntimeClasspath",
+            "contractTestCompileClasspath"
+    ]
 }
 
 repositories {
-  mavenLocal()
-  mavenCentral()
-  maven { url 'https://jitpack.io' }
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 ext {
-  log4JVersion = "2.21.0"
-  springVersion = "3.1.4"
-  jwtVersion = "0.12.3"
-  lombookVersion = "1.18.30"
+    log4JVersion = "2.21.1"
+    springVersion = "3.1.5"
+    jwtVersion = "0.12.3"
+    lombookVersion = "1.18.30"
 }
 
 ext['snakeyaml.version'] = '2.0'
 
 dependencies {
-  //Dependency overrides
 
-  //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
-  implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.15'
-  //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
-  implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.15'
+    //Dependency overrides
 
-  //End
+    //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.15'
+    //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
+    implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.15'
 
-  implementation files('lib/spring-support-library-0.1.2-plain.jar')
+    //End
 
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
+    implementation files('lib/spring-support-library-0.1.5-plain.jar')
 
-  implementation group: 'org.springframework.data', name: 'spring-data-commons', version: '3.1.5'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
 
-
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
-
-  implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.3.2'
-
-  // Database, repository
-  implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-  implementation 'org.postgresql:postgresql:42.6.0'
-  implementation 'org.hibernate.orm:hibernate-envers:6.3.1.Final'
-  testImplementation 'com.h2database:h2:2.2.224'
-  testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
-
-  // Documentation, logging
-  implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-  testImplementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-  testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-  implementation 'org.jetbrains:annotations:24.0.1'
-  testImplementation 'junit:junit:4.13.2'
-
-  // Data Mapping
-  implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    implementation group: 'org.springframework.data', name: 'spring-data-commons', version: '3.1.5'
 
 
-  compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
+    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
 
-  // Validation
+    implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.3.2'
 
-  // Security
-  implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jwtVersion
-  runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jwtVersion
-  runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jwtVersion
+    // Database, repository
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'org.postgresql:postgresql:42.6.0'
+    implementation 'org.hibernate.orm:hibernate-envers:6.3.1.Final'
+    implementation 'org.flywaydb:flyway-core:9.22.3'
+    testImplementation 'org.testcontainers:postgresql:1.19.1'
+
+    // Documentation, logging
+    implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
+    testImplementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
+    implementation 'org.jetbrains:annotations:24.0.1'
+    testImplementation 'junit:junit:4.13.2'
+
+    // Data Mapping
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 
-  // Web requests
-  implementation 'org.springframework:spring-webflux:6.0.13'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
 
-  testImplementation(platform('org.junit:junit-bom:5.10.0'))
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
-    exclude group: 'junit', module: 'junit'
-    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-  }, version: springVersion
+    // Validation
+
+    // Security
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jwtVersion
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jwtVersion
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jwtVersion
+
+
+    // Web requests
+    implementation 'org.springframework:spring-webflux:6.0.13'
+
+    testImplementation(platform('org.junit:junit-bom:5.10.0'))
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }, version: springVersion
+    testImplementation "org.junit.jupiter:junit-jupiter:5.8.1"
+    testImplementation "org.testcontainers:testcontainers:1.19.1"
+    testImplementation "org.testcontainers:junit-jupiter:1.19.1"
 }
-
 mainClassName = 'uk.gov.hmcts.juror.scheduler.Application'
 
 bootJar {
-  archiveFileName = "juror-scheduler-api.jar"
+    archiveFileName = "juror-scheduler-api.jar"
 
-  manifest {
-    attributes('Implementation-Version': project.version.toString())
-  }
+    manifest {
+        attributes('Implementation-Version': project.version.toString())
+    }
 }
 
 // Gradle 7.x issue, workaround from: https://github.com/gradle/gradle/issues/17236#issuecomment-894768083
 rootProject.tasks.named("processSmokeTestResources") {
-  duplicatesStrategy = 'include'
+    duplicatesStrategy = 'include'
 }
 
 rootProject.tasks.named("processIntegrationTestResources") {
-  duplicatesStrategy = 'include'
+    duplicatesStrategy = 'include'
 }
 
 wrapper {
-  distributionType = Wrapper.DistributionType.ALL
+    distributionType = Wrapper.DistributionType.ALL
 }
+
+//Flyway must align with application.yml
+flyway {
+    def dbHost = System.getenv("DB_HOST") ?: "localhost"
+    def dbPort = System.getenv("DB_PORT") ?: "5432"
+    def dbName = System.getenv("DB_NAME") ?: "scheduler_application"
+    def dbUserName = System.getenv("DB_USER_NAME") ?: "postgres"
+    def dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
+
+    url = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
+    user = "$dbUserName"
+    password = "$dbPassword"
+    defaultSchema = 'scheduler_application'
+    table = 'schema_history'
+    cleanDisabled = false
+}
+
+//project.tasks['integration'].dependsOn flywayClean
+//project.tasks['integration'].dependsOn flywayMigrate

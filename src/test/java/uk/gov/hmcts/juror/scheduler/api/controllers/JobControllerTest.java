@@ -38,7 +38,8 @@ import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.scheduler.testsupport.APIConstantsTest;
 import uk.gov.hmcts.juror.scheduler.testsupport.ControllerTestSupport;
-import uk.gov.hmcts.juror.scheduler.testsupport.TestUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.GenerateUtil;
+import uk.gov.hmcts.juror.scheduler.testsupport.util.TestUtil;
 import uk.gov.hmcts.juror.standard.api.ExceptionHandling;
 import uk.gov.hmcts.juror.standard.service.exceptions.BusinessRuleValidationException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
@@ -138,7 +139,7 @@ class JobControllerTest {
 
         @Test
         void positiveGetJob() throws Exception {
-            APIJobDetailsResponse apiJobDetails = TestUtil.generateAPIJobDetailsResponse();
+            APIJobDetailsResponse apiJobDetails = GenerateUtil.generateAPIJobDetailsResponse();
 
             final String jobKey = "ABC";
             when(jobDetailsMapper.toAPIJobDetailsResponse(any())).thenReturn(apiJobDetails);
@@ -655,7 +656,7 @@ class JobControllerTest {
         void positiveAllFields() throws Exception {
             String payload = TestUtil.readResource("patchJobDetailsTypical.json", RESOURCE_PREFIX);
 
-            APIJobDetailsResponse response = TestUtil.generateAPIJobDetailsResponse();
+            APIJobDetailsResponse response = GenerateUtil.generateAPIJobDetailsResponse();
 
             when(jobDetailsMapper.toAPIJobDetailsResponse(any())).thenReturn(response);
 
@@ -721,7 +722,7 @@ class JobControllerTest {
         void positiveOneField() throws Exception {
             String payload = TestUtil.readResource("patchJobDetailsSingleField.json", RESOURCE_PREFIX);
 
-            APIJobDetailsResponse response = TestUtil.generateAPIJobDetailsResponse();
+            APIJobDetailsResponse response = GenerateUtil.generateAPIJobDetailsResponse();
 
             when(jobDetailsMapper.toAPIJobDetailsResponse(any())).thenReturn(response);
 
@@ -797,7 +798,7 @@ class JobControllerTest {
         })
         void positiveGetTasksSingle() throws Exception {
             List<TaskDetail> responseTaskDetails = new ArrayList<>();
-            responseTaskDetails.add(TestUtil.generateTask());
+            responseTaskDetails.add(GenerateUtil.generateTask());
             performAndValidatePositive(responseTaskDetails);
         }
 
@@ -807,9 +808,9 @@ class JobControllerTest {
         })
         void positiveGetTasksMultiple() throws Exception {
             List<TaskDetail> responseTaskDetails = new ArrayList<>();
-            responseTaskDetails.add(TestUtil.generateTask());
-            responseTaskDetails.add(TestUtil.generateTask());
-            responseTaskDetails.add(TestUtil.generateTask());
+            responseTaskDetails.add(GenerateUtil.generateTask());
+            responseTaskDetails.add(GenerateUtil.generateTask());
+            responseTaskDetails.add(GenerateUtil.generateTask());
             performAndValidatePositive(responseTaskDetails);
         }
 
@@ -881,7 +882,7 @@ class JobControllerTest {
             "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
         })
         void positiveGetTask() throws Exception {
-            performAndValidatePositive(TestUtil.generateTask());
+            performAndValidatePositive(GenerateUtil.generateTask());
         }
 
         @Test

@@ -9,8 +9,10 @@ import java.util.Arrays;
 public enum Status {
 
     PENDING,
+    PROCESSING,
     VALIDATION_PASSED,
     VALIDATION_FAILED,
+    PROGRESSING,
     FAILED_UNEXPECTED_EXCEPTION,
     SUCCESS,
     FAILED,

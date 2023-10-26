@@ -1,5 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.service.impl;
 
+import io.jsonwebtoken.lang.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
 import uk.gov.hmcts.juror.scheduler.datastore.repository.TaskRepository;
+import uk.gov.hmcts.juror.scheduler.service.contracts.ActionService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
@@ -27,11 +29,15 @@ public class TaskServiceImpl implements TaskService {
 
     private final JobService jobService;
 
+    private final ActionService actionService;
+
 
     @Autowired
-    public TaskServiceImpl(@Lazy JobService jobService, TaskRepository taskRepository) {
+    public TaskServiceImpl(@Lazy JobService jobService, TaskRepository taskRepository,
+                           @Lazy ActionService actionService) {
         this.taskRepository = taskRepository;
         this.jobService = jobService;
+        this.actionService = actionService;
     }
 
 
@@ -45,7 +51,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskEntity saveTask(TaskEntity task) {
-        return taskRepository.save(task);
+        TaskEntity actionTaskEntity = this.actionService.taskUpdated(task);
+        return taskRepository.save(actionTaskEntity);
     }
 
     @Override
@@ -75,6 +82,9 @@ public class TaskServiceImpl implements TaskService {
         if (statusUpdate.getMessage() != null) {
             taskEntity.setMessage(statusUpdate.getMessage());
         }
+        if (!Collections.isEmpty(statusUpdate.getMetaData())) {
+            taskEntity.addMetaData(statusUpdate.getMetaData());
+        }
         saveTask(taskEntity);
     }
 
@@ -100,9 +110,10 @@ public class TaskServiceImpl implements TaskService {
         if (searchFilter.getStatuses() != null) {
             specifications.add(TaskRepository.Specs.byStatus(searchFilter.getStatuses()));
         }
-        List<TaskEntity> taskEntities = taskRepository.findAll(
-            TaskRepository.Specs.orderByCreatedOn(Specification.allOf(specifications))
-        );
+        List<TaskEntity> taskEntities =
+            taskRepository.findAll(TaskRepository.Specs.orderByCreatedOn(Specification.allOf(
+                specifications
+            )));
         if (taskEntities.isEmpty()) {
             throw new NotFoundException("No tasks found for the provided filter");
         }

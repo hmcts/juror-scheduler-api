@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.hibernate.envers.Audited;
 import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
@@ -21,6 +22,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 @PrimaryKeyJoinColumn(name = "validation_id")
 @AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class StatusCodeValidationEntity extends APIValidationEntity {
 
     @NotNull

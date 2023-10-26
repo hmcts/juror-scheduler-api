@@ -34,7 +34,9 @@ class SampleSmokeTest {
             .then()
             .extract().response();
 
-        assertEquals(200, response.statusCode(), "Status Code should match");
-        assertTrue(response.asString().startsWith("Welcome"), "Response should start with Welcome");
-    } 
+        assertEquals(200, response.statusCode(),
+            "Status code should match");
+        assertTrue(response.asString().startsWith("Welcome"),
+            "Response should contain welcome");
+    }
 }

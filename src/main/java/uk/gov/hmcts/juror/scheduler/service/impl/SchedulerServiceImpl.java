@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
 import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
-import uk.gov.hmcts.juror.standard.components.SystemUtil;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
@@ -31,7 +30,6 @@ public class SchedulerServiceImpl implements SchedulerService {
     private final Scheduler scheduler;
 
     @Autowired
-
     protected SchedulerServiceImpl(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
@@ -43,7 +41,7 @@ public class SchedulerServiceImpl implements SchedulerService {
             scheduler.start();
         } catch (Exception exception) {
             log.error("Failed to start the scheduler shutting down.", exception);
-            SystemUtil.exit(1);//No point continuing if the scheduler fails to start
+            throw new InternalServerException("Failed to start scheduler", exception);
         }
     }
 
