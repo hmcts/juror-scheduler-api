@@ -301,5 +301,5 @@ flyway {
     cleanDisabled = false
 }
 
-project.tasks['integration'].dependsOn flywayClean
-project.tasks['integration'].dependsOn flywayMigrate
+//project.tasks['integration'].dependsOn flywayClean
+//project.tasks['integration'].dependsOn flywayMigrate
