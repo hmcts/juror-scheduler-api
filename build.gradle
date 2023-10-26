@@ -223,7 +223,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.6.0'
     implementation 'org.hibernate.orm:hibernate-envers:6.3.1.Final'
     implementation 'org.flywaydb:flyway-core:9.22.3'
-    testImplementation 'com.h2database:h2:2.2.224'
+    integrationTestImplementation 'org.testcontainers:postgresql:1.19.1'
 
     // Documentation, logging
     implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
