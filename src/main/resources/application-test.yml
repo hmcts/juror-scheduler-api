@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_HOST:5433}/${DB_NAME:scheduler_application}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:scheduler_application}
   flyway:
     enabled: false
 uk:
