@@ -34,7 +34,7 @@ class ContainerDB {
             .withPassword("postgres")
             .withExposedPorts(5432);
         POSTGRE_SQL_CONTAINER.setPortBindings(List.of(
-            "5432:5432"
+            "5433:5432"
         ));
         POSTGRE_SQL_CONTAINER.start();
         String jdbcUrl = POSTGRE_SQL_CONTAINER.getJdbcUrl();
