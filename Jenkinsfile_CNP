@@ -139,27 +139,9 @@ withPipeline(type, product, component) {
       allowMissing         : true,
       alwaysLinkToLastBuild: true,
       keepAll              : true,
-      reportDir            : "build/reports/tests/integrationTest",
+      reportDir            : "build/reports/tests/integration",
       reportFiles          : "index.html",
       reportName           : "Integration Test Report"
-    ]
-
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/tests/functionalTest",
-      reportFiles          : "index.html",
-      reportName           : "Functional Test Report"
-    ]
-
-    publishHTML target: [
-      allowMissing         : true,
-      alwaysLinkToLastBuild: true,
-      keepAll              : true,
-      reportDir            : "build/reports/tests/smokeTest",
-      reportFiles          : "index.html",
-      reportName           : "Smoke Test Report"
     ]
   }
 
