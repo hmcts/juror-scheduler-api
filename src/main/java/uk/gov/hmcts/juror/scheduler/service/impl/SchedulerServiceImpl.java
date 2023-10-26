@@ -31,7 +31,6 @@ public class SchedulerServiceImpl implements SchedulerService {
     private final Scheduler scheduler;
 
     @Autowired
-
     protected SchedulerServiceImpl(Scheduler scheduler) {
         this.scheduler = scheduler;
     }
@@ -43,7 +42,7 @@ public class SchedulerServiceImpl implements SchedulerService {
             scheduler.start();
         } catch (Exception exception) {
             log.error("Failed to start the scheduler shutting down.", exception);
-            SystemUtil.exit(1);//No point continuing if the scheduler fails to start
+            throw new InternalServerException("Failed to start scheduler", exception);
         }
     }
 

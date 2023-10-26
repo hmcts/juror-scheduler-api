@@ -34,23 +34,6 @@ public abstract class AbstractIT {
     private static final String USER_PASSWORD = "testPassword123";
     protected final MockMvc mockMvc;
 
-
-    private static final String DOCKER_IMAGE = "postgres:15-alpine";
-    protected static final PostgreSQLContainer POSTGRE_SQL_CONTAINER;
-
-    static {
-        POSTGRE_SQL_CONTAINER
-            = new PostgreSQLContainer<>(DOCKER_IMAGE);
-        POSTGRE_SQL_CONTAINER.start();
-        String jdbcUrl = POSTGRE_SQL_CONTAINER.getJdbcUrl();
-        String username = POSTGRE_SQL_CONTAINER.getUsername();
-        String password = POSTGRE_SQL_CONTAINER.getPassword();
-        Flyway flyway = Flyway.configure().dataSource(
-            jdbcUrl, username, password).load();
-        flyway.clean();
-        flyway.migrate();
-    }
-
     protected AbstractIT(MockMvc mockMvc) {
         this.mockMvc = mockMvc;
     }
