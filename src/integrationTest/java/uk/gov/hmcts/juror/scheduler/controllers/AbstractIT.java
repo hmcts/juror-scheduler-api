@@ -2,6 +2,7 @@ package uk.gov.hmcts.juror.scheduler.controllers;
 
 import com.jayway.jsonpath.JsonPath;
 import jakarta.validation.constraints.NotNull;
+import org.flywaydb.core.Flyway;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.net.URI;
 
@@ -30,7 +32,24 @@ public abstract class AbstractIT {
     public static final String URL_JOBS_API = "/jobs/api";
 
     private static final String USER_PASSWORD = "testPassword123";
-    private final MockMvc mockMvc;
+    protected final MockMvc mockMvc;
+
+
+    private static final String DOCKER_IMAGE = "postgres:15-alpine";
+    protected static final PostgreSQLContainer POSTGRE_SQL_CONTAINER;
+
+    static {
+        POSTGRE_SQL_CONTAINER
+            = new PostgreSQLContainer<>(DOCKER_IMAGE);
+        POSTGRE_SQL_CONTAINER.start();
+        String jdbcUrl = POSTGRE_SQL_CONTAINER.getJdbcUrl();
+        String username = POSTGRE_SQL_CONTAINER.getUsername();
+        String password = POSTGRE_SQL_CONTAINER.getPassword();
+        Flyway flyway = Flyway.configure().dataSource(
+            jdbcUrl, username, password).load();
+        flyway.clean();
+        flyway.migrate();
+    }
 
     protected AbstractIT(MockMvc mockMvc) {
         this.mockMvc = mockMvc;
