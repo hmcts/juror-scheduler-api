@@ -16,7 +16,8 @@ public enum Status {
     FAILED_UNEXPECTED_EXCEPTION,
     SUCCESS,
     FAILED,
-    INDETERMINATE;
+    INDETERMINATE,
+    PARTIAL_SUCCESS;
 
     @JsonCreator
     @SuppressWarnings("PMD.PreserveStackTrace")

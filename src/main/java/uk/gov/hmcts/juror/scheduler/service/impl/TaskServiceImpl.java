@@ -60,7 +60,7 @@ public class TaskServiceImpl implements TaskService {
         if (!jobService.doesJobExist(jobKey)) {
             throw new NotFoundException("Job with key '" + jobKey + "' not found");
         }
-        return taskRepository.findFirstByJobKeyOrderByCreatedAt(jobKey);
+        return taskRepository.findFirstByJobKeyOrderByCreatedAtDesc(jobKey);
     }
 
     @Override

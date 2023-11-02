@@ -675,7 +675,7 @@ CREATE TABLE scheduler_application.status_code_validation_entity_aud
 
 CREATE TABLE scheduler_application.task_entity
 (
-    status               int2          NOT NULL,
+    status               varchar(255)  NOT NULL,
     created_at           timestamp(6)  NULL,
     last_updated_at      timestamp(6)  NULL,
     task_id              bigserial     NOT NULL,
@@ -683,7 +683,6 @@ CREATE TABLE scheduler_application.task_entity
     post_actions_message varchar(2500) NULL,
     job_key              varchar(255)  NOT NULL,
     CONSTRAINT task_entity_pkey PRIMARY KEY (task_id),
-    CONSTRAINT task_entity_status_check CHECK (((status >= 0) AND (status <= 7))),
     CONSTRAINT fkhjpac5wkyu4x3gwn4vru4u2ax FOREIGN KEY (job_key) REFERENCES scheduler_application.apijob_details_entity ("key")
 );
 
@@ -698,7 +697,7 @@ CREATE TABLE scheduler_application.task_entity_aud
 (
     rev                  int4         NOT NULL,
     revtype              int2         NULL,
-    status               int2         NULL,
+    status               varchar(255)         NULL,
     created_at           timestamp(6) NULL,
     last_updated_at      timestamp(6) NULL,
     task_id              int8         NOT NULL,
@@ -706,7 +705,6 @@ CREATE TABLE scheduler_application.task_entity_aud
     message              varchar(255) NULL,
     post_actions_message varchar(255) NULL,
     CONSTRAINT task_entity_aud_pkey PRIMARY KEY (rev, task_id),
-    CONSTRAINT task_entity_aud_status_check CHECK (((status >= 0) AND (status <= 7))),
     CONSTRAINT fk3nk7paopqhardsrsldguqsj49 FOREIGN KEY (rev) REFERENCES scheduler_application.revinfo (rev)
 );
 
@@ -932,5 +930,5 @@ VALUES (true, true, true, true, 'admin@scheduler.cgi.com', 'Admin',
         '$2a$10$H5xgNpQ8ZWrlkrTrzofTJep21hwn4EHw.bPEOcn.T0WkQpHsDC3mm');
 
 INSERT INTO scheduler_application.users_roles
-    (user_id, roles_name)
+(user_id, roles_name)
 VALUES ((SELECT ID from scheduler_application.users WHERE email = 'admin@scheduler.cgi.com'), 'ADMIN');

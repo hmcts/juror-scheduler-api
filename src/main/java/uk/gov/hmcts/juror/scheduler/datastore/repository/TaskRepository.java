@@ -20,7 +20,7 @@ public interface TaskRepository extends JpaRepository<TaskEntity, Long>, JpaSpec
 
     List<TaskEntity> findAllByJobKey(String jobKey);
 
-    TaskEntity findFirstByJobKeyOrderByCreatedAt(String jobKey);
+    TaskEntity findFirstByJobKeyOrderByCreatedAtDesc(String jobKey);
 
     Optional<TaskEntity> findByJobKeyAndTaskId(String jobKey, long taskId);
 
