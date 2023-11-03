@@ -15,6 +15,7 @@ public enum ConditionType {
     ON_PROGRESSING(Set.of(statusIs(Status.PROGRESSING))),
     ON_FAILED_UNEXPECTED_EXCEPTION(Set.of(statusIs(Status.FAILED_UNEXPECTED_EXCEPTION))),
     ON_SUCCESS(Set.of(statusIs(Status.SUCCESS))),
+    ON_PARTIAL_SUCCESS(Set.of(statusIs(Status.PARTIAL_SUCCESS))),
     ON_FAILED(Set.of(statusIs(Status.FAILED))),
     ON_INDETERMINATE(Set.of(statusIs(Status.INDETERMINATE)));
 

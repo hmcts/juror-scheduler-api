@@ -23,6 +23,7 @@ class ConditionTypeTest extends EnumTest<ConditionType> {
         ConditionType.ON_PROGRESSING, Status.PROGRESSING,
         ConditionType.ON_FAILED_UNEXPECTED_EXCEPTION, Status.FAILED_UNEXPECTED_EXCEPTION,
         ConditionType.ON_SUCCESS, Status.SUCCESS,
+        ConditionType.ON_PARTIAL_SUCCESS, Status.PARTIAL_SUCCESS,
         ConditionType.ON_FAILED, Status.FAILED,
         ConditionType.ON_INDETERMINATE, Status.INDETERMINATE
     );
