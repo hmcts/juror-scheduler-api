@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ITestUtil {
     private static final String USER_EMAIL_PREFIX = "user";
-    private static final String USER_EMAIL_POSTFIX = "@cgi.com";
+    private static final String USER_EMAIL_POSTFIX = "@hmcts.net";
     private static final AtomicInteger ATOMIC_INTEGER = new AtomicInteger(0);
 
     private ITestUtil() {

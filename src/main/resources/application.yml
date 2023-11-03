@@ -101,6 +101,6 @@ scheduler:
       secret: ${JUROR_API_SERVICE_AUTHENTICATION_SECRET}
     api-job-execution-service-authentication:
       issuer: Scheduler Service
-      subject: scheduler@scheduler.cgi.com
+      subject: scheduler@scheduler.hmcts.net
       token-validity: 1600000
       secret: ${API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET}

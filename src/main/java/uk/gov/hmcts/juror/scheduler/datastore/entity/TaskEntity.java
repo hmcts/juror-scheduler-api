@@ -2,6 +2,8 @@ package uk.gov.hmcts.juror.scheduler.datastore.entity;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -56,9 +58,11 @@ public class TaskEntity {
     private String postActionsMessage;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    private Map<String, String> metaData;
+    private Map<@Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String,
+        @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String> metaData;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @CreationTimestamp

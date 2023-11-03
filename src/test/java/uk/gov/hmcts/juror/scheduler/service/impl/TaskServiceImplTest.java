@@ -160,9 +160,9 @@ class TaskServiceImplTest {
         void positiveGetTasksSuccessfully() {
             when(jobService.doesJobExist(JOB_KEY)).thenReturn(true);
             TaskEntity task = TaskEntity.builder().taskId(1L).build();
-            when(taskRepository.findFirstByJobKeyOrderByCreatedAt(JOB_KEY)).thenReturn(task);
+            when(taskRepository.findFirstByJobKeyOrderByCreatedAtDesc(JOB_KEY)).thenReturn(task);
             assertEquals(task, taskService.getLatestTask(JOB_KEY), "Task must match");
-            verify(taskRepository, times(1)).findFirstByJobKeyOrderByCreatedAt(JOB_KEY);
+            verify(taskRepository, times(1)).findFirstByJobKeyOrderByCreatedAtDesc(JOB_KEY);
         }
 
         @Test

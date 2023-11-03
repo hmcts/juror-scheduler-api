@@ -30,6 +30,6 @@ scheduler:
       secret: W3N1cGVyLXNlY3JldC1vbmUtYnVyZWF1XVtzdXBlci1zZWNyZXQtb25lLWJ1cmVhdV1bc3VwZXItc2VjcmV0LW9uZS1idXJlYXVd
     api-job-execution-service-authentication:
       issuer: Scheduler Service
-      subject: scheduler@scheduler.cgi.com
+      subject: scheduler@scheduler.hmcts.net
       token-validity: 1600000
       secret: VGhpc0lzQUR1bW15U2VjcmV0S2V5VGhhdE5vT25lS25vd3NUaGVWYWx1ZXNJdENvbnRhaW5zQnV0Rm9yVGhlRXhlY3V0aW9uTGF5ZXJUaGlzVGltZQ==

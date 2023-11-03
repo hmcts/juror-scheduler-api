@@ -1,5 +1,5 @@
 {
-  "email":"admin@scheduler.cgi.com",
+  "email":"admin@scheduler.hmcts.net",
   "add": {
     "permissions": [
       "user::create"
