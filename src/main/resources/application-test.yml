@@ -21,6 +21,6 @@ scheduler:
       secret: ${JUROR_API_SERVICE_AUTHENTICATION_SECRET:W3N1cGVyLXNlY3JldC1rZXktYnVyZWF1XVtzdXBlci1zZWNyZXQta2V5LWJ1cmVhdV1bc3VwZXItc2VjcmV0LWtleS1idXJlYXVd}
     api-job-execution-service-authentication:
       issuer: Scheduler Service
-      subject: scheduler@scheduler.cgi.com
+      subject: scheduler@scheduler.hmcts.net
       token-validity: 1600000
       secret: ${API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET:WW91clZlcnlWZXJ5VmVyeVNlY3JldEtleVRoYXRJc1NvU2VjcmV0SURvbnRFdmVuS25vd0l0QnV0Rm9yVGhlRXhlY3V0aW9uTGF5ZXJUaGlzVGltZQ}

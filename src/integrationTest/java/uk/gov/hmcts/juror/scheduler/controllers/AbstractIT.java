@@ -24,7 +24,7 @@ import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.resetPasswordR
 @ActiveProfiles({"test"})
 public abstract class AbstractIT {
     public static final String API_DUMMY_CRON_JOB_JSON = "apiDummyCronJob.json";
-    public static final String ADMIN_EMAIL = "admin@scheduler.cgi.com";
+    public static final String ADMIN_EMAIL = "admin@scheduler.hmcts.net";
     public static final String ADMIN_PASSWORD_ENCRYPTED =
         "kj3TXdvYqmFTXXTq!9nA7ZUmDgiQ&W7Z&v7mnFyp2bvM&BZ#nPosFfL8zNvw";
     public static final String URL_JOBS_API = "/jobs/api";

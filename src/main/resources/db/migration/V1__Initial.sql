@@ -925,10 +925,10 @@ VALUES ('user::password::reset::self', 'USER'),
 
 INSERT INTO scheduler_application.users
 (account_non_expired, account_non_locked, credentials_non_expired, enabled, email, firstname, lastname, "password")
-VALUES (true, true, true, true, 'admin@scheduler.cgi.com', 'Admin',
+VALUES (true, true, true, true, 'admin@scheduler.hmcts.net', 'Admin',
         'Admin',
         '$2a$10$H5xgNpQ8ZWrlkrTrzofTJep21hwn4EHw.bPEOcn.T0WkQpHsDC3mm');
 
 INSERT INTO scheduler_application.users_roles
 (user_id, roles_name)
-VALUES ((SELECT ID from scheduler_application.users WHERE email = 'admin@scheduler.cgi.com'), 'ADMIN');
+VALUES ((SELECT ID from scheduler_application.users WHERE email = 'admin@scheduler.hmcts.net'), 'ADMIN');
