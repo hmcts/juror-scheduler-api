@@ -1,7 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.controllers;
 
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.internal.jdbc.JdbcUtils;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
