@@ -53,17 +53,15 @@ class ContainerDB {
         String jdbcUrl = POSTGRE_SQL_CONTAINER.getJdbcUrl();
         String username = POSTGRE_SQL_CONTAINER.getUsername();
         String password = POSTGRE_SQL_CONTAINER.getPassword();
-        try (Connection conn = DriverManager
-            .getConnection(jdbcUrl, username, password)) {
-            try (ResultSet resultSet =
-                     conn.createStatement().executeQuery("SELECT count(*) FROM scheduler_application.schema_history")) {
-                if (resultSet.next()) {    // result is properly examined and used
-                    assertNotEquals(0, resultSet.getInt(1), "Does schema_history table exist");
-                }
-
-                JdbcUtils.closeConnection(conn);
-                JdbcUtils.closeResultSet(resultSet);
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
+             ResultSet resultSet =
+                 conn.createStatement().executeQuery("SELECT count(*) FROM scheduler_application.schema_history")) {
+            if (resultSet.next()) {    // result is properly examined and used
+                assertNotEquals(0, resultSet.getInt(1),
+                    "Does schema_history table exist");
             }
+            JdbcUtils.closeConnection(conn);
+            JdbcUtils.closeResultSet(resultSet);
         }
     }
 }
