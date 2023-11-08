@@ -78,7 +78,7 @@ spring:
             instanceName: quartz-scheduler
 logging:
   level:
-    uk.gov.hmcts.juror: trace
+    uk.gov.hmcts.juror: info
 azure:
   application-insights:
     instrumentation-key: ${juror.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
