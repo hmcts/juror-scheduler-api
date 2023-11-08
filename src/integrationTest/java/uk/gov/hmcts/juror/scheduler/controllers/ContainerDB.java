@@ -60,8 +60,6 @@ class ContainerDB {
                 assertNotEquals(0, resultSet.getInt(1),
                     "Does schema_history table exist");
             }
-            JdbcUtils.closeConnection(conn);
-            JdbcUtils.closeResultSet(resultSet);
         }
     }
 }
