@@ -299,6 +299,7 @@ flyway {
     defaultSchema = 'scheduler_application'
     table = 'schema_history'
     cleanDisabled = false
+    sqlMigrationPrefix = 'scheduler-V'
 }
 
 //project.tasks['integration'].dependsOn flywayClean
