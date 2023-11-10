@@ -173,6 +173,7 @@ dependencyCheck {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven { url 'https://jitpack.io' }
 }
@@ -197,7 +198,7 @@ dependencies {
 
     //End
 
-    implementation 'com.github.hmcts:juror-spring-support-library:0.1.9'
+    implementation group: 'com.github.hmcts', name: 'spring-support-library', version: '1.0.10'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
