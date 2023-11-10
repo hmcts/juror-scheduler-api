@@ -198,7 +198,7 @@ dependencies {
 
     //End
 
-    implementation 'com.github.hmcts:juror-spring-support-library:1.0.1'
+    implementation 'com.github.hmcts:juror-spring-support-library:1.0.2'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
