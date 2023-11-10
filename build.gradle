@@ -172,7 +172,6 @@ dependencyCheck {
     ]
 }
 
-repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 repositories {
     mavenLocal()
     mavenCentral()
@@ -199,7 +198,7 @@ dependencies {
 
     //End
 
-    implementation 'com.github.hmcts:juror-spring-support-library:0.1.7'
+    implementation 'com.github.hmcts:juror-spring-support-library:0.1.9'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
