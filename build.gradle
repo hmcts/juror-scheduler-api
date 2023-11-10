@@ -198,7 +198,7 @@ dependencies {
 
     //End
 
-    implementation files('lib/spring-support-library-0.1.5-plain.jar')
+    implementation 'com.github.hmcts:juror-spring-support-library:1.0.2'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
@@ -299,6 +299,7 @@ flyway {
     defaultSchema = 'scheduler_application'
     table = 'schema_history'
     cleanDisabled = false
+    sqlMigrationPrefix = 'scheduler-V'
 }
 
 //project.tasks['integration'].dependsOn flywayClean
