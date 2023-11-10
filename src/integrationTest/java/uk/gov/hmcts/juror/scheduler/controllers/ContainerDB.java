@@ -43,7 +43,6 @@ class ContainerDB {
             .defaultSchema("scheduler_application")
             .table("schema_history")
             .dataSource(jdbcUrl, username, password)
-            .locations("filesystem:src/main/resources/db/migrations")
             .load();
         flyway.migrate();
     }
