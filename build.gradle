@@ -192,7 +192,7 @@ dependencies {
     //Dependency overrides
 
     //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.15'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.16'
     //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
     implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.15'
 
