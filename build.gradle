@@ -231,7 +231,7 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     testImplementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-    implementation 'org.jetbrains:annotations:24.0.1'
+    implementation 'org.jetbrains:annotations:24.1.0'
     testImplementation 'junit:junit:4.13.2'
 
     // Data Mapping
