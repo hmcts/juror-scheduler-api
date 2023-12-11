@@ -104,7 +104,7 @@ task smoke(type: Test) {
 
 checkstyle {
     maxWarnings = 0
-    toolVersion = '10.12.6'
+    toolVersion = '10.12.5'
     getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
@@ -197,7 +197,6 @@ dependencies {
     implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.16'
 
     //End
-
     implementation 'com.github.hmcts:juror-spring-support-library:1.0.3'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
