@@ -189,15 +189,18 @@ ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
-    //Dependency overrides
-
+    //Dependency overrides (Can be removed once other dependencies get updates to resolve security issues)
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+    implementation 'ch.qos.logback:logback-core:1.4.14'
     //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.16'
     //CVE-2023-44487 & CVE-2023-42795 & CVE-2023-45648
     implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.16'
+    //END
 
     //End
-    implementation 'com.github.hmcts:juror-spring-support-library:1.0.3'
+    implementation 'com.github.hmcts:juror-spring-support-library:1.0.4'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
