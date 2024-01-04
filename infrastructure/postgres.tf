@@ -27,7 +27,7 @@ module "postgresql_flexible" {
     }
   ]
 
-  pgsql_version = "15"
+  pgsql_version = "16"
 }
 
 data "azurerm_key_vault" "key_vault" {
