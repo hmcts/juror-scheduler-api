@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @Order(Integer.MIN_VALUE)
 @ActiveProfiles({"test"})
 class ContainerDB {
-    private static final String DOCKER_IMAGE = "postgres:15-alpine";
+    private static final String DOCKER_IMAGE = "postgres:16-alpine";
 
     @ClassRule
     protected static final PostgreSQLContainer<?> POSTGRE_SQL_CONTAINER;
