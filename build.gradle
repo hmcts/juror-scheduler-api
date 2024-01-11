@@ -293,7 +293,7 @@ flyway {
     def dbHost = System.getenv("DB_HOST") ?: "localhost"
     def dbPort = System.getenv("DB_PORT") ?: "5432"
     def dbName = System.getenv("DB_NAME") ?: "scheduler_application"
-    def dbUserName = System.getenv("DB_USER_NAME") ?: "postgres"
+    def dbUserName = System.getenv("DB_USER_NAME") ?: "system"
     def dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
 
     url = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
