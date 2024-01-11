@@ -14,7 +14,8 @@ public class PostgresqlContainer extends PostgreSQLContainer<PostgresqlContainer
         super(IMAGE_VERSION);
         setup();
     }
-    public void setup(){
+
+    public void setup() {
         withDatabaseName("scheduler_application");
         withUsername("system");
         withPassword("postgres");
