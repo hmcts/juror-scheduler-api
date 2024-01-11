@@ -11,6 +11,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.gov.hmcts.juror.scheduler.testsupport.PostgresqlContainer;
 
 import java.net.URI;
 
@@ -22,7 +25,12 @@ import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.resetPasswordR
 
 
 @ActiveProfiles({"test"})
+@Testcontainers
 public abstract class AbstractIT {
+
+    @Container
+    private static final PostgresqlContainer SQL_CONTAINER = PostgresqlContainer.getInstance();
+
     public static final String API_DUMMY_CRON_JOB_JSON = "apiDummyCronJob.json";
     public static final String ADMIN_EMAIL = "admin@scheduler.hmcts.net";
     public static final String ADMIN_PASSWORD_ENCRYPTED =
@@ -67,7 +75,6 @@ public abstract class AbstractIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.jwt").isNotEmpty())
             .andReturn();
-
         return JsonPath.read(mvcResult.getResponse().getContentAsString(), "$.jwt");
     }
 
