@@ -63,7 +63,7 @@ public class SchedulerIT extends AbstractIT {
 
         mockMvcPerform(URL_JOBS_API, jwtAdmin, POST, payload).andExpect(status().isOk());
 
-        mockMvcPerform("/job/" + uniqueJobKey, jwtAdmin, GET,"")
+        mockMvcPerform("/job/" + uniqueJobKey, jwtAdmin, GET, "")
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isNotEmpty())
             .andExpect(jsonPath("$.key").value(uniqueJobKey));
@@ -89,12 +89,12 @@ public class SchedulerIT extends AbstractIT {
     @DisplayName("Attempt to get details of a job that does not exist and error message is returned")
     @Test
     void getDetailsOfAJobThatDoesNotExist() throws Exception {
-        mockMvcPerform("/job/IDONOTEXIST", jwtAdmin, GET,"")
+        mockMvcPerform("/job/IDONOTEXIST", jwtAdmin, GET, "")
             .andExpect(status().isNotFound())
             .andExpect(jsonPath("$").isNotEmpty())
             .andExpect(jsonPath("$.code").value("NOT_FOUND"))
             .andExpect(jsonPath("$.messages")
-                     .value("The requested resource could not be located."));
+                .value("The requested resource could not be located."));
     }
 
     @DisplayName("Get the tasks executed for a scheduled job")
@@ -114,7 +114,7 @@ public class SchedulerIT extends AbstractIT {
         mockMvcPerform(url, jwtAdmin, GET, "")
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$",hasSize(greaterThan(1))))
+            .andExpect(jsonPath("$", hasSize(greaterThan(1))))
             .andExpect(jsonPath("$[1].job_key").value(uniqueJobKey)); //Validating against second task
     }
 
@@ -141,7 +141,7 @@ public class SchedulerIT extends AbstractIT {
             counter++;
         } while (tasksCounter == 0 && counter < 100);
 
-        mockMvcPerform(url + "/disable", jwtAdmin, PUT,"")
+        mockMvcPerform(url + "/disable", jwtAdmin, PUT, "")
             .andExpect(status().isAccepted());
 
         MvcResult resultAfter = mockMvcPerform(url + URL_TASKS, jwtAdmin, GET,
