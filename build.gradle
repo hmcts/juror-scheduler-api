@@ -1,3 +1,21 @@
+buildscript {
+    ext {
+        log4JVersion = "2.22.1"
+        logbackVersion = "1.4.14"
+        springVersion = "3.2.1"
+        jwtVersion = "0.12.3"
+        lombookVersion = "1.18.30"
+        flywayVersion = "10.5.0"
+        postgresVersion = "42.7.1"
+    }
+
+    ext['snakeyaml.version'] = '2.0'
+    dependencies {
+        classpath("org.postgresql:postgresql:${postgresVersion}")
+        classpath("org.flywaydb:flyway-database-postgresql:${flywayVersion}")
+    }
+}
+
 plugins {
     id 'application'
     id 'checkstyle'
@@ -178,15 +196,6 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-ext {
-    log4JVersion = "2.22.1"
-    logbackVersion = "1.4.14"
-    springVersion = "3.2.1"
-    jwtVersion = "0.12.3"
-    lombookVersion = "1.18.30"
-}
-
-ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
@@ -214,9 +223,12 @@ dependencies {
 
     // Database, repository
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
-    implementation 'org.postgresql:postgresql:42.7.1'
     implementation 'org.hibernate.orm:hibernate-envers:6.4.1.Final'
-    implementation 'org.flywaydb:flyway-core:10.5.0'
+
+    implementation group: 'org.postgresql', name: 'postgresql', version: postgresVersion
+    implementation group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion
+    implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: flywayVersion
+
     testImplementation 'org.testcontainers:postgresql:1.19.3'
 
     // Documentation, logging
