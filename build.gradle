@@ -182,7 +182,7 @@ ext {
     log4JVersion = "2.22.1"
     logbackVersion = "1.4.14"
     springVersion = "3.2.2"
-    jwtVersion = "0.12.3"
+    jwtVersion = "0.12.4"
     lombookVersion = "1.18.30"
 }
 
