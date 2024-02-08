@@ -20,8 +20,8 @@ def secrets = [
     secret('scheduler-api-POSTGRES-USER', 'DB_USER_NAME'),
     secret('scheduler-api-POSTGRES-PASS', 'DB_PASSWORD'),
     secret('scheduler-api-SECRET', 'SECRET'),
-    secret('scheduler-api-API-SECRET', 'JUROR_API_SERVICE_AUTHENTICATION_SECRET'),
-    secret('scheduler-api-JOB-SECRET', 'API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET')
+    secret('api-JWT-SECRET-BUREAU', 'JUROR_API_SERVICE_AUTHENTICATION_SECRET'),
+    secret('scheduler-execution-SECRET', 'API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET')
     ],
 ]
 
