@@ -217,7 +217,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.7.1'
     implementation 'org.hibernate.orm:hibernate-envers:6.4.3.Final'
     implementation 'org.flywaydb:flyway-core:9.22.3'
-    testImplementation 'org.testcontainers:postgresql:1.19.4'
+    testImplementation 'org.testcontainers:postgresql:1.19.5'
 
     // Documentation, logging
     implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
@@ -252,8 +252,8 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }, version: springVersion
     testImplementation "org.junit.jupiter:junit-jupiter:5.10.2"
-    testImplementation "org.testcontainers:testcontainers:1.19.4"
-    testImplementation "org.testcontainers:junit-jupiter:1.19.4"
+    testImplementation "org.testcontainers:testcontainers:1.19.5"
+    testImplementation "org.testcontainers:junit-jupiter:1.19.5"
 }
 mainClassName = 'uk.gov.hmcts.juror.scheduler.Application'
 
