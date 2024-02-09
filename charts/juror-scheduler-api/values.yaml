@@ -22,9 +22,9 @@ java:
           alias: DB_PASSWORD
         - name: scheduler-api-SECRET
           alias: SECRET  
-        - name: scheduler-api-API-SECRET
+        - name: api-JWT-SECRET-BUREAU
           alias: JUROR_API_SERVICE_AUTHENTICATION_SECRET
-        - name: scheduler-api-JOB-SECRET
+        - name: scheduler-execution-SECRET
           alias: API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET
   environment:
     POSTGRES_SSL_MODE: require
