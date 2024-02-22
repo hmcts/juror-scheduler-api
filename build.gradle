@@ -226,6 +226,7 @@ dependencies {
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     implementation 'org.jetbrains:annotations:24.1.0'
     testImplementation 'junit:junit:4.13.2'
+    runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '1.0.2')
 
     // Data Mapping
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
