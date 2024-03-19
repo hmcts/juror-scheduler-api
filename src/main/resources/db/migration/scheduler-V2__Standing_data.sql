@@ -1,4 +1,4 @@
-INSERT INTO scheduler_application.users (id, account_non_expired, account_non_locked, credentials_non_expired, enabled,
+INSERT INTO scheduler_application.users (account_non_expired, account_non_locked, credentials_non_expired, enabled,
                                          email, firstname, lastname, "password")
 VALUES (true, true, true, true, 'external-api@juror-scheduler-api.hmcts.net', 'System', 'Juror-Api',
         '$2a$10$QSvRxqNPA/SXm6vcWZ3a.eMijGVX9EGY7zKdXF.bOqF3MA/IFmKGa');
