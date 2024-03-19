@@ -5,6 +5,7 @@ import io.restassured.http.Method;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestLogSpecification;
 import io.restassured.specification.RequestSpecification;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,6 +71,9 @@ class APIJobTest {
 
     @MockBean
     private JobService jobService;
+
+    @MockBean
+    private EntityManager entityManager;
 
     @MockBean
     private TaskService taskService;

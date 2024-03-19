@@ -82,7 +82,7 @@ class TaskServiceImplTest {
         void positiveCreateTaskSuccessfully() {
             APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder().key(JOB_KEY).build();
 
-            when(taskRepository.save(any(TaskEntity.class)))
+            when(taskRepository.saveAndFlush(any(TaskEntity.class)))
                 .thenAnswer(invocation -> {
                     TaskEntity task = invocation.getArgument(0);
                     task.setTaskId(5L);
@@ -101,7 +101,7 @@ class TaskServiceImplTest {
             assertEquals(Status.PENDING, taskEntity.getStatus(), "Status must match");
 
             verify(actionService, times(1)).taskUpdated(any());
-            verify(taskRepository, times(1)).save(any());
+            verify(taskRepository, times(1)).saveAndFlush(any());
         }
     }
 
@@ -114,12 +114,12 @@ class TaskServiceImplTest {
             TaskEntity taskEntityProvided = new TaskEntity();
             TaskEntity savedTaskEntity = new TaskEntity();
             savedTaskEntity.setTaskId(4L);
-            when(taskRepository.save(savedTaskEntity)).thenReturn(savedTaskEntity);
+            when(taskRepository.saveAndFlush(savedTaskEntity)).thenReturn(savedTaskEntity);
             when(actionService.taskUpdated(taskEntityProvided)).thenReturn(savedTaskEntity);
             assertEquals(savedTaskEntity, taskService.saveTask(taskEntityProvided), "Task must match");
 
             verify(actionService, times(1)).taskUpdated(taskEntityProvided);
-            verify(taskRepository, times(1)).save(savedTaskEntity);
+            verify(taskRepository, times(1)).saveAndFlush(savedTaskEntity);
         }
     }
 
@@ -232,7 +232,7 @@ class TaskServiceImplTest {
             TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
             Optional<TaskEntity> optional = Optional.of(taskEntity);
             when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
-            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
+            when(taskRepository.saveAndFlush(taskEntity)).thenReturn(taskEntity);
             when(actionService.taskUpdated(taskEntity)).thenReturn(taskEntity);
 
             StatusUpdate statusUpdate = new StatusUpdate();
@@ -240,7 +240,7 @@ class TaskServiceImplTest {
 
             taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(1)).save(taskEntity);
+            verify(taskRepository, times(1)).saveAndFlush(taskEntity);
             assertEquals(status, taskEntity.getStatus(), "Status must match");
             assertEquals("Msg", taskEntity.getMessage(), "Message must match");
         }
@@ -253,7 +253,7 @@ class TaskServiceImplTest {
             TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
             Optional<TaskEntity> optional = Optional.of(taskEntity);
             when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
-            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
+            when(taskRepository.saveAndFlush(taskEntity)).thenReturn(taskEntity);
             when(actionService.taskUpdated(taskEntity)).thenReturn(taskEntity);
 
             StatusUpdate statusUpdate = new StatusUpdate();
@@ -262,7 +262,7 @@ class TaskServiceImplTest {
 
             taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(1)).save(taskEntity);
+            verify(taskRepository, times(1)).saveAndFlush(taskEntity);
             assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
             assertEquals("New Message", taskEntity.getMessage(), "Message must match");
         }
@@ -275,7 +275,7 @@ class TaskServiceImplTest {
             TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
             Optional<TaskEntity> optional = Optional.of(taskEntity);
             when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
-            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
+            when(taskRepository.saveAndFlush(taskEntity)).thenReturn(taskEntity);
             when(actionService.taskUpdated(taskEntity)).thenReturn(taskEntity);
 
             StatusUpdate statusUpdate = new StatusUpdate();
@@ -284,7 +284,7 @@ class TaskServiceImplTest {
 
             taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(1)).save(taskEntity);
+            verify(taskRepository, times(1)).saveAndFlush(taskEntity);
             assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
             assertEquals("Msg", taskEntity.getMessage(), "Message must not be updated");
 
@@ -300,7 +300,7 @@ class TaskServiceImplTest {
             TaskEntity taskEntity = TaskEntity.builder().taskId(taskId).message("Msg").build();
             Optional<TaskEntity> optional = Optional.of(taskEntity);
             when(taskRepository.findByJobKeyAndTaskId(JOB_KEY, taskId)).thenReturn(optional);
-            when(taskRepository.save(taskEntity)).thenReturn(taskEntity);
+            when(taskRepository.saveAndFlush(taskEntity)).thenReturn(taskEntity);
             when(actionService.taskUpdated(taskEntity)).thenReturn(taskEntity);
 
             StatusUpdate statusUpdate = new StatusUpdate();
@@ -309,7 +309,7 @@ class TaskServiceImplTest {
 
             taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(1)).save(taskEntity);
+            verify(taskRepository, times(1)).saveAndFlush(taskEntity);
             assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
             assertEquals("Msg", taskEntity.getMessage(), "Message must not be updated");
 
@@ -319,7 +319,7 @@ class TaskServiceImplTest {
             statusUpdate.setMetaData(Map.of("NewKey", "NewValue"));
             taskService.updateStatus(JOB_KEY, taskId, statusUpdate);
 
-            verify(taskRepository, times(2)).save(taskEntity);
+            verify(taskRepository, times(2)).saveAndFlush(taskEntity);
             assertEquals(Status.VALIDATION_PASSED, taskEntity.getStatus(), "Status must match");
             assertEquals("Msg", taskEntity.getMessage(), "Message must not be updated");
 
