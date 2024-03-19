@@ -295,6 +295,18 @@ flyway {
     cleanDisabled = false
     sqlMigrationPrefix = 'scheduler-V'
 }
+task runAllStyleChecks {
+    dependsOn 'checkstyleMain'
+    dependsOn 'checkstyleTest'
+    dependsOn 'checkstyleIntegrationTest'
+    dependsOn 'checkstyleSmokeTest'
+    dependsOn 'checkstyleFunctionalTest'
 
+    dependsOn 'pmdMain'
+    dependsOn 'pmdTest'
+    dependsOn 'pmdIntegrationTest'
+    dependsOn 'pmdSmokeTest'
+    dependsOn 'pmdFunctionalTest'
+}
 //project.tasks['integration'].dependsOn flywayClean
 //project.tasks['integration'].dependsOn flywayMigrate

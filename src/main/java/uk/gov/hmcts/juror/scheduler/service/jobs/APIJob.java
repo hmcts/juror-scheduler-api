@@ -67,7 +67,7 @@ public class APIJob implements Job {
             final APIJobDetailsEntity apiJobDetailsEntity = jobService.getJob(jobKey);
             task = taskService.createTask(apiJobDetailsEntity);
 
-            LocalDateTime lastUpdated = task.getLastUpdatedAt();
+            final LocalDateTime lastUpdated = task.getLastUpdatedAt();
             transactionManager.commit(status);
 
             final RequestSpecification requestSpecification = setupRequest(apiJobDetailsEntity, task);
