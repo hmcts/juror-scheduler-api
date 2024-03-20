@@ -27,8 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -280,40 +282,20 @@ class SchedulerServiceImplTest {
     class IsEnabled {
         @Test
         @DisplayName("Is Enabled")
-        void positiveJobIsEnabled() throws SchedulerException {
-            try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
-                    .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.NORMAL);
-                assertTrue(schedulerService.isEnabled(JOB_KEY), "Job should be enabled");
-            }
+        void positiveJobIsEnabled() {
+            schedulerService = spy(schedulerService);
+            doReturn(false).when(schedulerService).isDisabled(JOB_KEY);
+            assertTrue(schedulerService.isEnabled(JOB_KEY), "Job should be enabled");
+            verify(schedulerService, times(1)).isDisabled(JOB_KEY);
         }
 
         @Test
         @DisplayName("Is Disabled")
         void negativeJobIsDisabled() throws SchedulerException {
-            try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
-                    .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.PAUSED);
-                assertFalse(schedulerService.isEnabled(JOB_KEY), "Job should not be enabled");
-            }
-        }
-
-        @Test
-        @DisplayName("Unexpected Exception")
-        void negativeUnexpectedException() throws SchedulerException {
-            Exception thrownException = new RuntimeException("Some Reason");
-            doThrow(thrownException).when(scheduler).getTriggerState(any());
-            InternalServerException exception = assertThrows(
-                InternalServerException.class,
-                () -> schedulerService.isEnabled(JOB_KEY)
-            );
-            assertEquals("Failed to get trigger state",
-                exception.getMessage(), "Message must match");
-            assertEquals(thrownException, exception.getCause(), "Cause must match");
+            schedulerService = spy(schedulerService);
+            doReturn(true).when(schedulerService).isDisabled(JOB_KEY);
+            assertFalse(schedulerService.isEnabled(JOB_KEY), "Job should be enabled");
+            verify(schedulerService, times(1)).isDisabled(JOB_KEY);
         }
     }
 
@@ -323,32 +305,28 @@ class SchedulerServiceImplTest {
         @Test
         @DisplayName("Is Enabled")
         void positiveJobIsEnabled() throws SchedulerException {
-            try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
-                    .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.NORMAL);
-                assertFalse(schedulerService.isDisabled(JOB_KEY), "Job should not be disabled");
-            }
+            when(scheduler.getJobDetail(any())).thenReturn(mock(JobDetail.class));
+            assertFalse(schedulerService.isDisabled(JOB_KEY), "Job should not be disabled");
         }
 
         @Test
         @DisplayName("Is Disabled")
         void negativeJobIsDisabled() throws SchedulerException {
-            try (MockedStatic<TriggerKey> TriggerKeyUtilities = Mockito.mockStatic(TriggerKey.class)) {
-                TriggerKey triggerKey = new TriggerKey(JOB_KEY);
-                TriggerKeyUtilities.when(() -> TriggerKey.triggerKey(JOB_KEY))
-                    .thenReturn(triggerKey);
-                when(scheduler.getTriggerState(triggerKey)).thenReturn(Trigger.TriggerState.PAUSED);
-                assertTrue(schedulerService.isDisabled(JOB_KEY), "Job should be disabled");
-            }
+            schedulerService = spy(schedulerService);
+            JobKey jobKey = mock(JobKey.class);
+            doReturn(jobKey).when(schedulerService).createJobKey(JOB_KEY);
+
+            when(scheduler.getJobDetail(any())).thenReturn(null);
+            assertTrue(schedulerService.isDisabled(JOB_KEY), "Job should not be disabled");
+            verify(schedulerService, times(1)).createJobKey(JOB_KEY);
+            verify(scheduler, times(1)).getJobDetail(jobKey);
         }
 
         @Test
         @DisplayName("Unexpected Exception")
         void negativeUnexpectedException() throws SchedulerException {
             Exception thrownException = new RuntimeException("Some Reason");
-            doThrow(thrownException).when(scheduler).getTriggerState(any());
+            doThrow(thrownException).when(scheduler).getJobDetail(any());
             InternalServerException exception = assertThrows(
                 InternalServerException.class,
                 () -> schedulerService.isEnabled(JOB_KEY)
@@ -385,66 +363,6 @@ class SchedulerServiceImplTest {
                 () -> schedulerService.unregister(JOB_KEY)
             );
             assertEquals("Failed to unregister Job",
-                exception.getMessage(), "Message must match");
-            assertEquals(thrownException, exception.getCause(), "Cause must match");
-        }
-    }
-
-    @DisplayName("public void disable(String jobKey)")
-    @Nested
-    class Disable {
-        @Test
-        @DisplayName("Successful")
-        void positiveDisableSuccess() throws SchedulerException {
-            try (MockedStatic<JobKey> jobKeyUtilities = Mockito.mockStatic(JobKey.class)) {
-                JobKey jobKeyObj = new JobKey(JOB_KEY);
-                jobKeyUtilities.when(() -> JobKey.jobKey(JOB_KEY))
-                    .thenReturn(jobKeyObj);
-                schedulerService.disable(JOB_KEY);
-                verify(scheduler, times(1)).pauseJob(jobKeyObj);
-            }
-        }
-
-        @Test
-        @DisplayName("Unexpected Exception")
-        void negativeUnexpectedException() throws SchedulerException {
-            Exception thrownException = new RuntimeException("Some Reason");
-            doThrow(thrownException).when(scheduler).pauseJob(any());
-            InternalServerException exception = assertThrows(
-                InternalServerException.class,
-                () -> schedulerService.disable(JOB_KEY)
-            );
-            assertEquals("Failed to disable Job '" + JOB_KEY + "'",
-                exception.getMessage(), "Message must match");
-            assertEquals(thrownException, exception.getCause(), "Cause must match");
-        }
-    }
-
-    @DisplayName("public void enable(String jobKey)")
-    @Nested
-    class Enable {
-        @Test
-        @DisplayName("Successful")
-        void positiveEnableSuccess() throws SchedulerException {
-            try (MockedStatic<JobKey> jobKeyUtilities = Mockito.mockStatic(JobKey.class)) {
-                JobKey jobKeyObj = new JobKey(JOB_KEY);
-                jobKeyUtilities.when(() -> JobKey.jobKey(JOB_KEY))
-                    .thenReturn(jobKeyObj);
-                schedulerService.enable(JOB_KEY);
-                verify(scheduler, times(1)).resumeJob(jobKeyObj);
-            }
-        }
-
-        @Test
-        @DisplayName("Unexpected Exception")
-        void negativeUnexpectedException() throws SchedulerException {
-            Exception thrownException = new RuntimeException("Some Reason");
-            doThrow(thrownException).when(scheduler).resumeJob(any());
-            InternalServerException exception = assertThrows(
-                InternalServerException.class,
-                () -> schedulerService.enable(JOB_KEY)
-            );
-            assertEquals("Failed to enable Job '" + JOB_KEY + "'",
                 exception.getMessage(), "Message must match");
             assertEquals(thrownException, exception.getCause(), "Cause must match");
         }

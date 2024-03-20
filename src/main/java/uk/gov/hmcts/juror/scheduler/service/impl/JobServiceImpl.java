@@ -73,26 +73,27 @@ public class JobServiceImpl implements JobService {
     @Override
     public void disable(String jobKey) {
         throwErrorIfJobDoesNotExist(jobKey);
-        if (!schedulerService.isScheduled(jobKey)) {
+        APIJobDetailsEntity jobDetails = getJob(jobKey);
+        if (jobDetails.getCronExpression() == null) {
             throw new BusinessRuleValidationException(new NotAScheduledJobError());
         }
         if (schedulerService.isDisabled(jobKey)) {
             throw new BusinessRuleValidationException(new JobAlreadyDisabledError());
         }
-        schedulerService.disable(jobKey);
+        schedulerService.unregister(jobKey);
     }
 
     @Override
     public void enable(String jobKey) {
         throwErrorIfJobDoesNotExist(jobKey);
-        if (!schedulerService.isScheduled(jobKey)) {
+        APIJobDetailsEntity jobDetails = getJob(jobKey);
+        if (jobDetails.getCronExpression() == null) {
             throw new BusinessRuleValidationException(new NotAScheduledJobError());
         }
         if (schedulerService.isEnabled(jobKey)) {
             throw new BusinessRuleValidationException(new JobAlreadyEnabledError());
         }
-
-        schedulerService.enable(jobKey);
+        schedulerService.register(jobDetails);
     }
 
     @Override
@@ -151,6 +152,10 @@ public class JobServiceImpl implements JobService {
             )));
 
         foundJobs.forEach(this::addEnableDisableProperty);
+
+        if (searchFilter.getEnabled() != null) {
+            foundJobs.removeIf(job -> job.getEnabled() != searchFilter.getEnabled());
+        }
 
         if (foundJobs.isEmpty()) {
             throw new NotFoundException("No Jobs found for the provided filter");

@@ -7,10 +7,6 @@ public interface SchedulerService {
 
     void unregister(String jobKey);
 
-    void disable(String jobKey);
-
-    void enable(String jobKey);
-
     void executeJob(String jobKey);
 
     boolean isScheduled(String jobKey);

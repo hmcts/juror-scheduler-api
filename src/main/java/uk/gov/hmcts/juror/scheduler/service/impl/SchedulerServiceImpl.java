@@ -122,7 +122,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     @Override
     public boolean isDisabled(String jobKey) {
         try {
-            return scheduler.getTriggerState(TriggerKey.triggerKey(jobKey)) == Trigger.TriggerState.PAUSED;
+            return scheduler.getJobDetail(createJobKey(jobKey)) == null;
         } catch (Exception e) {
             log.error("Failed to get trigger state", e);
             throw new InternalServerException("Failed to get trigger state", e);
@@ -139,29 +139,7 @@ public class SchedulerServiceImpl implements SchedulerService {
         }
     }
 
-    @Override
-    public void disable(String jobKey) {
-        try {
-            scheduler.pauseJob(createJobKey(jobKey));
-            log.info("Job '" + jobKey + "' successfully disabled");
-        } catch (Exception exception) {
-            log.error("Failed to disable Job '" + jobKey + "'", exception);
-            throw new InternalServerException("Failed to disable Job '" + jobKey + "'", exception);
-        }
-    }
-
-    @Override
-    public void enable(String jobKey) {
-        try {
-            scheduler.resumeJob(createJobKey(jobKey));
-            log.info("Job '" + jobKey + "' successfully enabled");
-        } catch (Exception exception) {
-            log.error("Failed to enable Job '" + jobKey + "'", exception);
-            throw new InternalServerException("Failed to enable Job '" + jobKey + "'", exception);
-        }
-    }
-
-    private JobKey createJobKey(String jobKey) {
+    JobKey createJobKey(String jobKey) {
         return JobKey.jobKey(jobKey);
     }
 
@@ -171,25 +149,25 @@ public class SchedulerServiceImpl implements SchedulerService {
         final JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("key", jobKey);
         return JobBuilder
-                .newJob(JobType.API.getJobProcessingClass())
-                .withIdentity(jobKey)
-                .setJobData(jobDataMap)
-                .build();
+            .newJob(JobType.API.getJobProcessingClass())
+            .withIdentity(jobKey)
+            .setJobData(jobDataMap)
+            .build();
     }
 
     private Trigger cronTriggerBuilder(APIJobDetailsEntity jobDetails) {
         return TriggerBuilder
-                .newTrigger()
-                .withIdentity(jobDetails.getKey())
-                .withSchedule(CronScheduleBuilder.cronSchedule(jobDetails.getCronExpression()))
-                .startNow()
-                .build();
+            .newTrigger()
+            .withIdentity(jobDetails.getKey())
+            .withSchedule(CronScheduleBuilder.cronSchedule(jobDetails.getCronExpression()))
+            .startNow()
+            .build();
     }
 
     private Trigger simpleTrigger(String jobKey) {
         return TriggerBuilder
-                .newTrigger()
-                .withIdentity(jobKey)
-                .build();
+            .newTrigger()
+            .withIdentity(jobKey)
+            .build();
     }
 }
