@@ -2,6 +2,7 @@ package uk.gov.hmcts.juror.scheduler.api.model.job.details.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
@@ -22,4 +23,7 @@ public class APIJobDetailsResponse extends APIJobDetails {
     @JsonProperty("last_updated_at")
     @Schema(description = "The time at which this Job was last updated")
     private LocalDateTime lastUpdatedAt;
+
+    @NotNull
+    private Boolean enabled;
 }

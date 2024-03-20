@@ -105,7 +105,7 @@ public class JobServiceImpl implements JobService {
     public APIJobDetailsEntity getJob(String key) {
         Optional<APIJobDetailsEntity> jobDetailsEntity = this.jobRepository.findById(key);
         if (jobDetailsEntity.isPresent()) {
-            return jobDetailsEntity.get();
+            return addEnableDisableProperty(jobDetailsEntity.get());
         }
         throw new NotFoundException("Job not found for key: " + key);
     }
@@ -150,6 +150,8 @@ public class JobServiceImpl implements JobService {
                 specifications
             )));
 
+        foundJobs.forEach(this::addEnableDisableProperty);
+
         if (foundJobs.isEmpty()) {
             throw new NotFoundException("No Jobs found for the provided filter");
         }
@@ -191,5 +193,10 @@ public class JobServiceImpl implements JobService {
             schedulerService.register(updatedJobDetailsEntity);
         }
         return updatedJobDetailsEntity;
+    }
+
+    private APIJobDetailsEntity addEnableDisableProperty(APIJobDetailsEntity apiJobDetailsEntity) {
+        apiJobDetailsEntity.setEnabled(schedulerService.isEnabled(apiJobDetailsEntity.getKey()));
+        return apiJobDetailsEntity;
     }
 }
