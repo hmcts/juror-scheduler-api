@@ -345,6 +345,7 @@ class APIJobTest {
         verify(entityManager, times(1)).detach(updatedTaskEntity);
         verify(taskService, never()).saveTask(any());
     }
+
     @Test
     @SuppressWarnings({
         "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
@@ -367,6 +368,35 @@ class APIJobTest {
         LocalDateTime now = LocalDateTime.now();
         taskEntity.setLastUpdatedAt(now);
         updatedTaskEntity.setLastUpdatedAt(now);
+        apiJob.execute(context);
+        verify(entityManager, never()).detach(updatedTaskEntity);
+        verify(taskService, times(1)).saveTask(any());
+    }
+
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveTaskNotUpdatedWhenApiRunningButValidationFailed() {
+        List<APIValidationEntity> validationEntityList = new ArrayList<>();
+        validationEntityList.add(new TestAPIJobDetailsEntity(APIValidationEntity.Result.builder().passed(true).build(),
+            ValidationType.STATUS_CODE));
+
+        AuthenticationDefaults authenticationDefaults = mock(AuthenticationDefaults.class);
+
+        APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
+            .key(JOB_KEY)
+            .method(APIMethod.GET)
+            .url("www.myurl.com")
+            .validations(validationEntityList)
+            .authenticationDefault(authenticationDefaults)
+            .build();
+        runStandardSetup(apiJobDetailsEntity);
+        LocalDateTime now = LocalDateTime.now();
+
+        taskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setStatus(Status.VALIDATION_FAILED);
         apiJob.execute(context);
         verify(entityManager, never()).detach(updatedTaskEntity);
         verify(taskService, times(1)).saveTask(any());
