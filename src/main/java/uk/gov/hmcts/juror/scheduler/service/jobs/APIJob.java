@@ -34,12 +34,12 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @DisallowConcurrentExecution
 public class APIJob implements Job {
-    private final JobService jobService;
-    private final TaskService taskService;
-    private final PlatformTransactionManager transactionManager;
-    private final DefaultTransactionDefinition transactionDefinition;
+    final JobService jobService;
+    final TaskService taskService;
+    final PlatformTransactionManager transactionManager;
+    final DefaultTransactionDefinition transactionDefinition;
     @PersistenceContext
-    private EntityManager entityManager;
+    EntityManager entityManager;
 
     @Autowired
     public APIJob(JobService jobService, TaskService taskService, PlatformTransactionManager transactionManager) {

@@ -23,6 +23,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
@@ -36,12 +38,14 @@ import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -204,6 +208,21 @@ class APIJobTest {
         verify(taskService, times(1)).saveTask(updatedTaskEntity);
     }
 
+
+    @Test
+    void constructorTest() {
+        APIJob apiJob = new APIJob(jobService, taskService, transactionManager);
+        assertNotNull(apiJob, "APIJob must be created");
+        assertThat(apiJob.jobService).isEqualTo(jobService);
+        assertThat(apiJob.taskService).isEqualTo(taskService);
+        assertThat(apiJob.transactionManager).isEqualTo(transactionManager);
+        DefaultTransactionDefinition expectedTransactionDefinition =
+            new DefaultTransactionDefinition();
+        expectedTransactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
+        expectedTransactionDefinition.setTimeout(-1);
+        assertThat(apiJob.transactionDefinition).isEqualTo(expectedTransactionDefinition);
+    }
+
     @Test
     @SuppressWarnings({
         "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
@@ -297,6 +316,60 @@ class APIJobTest {
         apiJob.execute(context);
 
         runStandardVerification(apiJobDetailsEntity);
+    }
+
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveTaskUpdatedWhenApiRunning() {
+        apiJob.entityManager = entityManager;
+        List<APIValidationEntity> validationEntityList = new ArrayList<>();
+        validationEntityList.add(new TestAPIJobDetailsEntity(APIValidationEntity.Result.builder().passed(true).build(),
+            ValidationType.STATUS_CODE));
+
+        AuthenticationDefaults authenticationDefaults = mock(AuthenticationDefaults.class);
+
+        APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
+            .key(JOB_KEY)
+            .method(APIMethod.GET)
+            .url("www.myurl.com")
+            .validations(validationEntityList)
+            .authenticationDefault(authenticationDefaults)
+            .build();
+        runStandardSetup(apiJobDetailsEntity);
+        LocalDateTime now = LocalDateTime.now();
+        taskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setLastUpdatedAt(now.plusSeconds(1));
+        apiJob.execute(context);
+        verify(entityManager, times(1)).detach(updatedTaskEntity);
+        verify(taskService, never()).saveTask(any());
+    }
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveTaskNotUpdatedWhenApiRunning() {
+        List<APIValidationEntity> validationEntityList = new ArrayList<>();
+        validationEntityList.add(new TestAPIJobDetailsEntity(APIValidationEntity.Result.builder().passed(true).build(),
+            ValidationType.STATUS_CODE));
+
+        AuthenticationDefaults authenticationDefaults = mock(AuthenticationDefaults.class);
+
+        APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
+            .key(JOB_KEY)
+            .method(APIMethod.GET)
+            .url("www.myurl.com")
+            .validations(validationEntityList)
+            .authenticationDefault(authenticationDefaults)
+            .build();
+        runStandardSetup(apiJobDetailsEntity);
+        LocalDateTime now = LocalDateTime.now();
+        taskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setLastUpdatedAt(now);
+        apiJob.execute(context);
+        verify(entityManager, never()).detach(updatedTaskEntity);
+        verify(taskService, times(1)).saveTask(any());
     }
 
     @Test
