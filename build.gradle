@@ -183,7 +183,7 @@ ext {
     logbackVersion = "1.5.3"
     springVersion = "3.2.3"
     jwtVersion = "0.12.5"
-    lombookVersion = "1.18.30"
+    lombookVersion = "1.18.32"
 }
 
 ext['snakeyaml.version'] = '2.0'
