@@ -4,6 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.http.Method;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -11,6 +13,10 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
@@ -21,19 +27,28 @@ import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @Slf4j
 @DisallowConcurrentExecution
 public class APIJob implements Job {
-    private final JobService jobService;
-    private final TaskService taskService;
+    final JobService jobService;
+    final TaskService taskService;
+    final PlatformTransactionManager transactionManager;
+    final DefaultTransactionDefinition transactionDefinition;
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Autowired
-    public APIJob(JobService jobService, TaskService taskService) {
+    public APIJob(JobService jobService, TaskService taskService, PlatformTransactionManager transactionManager) {
         this.jobService = jobService;
         this.taskService = taskService;
+        this.transactionManager = transactionManager;
+        transactionDefinition = new DefaultTransactionDefinition();
+        transactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
+        transactionDefinition.setTimeout(-1);
     }
 
     @Override
@@ -45,19 +60,35 @@ public class APIJob implements Job {
         String jobKey = null;
         TaskEntity task = null;
 
+        TransactionStatus status = transactionManager.getTransaction(transactionDefinition);
         try {
+
             jobKey = getJobKeyFromContext(context);
             final APIJobDetailsEntity apiJobDetailsEntity = jobService.getJob(jobKey);
             task = taskService.createTask(apiJobDetailsEntity);
 
+            final LocalDateTime lastUpdated = task.getLastUpdatedAt();
+            transactionManager.commit(status);
 
             final RequestSpecification requestSpecification = setupRequest(apiJobDetailsEntity, task);
             final Response response = triggerRequest(requestSpecification, apiJobDetailsEntity);
 
+            status = transactionManager.getTransaction(transactionDefinition);
+            task = taskService.getLatestTask(jobKey, task.getTaskId());
+
+            boolean hasTaskBeenUpdated = lastUpdated != null && lastUpdated.isBefore(task.getLastUpdatedAt());
+
             //This method will automatically update the task with  the updated status / message
             validateResponse(response, apiJobDetailsEntity, task);
 
-            task = taskService.saveTask(task);
+
+            //If the task has not been updated OR task has been updated but validation has failed, then save the task
+            if (!hasTaskBeenUpdated || task.getStatus() != Status.VALIDATION_PASSED) {
+                task = taskService.saveTask(task);
+            } else {
+                entityManager.detach(task);//Detach so it does not get updated
+                log.info("Task was updated while processing, not updating the task");
+            }
             log.info("Complete task for Job: " + jobKey);
         } catch (Exception exception) {
             log.error("Failed to run Job" + (jobKey == null ? "" : " with Job key: " + jobKey), exception);
@@ -66,14 +97,16 @@ public class APIJob implements Job {
                 taskService.saveTask(task);
             }
             context.setResult(
-                    JobResult.builder()
-                            .passed(false)
-                            .error(JobResult.ErrorDetails.builder()
-                            .message(exception.getMessage())
-                                    .throwable(exception)
-                                    .build())
-                            .build()
+                JobResult.builder()
+                    .passed(false)
+                    .error(JobResult.ErrorDetails.builder()
+                        .message(exception.getMessage())
+                        .throwable(exception)
+                        .build())
+                    .build()
             );
+        } finally {
+            transactionManager.commit(status);
         }
     }
 
@@ -100,7 +133,7 @@ public class APIJob implements Job {
 
         if (apiJobDetailsEntity.getAuthenticationDefault() != null) {
             apiJobDetailsEntity.getAuthenticationDefault().addAuthentication(apiJobDetailsEntity,
-                    requestSpecification);
+                requestSpecification);
         }
         return requestSpecification;
     }
@@ -112,7 +145,7 @@ public class APIJob implements Job {
         apiJobDetailsEntity.getValidations().forEach(validation -> {
             APIValidationEntity.Result result = validation.validate(response, apiJobDetailsEntity);
             log.trace("Validating: " + validation.getType() + " Result: " + result.isPassed() + " - "
-                    + result.getMessage());
+                + result.getMessage());
             if (result.isPassed()) {
                 //No need to get message if passed
                 return;
@@ -129,7 +162,7 @@ public class APIJob implements Job {
     private Response triggerRequest(RequestSpecification requestSpecification,
                                     APIJobDetailsEntity apiJobDetailsEntity) {
         return requestSpecification.request(
-                Method.valueOf(apiJobDetailsEntity.getMethod().name()),
-                apiJobDetailsEntity.getUrl());
+            Method.valueOf(apiJobDetailsEntity.getMethod().name()),
+            apiJobDetailsEntity.getUrl());
     }
 }

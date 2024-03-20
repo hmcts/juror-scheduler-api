@@ -52,7 +52,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskEntity saveTask(TaskEntity task) {
         TaskEntity actionTaskEntity = this.actionService.taskUpdated(task);
-        return taskRepository.save(actionTaskEntity);
+        return taskRepository.saveAndFlush(actionTaskEntity);
     }
 
     @Override
