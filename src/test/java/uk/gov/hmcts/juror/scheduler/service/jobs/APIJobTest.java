@@ -6,6 +6,7 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestLogSpecification;
 import io.restassured.specification.RequestSpecification;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
@@ -74,6 +76,10 @@ class APIJobTest {
 
     @MockBean
     private EntityManager entityManager;
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+    @MockBean
+    private PlatformTransactionManager transactionManager;
 
     @MockBean
     private TaskService taskService;
@@ -92,6 +98,7 @@ class APIJobTest {
     private JobExecutionContext context;
 
     private TaskEntity taskEntity;
+    private TaskEntity updatedTaskEntity;
 
     private static final String JOB_KEY = "ABC123";
 
@@ -131,6 +138,11 @@ class APIJobTest {
         taskEntity.setTaskId(1L);
         taskEntity.setStatus(Status.PENDING);
         when(taskService.createTask(apiJobDetailsEntity)).thenReturn(taskEntity);
+
+
+        updatedTaskEntity = new TaskEntity();
+        when(taskService.getLatestTask(JOB_KEY, taskEntity.getTaskId())).thenReturn(updatedTaskEntity);
+        when(taskService.saveTask(updatedTaskEntity)).thenReturn(updatedTaskEntity);
     }
 
 
@@ -176,12 +188,12 @@ class APIJobTest {
         assertEquals(passed.get()
                 ? Status.VALIDATION_PASSED
                 : Status.VALIDATION_FAILED,
-            taskEntity.getStatus(), "Status must match");
+            updatedTaskEntity.getStatus(), "Status must match");
 
         if (passed.get()) {
-            assertNull(taskEntity.getMessage(), "Message should be null");
+            assertNull(updatedTaskEntity.getMessage(), "Message should be null");
         } else {
-            assertEquals(expectedMessageBuilder.toString(), taskEntity.getMessage(),
+            assertEquals(expectedMessageBuilder.toString(), updatedTaskEntity.getMessage(),
                 "Message must match");
         }
 
@@ -189,7 +201,7 @@ class APIJobTest {
         //Validate Request was sent correctly
         verify(requestSpecification, times(1))
             .request(Method.valueOf(apiJobDetailsEntity.getMethod().name()), apiJobDetailsEntity.getUrl());
-        verify(taskService, times(1)).saveTask(taskEntity);
+        verify(taskService, times(1)).saveTask(updatedTaskEntity);
     }
 
     @Test
@@ -390,7 +402,7 @@ class APIJobTest {
             errorDetails.getMessage(), "Expect correct message");
         assertEquals(cause, errorDetails.getThrowable(), "Expect correct throwable");
 
-        assertEquals(Status.FAILED_UNEXPECTED_EXCEPTION, taskEntity.getStatus(),"Status must match");
+        assertEquals(Status.FAILED_UNEXPECTED_EXCEPTION, taskEntity.getStatus(), "Status must match");
     }
 
     @Test

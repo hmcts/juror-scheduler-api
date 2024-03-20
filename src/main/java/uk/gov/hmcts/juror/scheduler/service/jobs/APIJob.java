@@ -37,7 +37,7 @@ public class APIJob implements Job {
     private final JobService jobService;
     private final TaskService taskService;
     private final PlatformTransactionManager transactionManager;
-    DefaultTransactionDefinition transactionDefinition;
+    private final DefaultTransactionDefinition transactionDefinition;
     @PersistenceContext
     private EntityManager entityManager;
 
