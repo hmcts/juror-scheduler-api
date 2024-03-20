@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -53,6 +54,9 @@ public class APIJobDetailsEntity {
     private String cronExpression;
     @NotNull
     private APIMethod method;
+
+    @Transient
+    private Boolean enabled;
 
     @NotNull
     @Column(length = APIConstants.DEFAULT_MAX_LENGTH_LONG)

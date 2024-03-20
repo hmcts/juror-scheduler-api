@@ -36,6 +36,7 @@ public abstract class JobDetailsMapper {
     @Mapping(target = "tags", source = "information.tags")
     @Mapping(target = "name", source = "information.name")
     @Mapping(target = "description", source = "information.description")
+    @Mapping(target = "enabled", ignore = true)
     public abstract APIJobDetailsEntity toAPIJobDetailsEntity(APIJobDetails apiJobDetails);
 
 
