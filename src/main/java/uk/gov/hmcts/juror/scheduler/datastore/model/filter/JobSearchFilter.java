@@ -15,4 +15,6 @@ public class JobSearchFilter {
     private String jobKey;
 
     private Set<@Length(max = APIConstants.DEFAULT_MAX_LENGTH_SHORT) @NotBlank String> tags;
+
+    private Boolean enabled;
 }
