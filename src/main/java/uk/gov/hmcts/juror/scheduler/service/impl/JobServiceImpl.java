@@ -73,26 +73,27 @@ public class JobServiceImpl implements JobService {
     @Override
     public void disable(String jobKey) {
         throwErrorIfJobDoesNotExist(jobKey);
-        if (!schedulerService.isScheduled(jobKey)) {
+        APIJobDetailsEntity jobDetails = getJob(jobKey);
+        if (jobDetails.getCronExpression() == null) {
             throw new BusinessRuleValidationException(new NotAScheduledJobError());
         }
         if (schedulerService.isDisabled(jobKey)) {
             throw new BusinessRuleValidationException(new JobAlreadyDisabledError());
         }
-        schedulerService.disable(jobKey);
+        schedulerService.unregister(jobKey);
     }
 
     @Override
     public void enable(String jobKey) {
         throwErrorIfJobDoesNotExist(jobKey);
-        if (!schedulerService.isScheduled(jobKey)) {
+        APIJobDetailsEntity jobDetails = getJob(jobKey);
+        if (jobDetails.getCronExpression() == null) {
             throw new BusinessRuleValidationException(new NotAScheduledJobError());
         }
         if (schedulerService.isEnabled(jobKey)) {
             throw new BusinessRuleValidationException(new JobAlreadyEnabledError());
         }
-
-        schedulerService.enable(jobKey);
+        schedulerService.register(jobDetails);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class JobServiceImpl implements JobService {
     public APIJobDetailsEntity getJob(String key) {
         Optional<APIJobDetailsEntity> jobDetailsEntity = this.jobRepository.findById(key);
         if (jobDetailsEntity.isPresent()) {
-            return jobDetailsEntity.get();
+            return addEnableDisableProperty(jobDetailsEntity.get());
         }
         throw new NotFoundException("Job not found for key: " + key);
     }
@@ -150,6 +151,12 @@ public class JobServiceImpl implements JobService {
                 specifications
             )));
 
+        foundJobs.forEach(this::addEnableDisableProperty);
+
+        if (searchFilter.getEnabled() != null) {
+            foundJobs.removeIf(job -> !searchFilter.getEnabled().equals(job.getEnabled()));
+        }
+
         if (foundJobs.isEmpty()) {
             throw new NotFoundException("No Jobs found for the provided filter");
         }
@@ -191,5 +198,10 @@ public class JobServiceImpl implements JobService {
             schedulerService.register(updatedJobDetailsEntity);
         }
         return updatedJobDetailsEntity;
+    }
+
+    private APIJobDetailsEntity addEnableDisableProperty(APIJobDetailsEntity apiJobDetailsEntity) {
+        apiJobDetailsEntity.setEnabled(schedulerService.isEnabled(apiJobDetailsEntity.getKey()));
+        return apiJobDetailsEntity;
     }
 }

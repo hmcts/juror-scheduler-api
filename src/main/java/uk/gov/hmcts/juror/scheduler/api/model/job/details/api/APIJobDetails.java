@@ -39,21 +39,21 @@ public class APIJobDetails extends JobDetails {
     @Schema(description = "All the headers that should be included when making the API Request")
     @Size(min = 1, max = 100)
     private Map<
-            @NotNull @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String,
-            @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String> headers;
+        @NotNull @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String,
+        @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG) String> headers;
 
     @Schema(description = "If present an authentication token will automatically be added to your API request based "
-            + "on the selected system.")
+        + "on the selected system.")
     @JsonProperty("authentication_default")
     private AuthenticationDefaults authenticationDefault;
 
     @Schema(description = "The payload to include along with the request (Note this should not be present for GET "
-            + "requests)")
+        + "requests)")
     @Length(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_LONG)
     private String payload;
 
     @Schema(description = "A list of validations that should be applied to the response after the API request has "
-            + "been made. If any of these fail the task will fail.")
+        + "been made. If any of these fail the task will fail.")
     @NotEmpty
     @Size(min = 1, max = APIConstants.DEFAULT_MAX_LENGTH_SHORT)
     private List<@Valid ? extends APIValidation> validations;

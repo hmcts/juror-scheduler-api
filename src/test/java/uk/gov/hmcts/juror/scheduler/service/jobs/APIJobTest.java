@@ -5,6 +5,8 @@ import io.restassured.http.Method;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestLogSpecification;
 import io.restassured.specification.RequestSpecification;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIValidationEntity;
@@ -33,12 +38,14 @@ import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -72,6 +79,13 @@ class APIJobTest {
     private JobService jobService;
 
     @MockBean
+    private EntityManager entityManager;
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
+    @MockBean
+    private PlatformTransactionManager transactionManager;
+
+    @MockBean
     private TaskService taskService;
 
     @Autowired
@@ -88,6 +102,7 @@ class APIJobTest {
     private JobExecutionContext context;
 
     private TaskEntity taskEntity;
+    private TaskEntity updatedTaskEntity;
 
     private static final String JOB_KEY = "ABC123";
 
@@ -127,6 +142,11 @@ class APIJobTest {
         taskEntity.setTaskId(1L);
         taskEntity.setStatus(Status.PENDING);
         when(taskService.createTask(apiJobDetailsEntity)).thenReturn(taskEntity);
+
+
+        updatedTaskEntity = new TaskEntity();
+        when(taskService.getLatestTask(JOB_KEY, taskEntity.getTaskId())).thenReturn(updatedTaskEntity);
+        when(taskService.saveTask(updatedTaskEntity)).thenReturn(updatedTaskEntity);
     }
 
 
@@ -172,12 +192,12 @@ class APIJobTest {
         assertEquals(passed.get()
                 ? Status.VALIDATION_PASSED
                 : Status.VALIDATION_FAILED,
-            taskEntity.getStatus(), "Status must match");
+            updatedTaskEntity.getStatus(), "Status must match");
 
         if (passed.get()) {
-            assertNull(taskEntity.getMessage(), "Message should be null");
+            assertNull(updatedTaskEntity.getMessage(), "Message should be null");
         } else {
-            assertEquals(expectedMessageBuilder.toString(), taskEntity.getMessage(),
+            assertEquals(expectedMessageBuilder.toString(), updatedTaskEntity.getMessage(),
                 "Message must match");
         }
 
@@ -185,7 +205,22 @@ class APIJobTest {
         //Validate Request was sent correctly
         verify(requestSpecification, times(1))
             .request(Method.valueOf(apiJobDetailsEntity.getMethod().name()), apiJobDetailsEntity.getUrl());
-        verify(taskService, times(1)).saveTask(taskEntity);
+        verify(taskService, times(1)).saveTask(updatedTaskEntity);
+    }
+
+
+    @Test
+    void constructorTest() {
+        APIJob apiJob = new APIJob(jobService, taskService, transactionManager);
+        assertNotNull(apiJob, "APIJob must be created");
+        assertThat(apiJob.jobService).isEqualTo(jobService);
+        assertThat(apiJob.taskService).isEqualTo(taskService);
+        assertThat(apiJob.transactionManager).isEqualTo(transactionManager);
+        DefaultTransactionDefinition expectedTransactionDefinition =
+            new DefaultTransactionDefinition();
+        expectedTransactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
+        expectedTransactionDefinition.setTimeout(-1);
+        assertThat(apiJob.transactionDefinition).isEqualTo(expectedTransactionDefinition);
     }
 
     @Test
@@ -281,6 +316,90 @@ class APIJobTest {
         apiJob.execute(context);
 
         runStandardVerification(apiJobDetailsEntity);
+    }
+
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveTaskUpdatedWhenApiRunning() {
+        apiJob.entityManager = entityManager;
+        List<APIValidationEntity> validationEntityList = new ArrayList<>();
+        validationEntityList.add(new TestAPIJobDetailsEntity(APIValidationEntity.Result.builder().passed(true).build(),
+            ValidationType.STATUS_CODE));
+
+        AuthenticationDefaults authenticationDefaults = mock(AuthenticationDefaults.class);
+
+        APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
+            .key(JOB_KEY)
+            .method(APIMethod.GET)
+            .url("www.myurl.com")
+            .validations(validationEntityList)
+            .authenticationDefault(authenticationDefaults)
+            .build();
+        runStandardSetup(apiJobDetailsEntity);
+        LocalDateTime now = LocalDateTime.now();
+        taskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setLastUpdatedAt(now.plusSeconds(1));
+        apiJob.execute(context);
+        verify(entityManager, times(1)).detach(updatedTaskEntity);
+        verify(taskService, never()).saveTask(any());
+    }
+
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveTaskNotUpdatedWhenApiRunning() {
+        List<APIValidationEntity> validationEntityList = new ArrayList<>();
+        validationEntityList.add(new TestAPIJobDetailsEntity(APIValidationEntity.Result.builder().passed(true).build(),
+            ValidationType.STATUS_CODE));
+
+        AuthenticationDefaults authenticationDefaults = mock(AuthenticationDefaults.class);
+
+        APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
+            .key(JOB_KEY)
+            .method(APIMethod.GET)
+            .url("www.myurl.com")
+            .validations(validationEntityList)
+            .authenticationDefault(authenticationDefaults)
+            .build();
+        runStandardSetup(apiJobDetailsEntity);
+        LocalDateTime now = LocalDateTime.now();
+        taskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setLastUpdatedAt(now);
+        apiJob.execute(context);
+        verify(entityManager, never()).detach(updatedTaskEntity);
+        verify(taskService, times(1)).saveTask(any());
+    }
+
+    @Test
+    @SuppressWarnings({
+        "PMD.JUnitTestsShouldIncludeAssert" //False positive done via inheritance
+    })
+    void positiveTaskNotUpdatedWhenApiRunningButValidationFailed() {
+        List<APIValidationEntity> validationEntityList = new ArrayList<>();
+        validationEntityList.add(new TestAPIJobDetailsEntity(APIValidationEntity.Result.builder().passed(true).build(),
+            ValidationType.STATUS_CODE));
+
+        AuthenticationDefaults authenticationDefaults = mock(AuthenticationDefaults.class);
+
+        APIJobDetailsEntity apiJobDetailsEntity = APIJobDetailsEntity.builder()
+            .key(JOB_KEY)
+            .method(APIMethod.GET)
+            .url("www.myurl.com")
+            .validations(validationEntityList)
+            .authenticationDefault(authenticationDefaults)
+            .build();
+        runStandardSetup(apiJobDetailsEntity);
+        LocalDateTime now = LocalDateTime.now();
+
+        taskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setLastUpdatedAt(now);
+        updatedTaskEntity.setStatus(Status.VALIDATION_FAILED);
+        apiJob.execute(context);
+        verify(entityManager, never()).detach(updatedTaskEntity);
+        verify(taskService, times(1)).saveTask(any());
     }
 
     @Test
@@ -386,7 +505,7 @@ class APIJobTest {
             errorDetails.getMessage(), "Expect correct message");
         assertEquals(cause, errorDetails.getThrowable(), "Expect correct throwable");
 
-        assertEquals(Status.FAILED_UNEXPECTED_EXCEPTION, taskEntity.getStatus(),"Status must match");
+        assertEquals(Status.FAILED_UNEXPECTED_EXCEPTION, taskEntity.getStatus(), "Status must match");
     }
 
     @Test

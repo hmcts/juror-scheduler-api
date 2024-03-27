@@ -116,8 +116,11 @@ public class JobsController {
             description = "The job to search for on. (If none provided all Jobs will be searched)")
         @Pattern(regexp = APIConstants.JOB_KEY_REGEX) @Valid String jobKey,
         @RequestParam(name = "tag", required = false) @Schema(name = "tag", description = "The tags to filter by")
-        @Valid Set<@Length(max = APIConstants.DEFAULT_MAX_LENGTH_SHORT) @NotBlank String> tags) {
+        @Valid Set<@Length(max = APIConstants.DEFAULT_MAX_LENGTH_SHORT) @NotBlank String> tags,
+        @RequestParam(name = "enabled", required = false) @Schema(name = "enabled", description = "The enabled status"
+            + " to filter on")
+        Boolean enabled) {
         return ResponseEntity.ok(jobDetailsMapper.toJobDetailsJobDetailsList(
-            jobService.getJobs(JobSearchFilter.builder().jobKey(jobKey).tags(tags).build())));
+            jobService.getJobs(JobSearchFilter.builder().jobKey(jobKey).tags(tags).enabled(enabled).build())));
     }
 }

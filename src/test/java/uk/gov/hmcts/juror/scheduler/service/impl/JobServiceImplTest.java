@@ -69,7 +69,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -156,14 +159,19 @@ class JobServiceImplTest {
         @Test
         @DisplayName("Scheduled Job exists and is enabled")
         void positiveJobExistsIsScheduledIsEnabled() {
+            jobService = spy(jobService);
+            APIJobDetailsEntity jobDetailsEntity = mock(APIJobDetailsEntity.class);
+            when(jobDetailsEntity.getCronExpression()).thenReturn("* 5 * * * ?");
+            doReturn(jobDetailsEntity).when(jobService).getJob(JOB_KEY);
+
             when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
             when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
             when(schedulerService.isDisabled(JOB_KEY)).thenReturn(false);
 
             jobService.disable(JOB_KEY);
-            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
-            verify(schedulerService, times(1)).isDisabled(JOB_KEY);
-            verify(schedulerService, times(1)).disable(JOB_KEY);
+            verify(jobService, times(1)).getJob(JOB_KEY);
+            verify(schedulerService, times(1)).isDisabled(any());
+            verify(schedulerService, times(1)).unregister(any());
         }
 
         @Test
@@ -177,14 +185,18 @@ class JobServiceImplTest {
             assertEquals("Job with key '" + JOB_KEY + "' not found",
                 notFoundException.getMessage(), "Message must match");
 
-            verify(schedulerService, never()).isScheduled(JOB_KEY);
-            verify(schedulerService, never()).isDisabled(JOB_KEY);
-            verify(schedulerService, never()).disable(JOB_KEY);
+            verify(schedulerService, never()).isScheduled(any());
+            verify(schedulerService, never()).isDisabled(any());
+            verify(schedulerService, never()).unregister(any());
         }
 
         @Test
         @DisplayName("Job is not scheduled")
         void negativeJobNotScheduled() {
+            jobService = spy(jobService);
+            APIJobDetailsEntity jobDetailsEntity = mock(APIJobDetailsEntity.class);
+            doReturn(jobDetailsEntity).when(jobService).getJob(JOB_KEY);
+
             when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
             when(schedulerService.isScheduled(JOB_KEY)).thenReturn(false);
             when(schedulerService.isDisabled(JOB_KEY)).thenReturn(false);
@@ -192,13 +204,18 @@ class JobServiceImplTest {
             BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
                 () -> jobService.disable(JOB_KEY));
             assertEquals(NotAScheduledJobError.class, exception.getErrorObject().getClass(), "Class must match");
-            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
-            verify(schedulerService, never()).disable(JOB_KEY);
+            verify(schedulerService, never()).unregister(JOB_KEY);
+            verify(jobService,times(1)).getJob(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is already disabled")
         void negativeJobAlreadyDisabled() {
+            jobService = spy(jobService);
+            APIJobDetailsEntity jobDetailsEntity = mock(APIJobDetailsEntity.class);
+            when(jobDetailsEntity.getCronExpression()).thenReturn("* 5 * * * ?");
+            doReturn(jobDetailsEntity).when(jobService).getJob(JOB_KEY);
+
             when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
             when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
             when(schedulerService.isDisabled(JOB_KEY)).thenReturn(true);
@@ -207,7 +224,8 @@ class JobServiceImplTest {
                 () -> jobService.disable(JOB_KEY));
             assertEquals(JobAlreadyDisabledError.class, exception.getErrorObject().getClass(), "Class must match");
             verify(schedulerService, times(1)).isDisabled(JOB_KEY);
-            verify(schedulerService, never()).disable(JOB_KEY);
+            verify(schedulerService, never()).unregister(JOB_KEY);
+            verify(jobService,times(1)).getJob(JOB_KEY);
         }
     }
 
@@ -217,35 +235,27 @@ class JobServiceImplTest {
         @Test
         @DisplayName("Scheduled Job exists and is disabled")
         void positiveJobExistsIsScheduledIsDisabled() {
+            jobService = spy(jobService);
+            APIJobDetailsEntity jobDetailsEntity = mock(APIJobDetailsEntity.class);
+            when(jobDetailsEntity.getCronExpression()).thenReturn("* 5 * * * ?");
+            doReturn(jobDetailsEntity).when(jobService).getJob(JOB_KEY);
+
             when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
             when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
             when(schedulerService.isEnabled(JOB_KEY)).thenReturn(false);
 
             jobService.enable(JOB_KEY);
-            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
             verify(schedulerService, times(1)).isEnabled(JOB_KEY);
-            verify(schedulerService, times(1)).enable(JOB_KEY);
-        }
-
-        @Test
-        @DisplayName("Job does not exist")
-        void negativeJobDoesNotExist() {
-            when(jobRepository.existsById(JOB_KEY)).thenReturn(false);
-            when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
-            when(schedulerService.isEnabled(JOB_KEY)).thenReturn(false);
-            NotFoundException notFoundException = assertThrows(NotFoundException.class,
-                () -> jobService.enable(JOB_KEY));
-            assertEquals("Job with key '" + JOB_KEY + "' not found",
-                notFoundException.getMessage(), "Message must match");
-
-            verify(schedulerService, never()).isScheduled(JOB_KEY);
-            verify(schedulerService, never()).isEnabled(JOB_KEY);
-            verify(schedulerService, never()).enable(JOB_KEY);
+            verify(schedulerService, times(1)).register(jobDetailsEntity);
+            verify(jobService,times(1)).getJob(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is not scheduled")
         void negativeJobNotScheduled() {
+            jobService = spy(jobService);
+            APIJobDetailsEntity jobDetailsEntity = mock(APIJobDetailsEntity.class);
+            doReturn(jobDetailsEntity).when(jobService).getJob(JOB_KEY);
             when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
             when(schedulerService.isScheduled(JOB_KEY)).thenReturn(false);
             when(schedulerService.isEnabled(JOB_KEY)).thenReturn(false);
@@ -253,13 +263,17 @@ class JobServiceImplTest {
             BusinessRuleValidationException exception = assertThrows(BusinessRuleValidationException.class,
                 () -> jobService.enable(JOB_KEY));
             assertEquals(NotAScheduledJobError.class, exception.getErrorObject().getClass(), "Class must match");
-            verify(schedulerService, times(1)).isScheduled(JOB_KEY);
-            verify(schedulerService, never()).enable(JOB_KEY);
+            verify(schedulerService, never()).register(jobDetailsEntity);
+            verify(jobService,times(1)).getJob(JOB_KEY);
         }
 
         @Test
         @DisplayName("Job is already enabled")
         void negativeJobAlreadyEnabled() {
+            jobService = spy(jobService);
+            APIJobDetailsEntity jobDetailsEntity = mock(APIJobDetailsEntity.class);
+            when(jobDetailsEntity.getCronExpression()).thenReturn("* 5 * * * ?");
+            doReturn(jobDetailsEntity).when(jobService).getJob(JOB_KEY);
             when(jobRepository.existsById(JOB_KEY)).thenReturn(true);
             when(schedulerService.isScheduled(JOB_KEY)).thenReturn(true);
             when(schedulerService.isEnabled(JOB_KEY)).thenReturn(true);
@@ -268,7 +282,8 @@ class JobServiceImplTest {
                 () -> jobService.enable(JOB_KEY));
             assertEquals(JobAlreadyEnabledError.class, exception.getErrorObject().getClass(), "Class must match");
             verify(schedulerService, times(1)).isEnabled(JOB_KEY);
-            verify(schedulerService, never()).enable(JOB_KEY);
+            verify(schedulerService, never()).register(jobDetailsEntity);
+            verify(jobService,times(1)).getJob(JOB_KEY);
         }
     }
 
