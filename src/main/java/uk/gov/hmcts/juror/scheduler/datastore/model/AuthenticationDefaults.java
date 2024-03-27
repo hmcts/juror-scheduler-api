@@ -123,6 +123,7 @@ public enum AuthenticationDefaults {
                 final Map<String, Object> claims = new ConcurrentHashMap<>();
                 claims.put("login", "AUTO");   //cronuser
                 claims.put("userLevel", "1");
+                claims.put("userType", "SYSTEM");
                 claims.put("daysToExpire", 6);
                 claims.put("passwordWarning", true);
 
