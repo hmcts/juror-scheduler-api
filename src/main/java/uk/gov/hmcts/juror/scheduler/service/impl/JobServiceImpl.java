@@ -154,7 +154,7 @@ public class JobServiceImpl implements JobService {
         foundJobs.forEach(this::addEnableDisableProperty);
 
         if (searchFilter.getEnabled() != null) {
-            foundJobs.removeIf(job -> job.getEnabled() != searchFilter.getEnabled());
+            foundJobs.removeIf(job -> !searchFilter.getEnabled().equals(job.getEnabled()));
         }
 
         if (foundJobs.isEmpty()) {
