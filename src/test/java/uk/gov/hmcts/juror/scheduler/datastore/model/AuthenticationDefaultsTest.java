@@ -113,9 +113,10 @@ class AuthenticationDefaultsTest extends EnumTest<AuthenticationDefaults> {
         Map<String, Object> claims = claimsCaptor.getValue();
         assertEquals("AUTO", claims.get("login"), "Login must match");
         assertEquals("1", claims.get("userLevel"), "User level must match");
+        assertEquals("SYSTEM", claims.get("userType"), "User type must match");
         assertEquals(6, claims.get("daysToExpire"), "Days to expire must match");
         assertEquals(true, claims.get("passwordWarning"), "Password warning must match");
-        assertEquals(5, claims.size(), "Claim size must match");
+        assertEquals(6, claims.size(), "Claim size must match");
 
         Object staffObj = claims.get("staff");
         if (staffObj instanceof Map staffMap) {
