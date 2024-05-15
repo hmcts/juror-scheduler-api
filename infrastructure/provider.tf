@@ -9,5 +9,5 @@ provider "azurerm" {
   subscription_id            = var.aks_subscription_id
 }
 
-provider "random" {    
+provider "random" {
 }

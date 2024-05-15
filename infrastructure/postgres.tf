@@ -9,15 +9,15 @@ module "postgresql_flexible" {
     azurerm.postgres_network = azurerm.postgres_network
   }
 
-  source               = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
-  env                  = var.env
-  product              = var.product
-  resource_group_name  = local.rg_name
-  component            = var.component
-  business_area        = "sds"
-  location             = var.location
-  pgsql_sku            = "GP_Standard_D2s_v3"
-  pgsql_storage_mb     = 65536
+  source              = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
+  env                 = var.env
+  product             = var.product
+  resource_group_name = local.rg_name
+  component           = var.component
+  business_area       = "sds"
+  location            = var.location
+  pgsql_sku           = "GP_Standard_D2s_v3"
+  pgsql_storage_mb    = 65536
 
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
@@ -73,4 +73,21 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   name         = "${var.component}-POSTGRES-DATABASE"
   value        = local.db_name
   key_vault_id = data.azurerm_key_vault.key_vault.id
+}
+
+data "azurerm_client_config" "current" {}
+
+data "azuread_group" "dts_jit_access_juror_db_admin" {
+  display_name = "DTS JIT Access Juror DB Admin"
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "jit" {
+  server_name         = "juror-scheduler-api-${var.env}"
+  resource_group_name = local.rg_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azuread_group.dts_jit_access_juror_db_admin.object_id
+  principal_name      = data.azuread_group.dts_jit_access_juror_db_admin.display_name
+  principal_type      = "Group"
+
+  depends_on = [module.postgresql_flexible]
 }
