@@ -1,2 +1,2 @@
 # juror-scheduler-api
-Juror Scheduler API 
+Juror Scheduler API.
