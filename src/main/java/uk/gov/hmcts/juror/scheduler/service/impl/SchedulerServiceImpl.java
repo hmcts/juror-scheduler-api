@@ -17,6 +17,7 @@ import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.JobType;
 import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
@@ -56,6 +57,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
+    @Transactional
     public void register(APIJobDetailsEntity jobDetails) {
         if (jobDetails.getCronExpression() != null) {
             scheduleCronJob(jobDetails);
@@ -130,6 +132,7 @@ public class SchedulerServiceImpl implements SchedulerService {
     }
 
     @Override
+    @Transactional
     public void unregister(String jobKey) {
         try {
             scheduler.deleteJob(createJobKey(jobKey));
