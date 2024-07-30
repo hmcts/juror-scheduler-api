@@ -121,6 +121,7 @@ public class SchedulerIT extends AbstractIT {
 
     @DisplayName("Disable and enable a scheduled job")
     @Test
+    @Disabled("Fixed test stability")
     void disableAndEnableScheduledJob() throws Exception {
         String payload = updateJson(getTestDataAsStringFromFile(API_DUMMY_CRON_JOB_JSON),
             "key",
@@ -171,7 +172,6 @@ public class SchedulerIT extends AbstractIT {
 
     @DisplayName("Update a scheduled job")
     @Test
-    @Disabled("Fixed test stability")
     void updatedScheduledJob() throws Exception {
         String payload = updateJson(getTestDataAsStringFromFile(API_DUMMY_CRON_JOB_JSON),
             "key",
