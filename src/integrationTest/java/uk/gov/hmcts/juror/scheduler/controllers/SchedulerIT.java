@@ -132,17 +132,14 @@ public class SchedulerIT extends AbstractIT {
 
         String url = "/job/" + uniqueJobKey;
         int tasksCounter;
-        int counter = 0; // this is required to ensure don't have an infinite loop
         MvcResult resultBefore;
-        do {
-            resultBefore = mockMvcPerform(url + URL_TASKS, jwtAdmin, GET, "")
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andReturn();
-            tasksCounter = JsonPath.read(resultBefore.getResponse().getContentAsString(), "$.length()");
-            counter++;
-        } while (tasksCounter == 0 && counter < 100);
+
+        resultBefore = mockMvcPerform(url + URL_TASKS, jwtAdmin, GET, "")
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andReturn();
+        tasksCounter = JsonPath.read(resultBefore.getResponse().getContentAsString(), "$.length()");
 
         // assert that tasks have been executed
         Assertions.assertTrue(tasksCounter > 0);
@@ -165,7 +162,7 @@ public class SchedulerIT extends AbstractIT {
             .andExpect(status().isAccepted());
 
         //Give job a few seconds to execute
-        TimeUnit.SECONDS.sleep(10);
+        TimeUnit.SECONDS.sleep(30);
 
         //If the job has successfully resumed, there should now be more tasks executed
         mockMvcPerform(url + URL_TASKS, jwtAdmin, GET, "")
