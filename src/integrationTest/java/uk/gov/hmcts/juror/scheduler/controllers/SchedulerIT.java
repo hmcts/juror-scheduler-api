@@ -1,6 +1,7 @@
 package uk.gov.hmcts.juror.scheduler.controllers;
 
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -121,13 +122,14 @@ public class SchedulerIT extends AbstractIT {
 
     @DisplayName("Disable and enable a scheduled job")
     @Test
-    @Disabled("Fixed test stability")
     void disableAndEnableScheduledJob() throws Exception {
         String payload = updateJson(getTestDataAsStringFromFile(API_DUMMY_CRON_JOB_JSON),
             "key",
             uniqueJobKey);
 
         mockMvcPerform(URL_JOBS_API, jwtAdmin, POST, payload).andExpect(status().isOk());
+        //Give job a few seconds to execute
+        TimeUnit.SECONDS.sleep(30);
 
         String url = "/job/" + uniqueJobKey;
         int tasksCounter;
@@ -143,17 +145,20 @@ public class SchedulerIT extends AbstractIT {
             counter++;
         } while (tasksCounter == 0 && counter < 100);
 
+        // assert that tasks have been executed
+        Assertions.assertTrue(tasksCounter > 0);
+
         mockMvcPerform(url + "/disable", jwtAdmin, PUT, "")
             .andExpect(status().isAccepted());
 
-        MvcResult resultAfter = mockMvcPerform(url + URL_TASKS, jwtAdmin, GET,
+        MvcResult resultAfterDisable = mockMvcPerform(url + URL_TASKS, jwtAdmin, GET,
             "")
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andReturn();
 
         //Get count of tasks executed
-        Integer tasksExecutedBeforeDisable = JsonPath.read(resultAfter.getResponse().getContentAsString(),
+        Integer tasksExecutedBeforeReEnable = JsonPath.read(resultAfterDisable.getResponse().getContentAsString(),
             "$.length()");
 
         //Enable the job
@@ -161,13 +166,13 @@ public class SchedulerIT extends AbstractIT {
             .andExpect(status().isAccepted());
 
         //Give job a few seconds to execute
-        TimeUnit.SECONDS.sleep(2);
+        TimeUnit.SECONDS.sleep(10);
 
         //If the job has successfully resumed, there should now be more tasks executed
         mockMvcPerform(url + URL_TASKS, jwtAdmin, GET, "")
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$", hasSize(greaterThan(tasksExecutedBeforeDisable))));
+            .andExpect(jsonPath("$", hasSize(greaterThan(tasksExecutedBeforeReEnable))));
     }
 
     @DisplayName("Update a scheduled job")
