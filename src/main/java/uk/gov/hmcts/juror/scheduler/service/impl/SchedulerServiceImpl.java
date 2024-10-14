@@ -24,6 +24,8 @@ import uk.gov.hmcts.juror.scheduler.service.contracts.SchedulerService;
 import uk.gov.hmcts.juror.standard.service.exceptions.InternalServerException;
 import uk.gov.hmcts.juror.standard.service.exceptions.NotFoundException;
 
+import java.util.TimeZone;
+
 @Service
 @Slf4j
 @SuppressWarnings("PMD.TooManyMethods")
@@ -162,7 +164,8 @@ public class SchedulerServiceImpl implements SchedulerService {
         return TriggerBuilder
             .newTrigger()
             .withIdentity(jobDetails.getKey())
-            .withSchedule(CronScheduleBuilder.cronSchedule(jobDetails.getCronExpression()))
+            .withSchedule(CronScheduleBuilder.cronSchedule(jobDetails.getCronExpression())
+                              .inTimeZone(TimeZone.getTimeZone("Europe/London")))
             .startNow()
             .build();
     }
