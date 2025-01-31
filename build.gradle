@@ -229,8 +229,8 @@ dependencies {
     runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '3.7.0')
 
     // Data Mapping
-    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
 
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
