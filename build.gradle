@@ -180,7 +180,7 @@ repositories {
 
 ext {
     log4JVersion = "2.23.1"
-    logbackVersion = "1.5.6"
+    logbackVersion = "1.5.16"
     springVersion = "3.3.7"
     jwtVersion = "0.12.6"
     lombookVersion = "1.18.36"
