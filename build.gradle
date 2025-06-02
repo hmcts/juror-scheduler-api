@@ -175,7 +175,9 @@ dependencyCheck {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven {
+      url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'
+    }
 }
 
 ext {
@@ -190,7 +192,7 @@ ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
-    implementation 'com.github.hmcts:juror-spring-support-library:1.1.2'
+    implementation 'com.github.hmcts:juror-spring-support-library:1.1.4'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
@@ -204,7 +206,7 @@ dependencies {
 
 
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
-    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.7'
+    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
