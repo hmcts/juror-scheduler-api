@@ -10,8 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.stream.Stream;
@@ -31,9 +31,9 @@ import static org.mockito.Mockito.when;
 class CronExpressionValidatorTest {
 
 
-    @MockBean
+    @MockitoBean
     private ConstraintValidatorContext context;
-    @MockBean
+    @MockitoBean
     private ConstraintValidatorContext.ConstraintViolationBuilder constraintViolationBuilder;
 
     @Autowired

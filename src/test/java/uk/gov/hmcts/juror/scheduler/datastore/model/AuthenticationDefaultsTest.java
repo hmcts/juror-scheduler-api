@@ -7,8 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.standard.service.contracts.auth.JwtService;
@@ -59,13 +59,13 @@ class AuthenticationDefaultsTest extends EnumTest<AuthenticationDefaults> {
         "RXhhbXBsZVRva2VuMTIzRXhhbXBsZVRva2VuMTIzRXhhbXBsZVRva2VuMTIzRXhhbXBsZVRva2VuMTIzRXhhbXBsZVRva2VuMTIz";
 
 
-    @MockBean
+    @MockitoBean
     private JwtService jwtService;
 
     @Autowired
     AuthenticationDefaults.AuthenticationDefaultsInjector authenticationDefaultsInjector;
 
-    @MockBean
+    @MockitoBean
     RequestSpecification requestSpecification;
 
     private static final String TOKEN = "ExampleToken123";

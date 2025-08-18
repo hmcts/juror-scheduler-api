@@ -6,8 +6,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.juror.scheduler.datastore.model.ValidationType;
 
@@ -28,9 +28,9 @@ import static org.mockito.Mockito.when;
     }
 )
 class StatusCodeValidationEntityTest {
-    @MockBean
+    @MockitoBean
     private Response response;
-    @MockBean
+    @MockitoBean
     private APIJobDetailsEntity jobData;
 
     @Autowired

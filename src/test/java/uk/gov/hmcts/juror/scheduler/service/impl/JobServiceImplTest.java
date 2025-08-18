@@ -10,10 +10,10 @@ import org.mockito.Captor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
 import uk.gov.hmcts.juror.scheduler.api.model.error.bvr.JobAlreadyDisabledError;
@@ -93,13 +93,13 @@ class JobServiceImplTest {
 
     private static final String JOB_KEY = "JOB123";
 
-    @MockBean
+    @MockitoBean
     private SchedulerService schedulerService;
-    @MockBean
+    @MockitoBean
     private JobRepository jobRepository;
-    @MockBean
+    @MockitoBean
     private JobDetailsMapper jobDetailsMapper;
-    @MockBean
+    @MockitoBean
     private TaskService taskService;
 
     @Autowired

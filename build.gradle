@@ -4,7 +4,7 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.springframework.boot' version '3.3.7'
+    id 'org.springframework.boot' version '3.5.4'
     id 'org.owasp.dependencycheck' version '12.0.2'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'org.sonarqube' version '6.0.1.5171'
@@ -173,15 +173,22 @@ dependencyCheck {
 }
 
 repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
+  mavenLocal()
+  mavenCentral()
+  maven {
+    url = uri('https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1')
+  }
 }
+
+dependencies {
+  implementation 'com.github.hmcts:juror-spring-support-library:1.1.5' // use the local version
+}
+
 
 ext {
     log4JVersion = "2.24.3"
     logbackVersion = "1.5.16"
-    springVersion = "3.3.7"
+    springVersion = "3.5.4"
     jwtVersion = "0.12.6"
     lombookVersion = "1.18.36"
 }
@@ -190,7 +197,7 @@ ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
-    implementation 'com.github.hmcts:juror-spring-support-library:1.1.2'
+ //   implementation 'com.github.hmcts:juror-spring-support-library:1.1.4'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
@@ -200,11 +207,11 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
-    implementation group: 'org.springframework.data', name: 'spring-data-commons', version: springVersion
+    implementation "org.springframework.data:spring-data-commons:3.5.2"
 
 
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
-    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.7'
+    implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
