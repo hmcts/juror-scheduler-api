@@ -175,15 +175,10 @@ dependencyCheck {
 repositories {
   mavenLocal()
   maven {
-    url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1'
+    url = uri('https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1')
   }
   mavenCentral()
 }
-
-dependencies {
-  implementation 'com.github.hmcts:juror-spring-support-library:1.1.5' // use the local version
-}
-
 
 ext {
     log4JVersion = "2.24.3"
@@ -196,8 +191,7 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 
 dependencies {
-
- //   implementation 'com.github.hmcts:juror-spring-support-library:1.1.4'
+    implementation 'com.github.hmcts:juror-spring-support-library:1.1.5:plain@jar'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
