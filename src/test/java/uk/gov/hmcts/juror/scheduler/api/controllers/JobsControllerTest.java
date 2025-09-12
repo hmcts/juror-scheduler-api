@@ -11,10 +11,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.juror.scheduler.api.model.error.KeyAlreadyInUseError;
@@ -92,10 +92,10 @@ class JobsControllerTest {
 
     private static final String RESOURCE_PREFIX = "/testData/jobsController";
 
-    @MockBean
+    @MockitoBean
     private JobService jobService;
 
-    @MockBean
+    @MockitoBean
     private JobDetailsMapper jobDetailsMapper;
 
 

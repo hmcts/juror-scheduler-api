@@ -19,8 +19,8 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -75,17 +75,17 @@ import static org.mockito.Mockito.when;
 })
 class APIJobTest {
 
-    @MockBean
+    @MockitoBean
     private JobService jobService;
 
-    @MockBean
+    @MockitoBean
     private EntityManager entityManager;
-    @MockBean
+    @MockitoBean
     private EntityManagerFactory entityManagerFactory;
-    @MockBean
+    @MockitoBean
     private PlatformTransactionManager transactionManager;
 
-    @MockBean
+    @MockitoBean
     private TaskService taskService;
 
     @Autowired
@@ -93,12 +93,12 @@ class APIJobTest {
 
     private MockedStatic<RestAssured> restAssuredMockedStatic;
 
-    @MockBean
+    @MockitoBean
     private RequestSpecification requestSpecification;
-    @MockBean
+    @MockitoBean
     private Response response;
 
-    @MockBean
+    @MockitoBean
     private JobExecutionContext context;
 
     private TaskEntity taskEntity;

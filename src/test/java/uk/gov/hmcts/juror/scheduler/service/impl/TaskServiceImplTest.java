@@ -12,9 +12,9 @@ import org.mockito.Captor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.juror.scheduler.api.model.job.details.StatusUpdate;
 import uk.gov.hmcts.juror.scheduler.datastore.entity.TaskEntity;
@@ -60,13 +60,13 @@ import static org.mockito.Mockito.when;
 })
 class TaskServiceImplTest {
 
-    @MockBean
+    @MockitoBean
     private TaskRepository taskRepository;
 
-    @MockBean
+    @MockitoBean
     private JobService jobService;
 
-    @MockBean
+    @MockitoBean
     private ActionService actionService;
 
     @Autowired
