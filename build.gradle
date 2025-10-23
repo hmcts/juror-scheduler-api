@@ -225,7 +225,7 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     testImplementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-    implementation 'org.jetbrains:annotations:26.0.2'
+    implementation 'org.jetbrains:annotations:26.0.2-1'
     testImplementation 'junit:junit:4.13.2'
     runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '3.7.5')
 
