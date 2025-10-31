@@ -23,5 +23,7 @@ public interface TaskService {
     void updateStatus(String jobKey, long taskId, StatusUpdate statusUpdate);
 
 
+    void logTaskEntity(TaskEntity task);
+
     void deleteAllByJobKey(String jobKey);
 }
