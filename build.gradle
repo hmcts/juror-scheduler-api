@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'uk.gov.hmcts.juror.scheduler'
-version = '5.14.0'
+version = '5.22.0'
 
 java {
     toolchain {
@@ -218,7 +218,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.7.5'
     implementation 'org.hibernate.orm:hibernate-envers:6.6.5.Final'
     implementation 'org.flywaydb:flyway-core:9.22.3'
-    testImplementation 'org.testcontainers:postgresql:1.20.4'
+    testImplementation 'org.testcontainers:postgresql:1.21.4'
 
     // Documentation, logging
     implementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
@@ -254,8 +254,8 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }, version: springVersion
     testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
-    testImplementation "org.testcontainers:testcontainers:1.20.4"
-    testImplementation "org.testcontainers:junit-jupiter:1.20.4"
+    testImplementation "org.testcontainers:testcontainers:1.21.4"
+    testImplementation "org.testcontainers:junit-jupiter:1.21.4"
 }
 mainClassName = 'uk.gov.hmcts.juror.scheduler.Application'
 

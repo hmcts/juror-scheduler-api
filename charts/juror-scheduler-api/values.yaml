@@ -1,11 +1,11 @@
 java:
   applicationPort: 8080
-  image: 'sdshmctspublic.azurecr.io/juror/scheduler-api:latest'
+  image: 'hmctsprod.azurecr.io/juror/scheduler-api:latest'
   ingressHost: juror-scheduler-api.{{ .Values.global.environment }}.platform.hmcts.net
   aadIdentityName: juror
   keyVaults:
     juror:
-      secrets:      
+      secrets:
         - name: AppInsightsInstrumentationKey
           alias: azure.application-insights.instrumentation-key
         - name: app-insights-connection-string
@@ -21,7 +21,7 @@ java:
         - name: scheduler-api-POSTGRES-PASS
           alias: DB_PASSWORD
         - name: scheduler-api-SECRET
-          alias: SECRET  
+          alias: SECRET
         - name: api-JWT-SECRET-BUREAU
           alias: JUROR_API_SERVICE_AUTHENTICATION_SECRET
         - name: scheduler-execution-SECRET
