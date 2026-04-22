@@ -18,6 +18,7 @@ module "postgresql_flexible" {
   location            = var.location
   pgsql_sku           = "GP_Standard_D2s_v3"
   pgsql_storage_mb    = 65536
+  service_criticality = var.service_criticality
 
   common_tags          = var.common_tags
   admin_user_object_id = var.jenkins_AAD_objectId
