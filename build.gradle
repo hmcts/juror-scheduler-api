@@ -16,7 +16,7 @@ version = '5.22.0'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -191,7 +191,7 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 
 dependencies {
-    implementation 'com.github.hmcts:juror-spring-support-library:1.1.5:plain@jar'
+    implementation 'com.github.hmcts:juror-spring-support-library:1.2.0:plain@jar'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
