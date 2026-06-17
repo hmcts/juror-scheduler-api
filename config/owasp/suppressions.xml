@@ -19,48 +19,6 @@
 		<cve>CVE-2026-34481</cve>
 	</suppress>
 	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.springframework\.boot/spring-boot-starter-(actuator|aop|data-jpa|json|quartz|security|validation|web)@3\.5\.4$</packageUrl>
-		<cve>CVE-2026-22731</cve>
-		<cve>CVE-2026-22733</cve>
-		<cve>CVE-2026-40971</cve>
-		<cve>CVE-2026-40972</cve>
-		<cve>CVE-2026-40973</cve>
-		<cve>CVE-2026-40974</cve>
-		<cve>CVE-2026-40975</cve>
-		<cve>CVE-2026-40977</cve>
-	</suppress>
-	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.springframework/spring-(aop|aspects|beans|context|context-support|core|expression|jcl|jdbc|orm|tx|webflux|webmvc)@6\.2\.18$</packageUrl>
-		<cve>CVE-2026-41838</cve>
-		<cve>CVE-2026-41840</cve>
-		<cve>CVE-2026-41841</cve>
-		<cve>CVE-2026-41842</cve>
-		<cve>CVE-2026-41843</cve>
-		<cve>CVE-2026-41844</cve>
-		<cve>CVE-2026-41845</cve>
-		<cve>CVE-2026-41846</cve>
-		<cve>CVE-2026-41848</cve>
-		<cve>CVE-2026-41850</cve>
-		<cve>CVE-2026-41851</cve>
-		<cve>CVE-2026-41852</cve>
-	</suppress>
-	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-(config|core|crypto|web)@6\.5\.10$</packageUrl>
-		<cve>CVE-2026-40988</cve>
-		<cve>CVE-2026-41003</cve>
-		<cve>CVE-2026-41694</cve>
-	</suppress>
-	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-(core|websocket)@10\.1\.54$</packageUrl>
-		<cve>CVE-2026-41284</cve>
-		<cve>CVE-2026-41293</cve>
-		<cve>CVE-2026-42498</cve>
-		<cve>CVE-2026-43512</cve>
-		<cve>CVE-2026-43513</cve>
-		<cve>CVE-2026-43514</cve>
-		<cve>CVE-2026-43515</cve>
-	</suppress>
-	<suppress>
 		<packageUrl regex="true">^pkg:javascript/DOMPurify@3\.3\.2$</packageUrl>
 		<cve>CVE-2026-41240</cve>
 		<vulnerabilityName>CVE-2026-41238</vulnerabilityName>
