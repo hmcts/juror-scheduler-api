@@ -172,7 +172,7 @@ ext {
     springVersion = "3.5.15"
     springDataVersion = "3.5.12"
     jwtVersion = "0.13.0"
-    lombookVersion = "1.18.36"
+    lombookVersion = "1.18.46"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -197,7 +197,7 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
 
-    implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.6'
+    implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.7'
 
     // Database, repository
     implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
@@ -211,9 +211,9 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     testImplementation group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
-    implementation 'org.jetbrains:annotations:26.0.2'
+    implementation 'org.jetbrains:annotations:26.1.0'
     testImplementation 'junit:junit:4.13.2'
-    runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '3.7.5')
+    runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '3.7.9')
 
     // Data Mapping
     implementation 'org.mapstruct:mapstruct:1.6.3'
