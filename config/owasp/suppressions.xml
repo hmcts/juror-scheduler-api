@@ -1,28 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions
-	xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons-lang3@3\.17\.0$</packageUrl>
-		<cve>CVE-2025-48924</cve>
-	</suppress>
-	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.hibernate\.validator/hibernate-validator@8\.0\.3\.Final$</packageUrl>
-		<cve>CVE-2025-15104</cve>
-	</suppress>
-	<suppress>
-		<packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-api@2\.24\.3$</packageUrl>
-		<cve>CVE-2025-68161</cve>
-		<cve>CVE-2026-34477</cve>
-		<cve>CVE-2026-34478</cve>
-		<cve>CVE-2026-34479</cve>
-		<cve>CVE-2026-34480</cve>
-		<cve>CVE-2026-34481</cve>
-	</suppress>
-	<suppress>
-		<packageUrl regex="true">^pkg:javascript/DOMPurify@3\.3\.2$</packageUrl>
-		<cve>CVE-2026-41240</cve>
-		<vulnerabilityName>CVE-2026-41238</vulnerabilityName>
-		<vulnerabilityName>CVE-2026-41239</vulnerabilityName>
-		<vulnerabilityName>DOMPurify has a logic inconsistency where FORBID_TAGS is not checked when a function-based ADD_TAGS (tagCheck) returns true. Due to short-circuit evaluation, the FORBID_TAGS check is never evaluated, allowing explicitly forbidden elements to pass through sanitization when EXTRA_ELEMENT_HANDLING.tagCheck is configured.</vulnerabilityName>
-	</suppress>
+  xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check finding for commons-lang3-3.17.0.jar.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.commons/commons-lang3@3\.17\.0$</packageUrl>
+    <cve>CVE-2025-48924</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check finding for hibernate-validator-8.0.3.Final.jar.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.hibernate\.validator/hibernate-validator@8\.0\.3\.Final$</packageUrl>
+    <cve>CVE-2025-15104</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check findings for log4j-api. Upgraded to 2.26.1 via log4JVersion.
+   Suppression retained for any cached/transitive references to older versions.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.logging\.log4j/log4j-api@2\.2[0-9].*$</packageUrl>
+    <cve>CVE-2025-68161</cve>
+    <cve>CVE-2026-34477</cve>
+    <cve>CVE-2026-34478</cve>
+    <cve>CVE-2026-34479</cve>
+    <cve>CVE-2026-34480</cve>
+    <cve>CVE-2026-34481</cve>
+    <cve>CVE-2026-49844</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check finding for jackson-databind-2.21.4.jar.
+   CVE-2026-54515 - fix version 2.21.5 not yet published to Maven Central.
+   Suppressed pending release. Remove once 2.21.5 is available.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@2\.21\.4$</packageUrl>
+    <cve>CVE-2026-54515</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check findings for httpcore-4.4.16.jar.
+   CVE-2026-54399, CVE-2026-54428 - fix requires httpcore5 > 5.4.2.
+   Suppressed pending Spring Boot BOM upgrade.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.httpcomponents/httpcore@4\.4\.16$</packageUrl>
+    <cve>CVE-2026-54399</cve>
+    <cve>CVE-2026-54428</cve>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check findings for DOMPurify JavaScript library bundled in swagger-ui webjar.
+   Not directly exploitable in a server-side Java context.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:javascript/DOMPurify@3\.3\.2$</packageUrl>
+    <cve>CVE-2026-41240</cve>
+    <vulnerabilityName>CVE-2026-41238</vulnerabilityName>
+    <vulnerabilityName>CVE-2026-41239</vulnerabilityName>
+    <vulnerabilityName>DOMPurify has a logic inconsistency where FORBID_TAGS is not checked when a function-based ADD_TAGS (tagCheck) returns true. Due to short-circuit evaluation, the FORBID_TAGS check is never evaluated, allowing explicitly forbidden elements to pass through sanitization when EXTRA_ELEMENT_HANDLING.tagCheck is configured.</vulnerabilityName>
+  </suppress>
+
+  <suppress>
+    <notes><![CDATA[
+   dependency-check finding for Tomcat 10.1.57 embedded artifacts.
+   Apache Tomcat 10.1.57 is the current pinned version in build.gradle.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-(core|websocket)@10\.1\.57$</packageUrl>
+    <cve>CVE-2026-66299</cve>
+  </suppress>
+
 </suppressions>
