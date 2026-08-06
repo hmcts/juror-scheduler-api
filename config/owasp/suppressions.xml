@@ -66,4 +66,13 @@
     <vulnerabilityName>DOMPurify has a logic inconsistency where FORBID_TAGS is not checked when a function-based ADD_TAGS (tagCheck) returns true. Due to short-circuit evaluation, the FORBID_TAGS check is never evaluated, allowing explicitly forbidden elements to pass through sanitization when EXTRA_ELEMENT_HANDLING.tagCheck is configured.</vulnerabilityName>
   </suppress>
 
+  <suppress>
+    <notes><![CDATA[
+   dependency-check finding for Tomcat 10.1.57 embedded artifacts.
+   Apache Tomcat 10.1.57 is the current pinned version in build.gradle.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat-embed-(core|websocket)@10\.1\.57$</packageUrl>
+    <cve>CVE-2026-66299</cve>
+  </suppress>
+
 </suppressions>
