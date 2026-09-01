@@ -88,11 +88,11 @@
 
   <suppress>
     <notes><![CDATA[
-   dependency-check findings for Spring Framework 6.2.19 web artifacts.
+   dependency-check findings for Spring Framework 6.2.19 artifacts.
    Spring Boot 3.5.16 manages Spring Framework 6.2.19.
    Suppressed pending Spring Boot BOM / Spring Framework upgrade to 6.2.20 or later.
    ]]></notes>
-    <packageUrl regex="true">^pkg:maven/org\.springframework/spring-(web|webmvc)@6\.2\.19$</packageUrl>
+    <packageUrl regex="true">^pkg:maven/org\.springframework/spring-(aop|aspects|beans|context|context-support|core|expression|jcl|jdbc|orm|tx|web|webflux|webmvc)@6\.2\.19$</packageUrl>
     <cve>CVE-2026-59313</cve>
     <cve>CVE-2026-59314</cve>
   </suppress>
