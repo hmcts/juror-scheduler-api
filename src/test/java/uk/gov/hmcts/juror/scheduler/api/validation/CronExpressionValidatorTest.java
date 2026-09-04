@@ -3,6 +3,7 @@ package uk.gov.hmcts.juror.scheduler.api.validation;
 
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -117,6 +118,14 @@ class CronExpressionValidatorTest {
         verify(context, times(1)).disableDefaultConstraintViolation();
         verify(context, times(1)).buildConstraintViolationWithTemplate(
             "Invalid Cron Expression: " + expectedErrorMessage);
+        verify(constraintViolationBuilder, times(1)).addConstraintViolation();
+    }
+
+    @Test
+    void negativeEmptyCronExpression() {
+        assertFalse(this.validator.isValid("", context), "Validator should return false");
+        verify(context, times(1)).disableDefaultConstraintViolation();
+        verify(context, times(1)).buildConstraintViolationWithTemplate(any());
         verify(constraintViolationBuilder, times(1)).addConstraintViolation();
     }
 }
