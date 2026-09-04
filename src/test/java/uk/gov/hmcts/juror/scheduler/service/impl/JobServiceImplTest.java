@@ -465,6 +465,36 @@ class JobServiceImplTest {
         }
 
         @Test
+        @DisplayName("Enabled Filter")
+        void positiveGetJobsEnabledFilter() {
+            APIJobDetailsEntity enabledJob = new APIJobDetailsEntity();
+            enabledJob.setKey("ENABLED_JOB");
+            APIJobDetailsEntity disabledJob = new APIJobDetailsEntity();
+            disabledJob.setKey("DISABLED_JOB");
+            List<APIJobDetailsEntity> jobs = new ArrayList<>(List.of(enabledJob, disabledJob));
+
+            when(jobRepository.findAll(ArgumentMatchers.<Specification<APIJobDetailsEntity>>any())).thenReturn(jobs);
+            when(schedulerService.isEnabled(enabledJob.getKey())).thenReturn(true);
+            when(schedulerService.isEnabled(disabledJob.getKey())).thenReturn(false);
+
+            try (MockedStatic<JobRepository.Specs> utilities = Mockito.mockStatic(JobRepository.Specs.class)) {
+                setupSpecificationMocks(utilities);
+
+                JobSearchFilter jobSearchFilter = JobSearchFilter.builder().enabled(true).build();
+
+                try (MockedStatic<Specification> ignored = Mockito.mockStatic(Specification.class)) {
+                    List<APIJobDetailsEntity> returnedJobs = jobService.getJobs(jobSearchFilter);
+
+                    assertEquals(1, returnedJobs.size(), "Only enabled jobs should be returned");
+                    assertEquals(enabledJob, returnedJobs.get(0), "Enabled job must be returned");
+                }
+            }
+
+            verify(schedulerService, times(1)).isEnabled(enabledJob.getKey());
+            verify(schedulerService, times(1)).isEnabled(disabledJob.getKey());
+        }
+
+        @Test
         @DisplayName("Job Key Filter")
         void positiveGetJobsKobKeyFilter() {
             List<APIJobDetailsEntity> jobs = new ArrayList<>();
