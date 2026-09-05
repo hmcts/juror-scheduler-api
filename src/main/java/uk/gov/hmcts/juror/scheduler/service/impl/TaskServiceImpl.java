@@ -1,6 +1,8 @@
 package uk.gov.hmcts.juror.scheduler.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.lang.Collections;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,6 +14,7 @@ import uk.gov.hmcts.juror.scheduler.datastore.entity.api.APIJobDetailsEntity;
 import uk.gov.hmcts.juror.scheduler.datastore.model.Status;
 import uk.gov.hmcts.juror.scheduler.datastore.model.filter.TaskSearchFilter;
 import uk.gov.hmcts.juror.scheduler.datastore.repository.TaskRepository;
+import uk.gov.hmcts.juror.scheduler.mapping.TaskMapper;
 import uk.gov.hmcts.juror.scheduler.service.contracts.ActionService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.JobService;
 import uk.gov.hmcts.juror.scheduler.service.contracts.TaskService;
@@ -23,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
@@ -30,14 +34,19 @@ public class TaskServiceImpl implements TaskService {
     private final JobService jobService;
 
     private final ActionService actionService;
-
+    private final TaskMapper taskMapper;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public TaskServiceImpl(@Lazy JobService jobService, TaskRepository taskRepository,
-                           @Lazy ActionService actionService) {
+                           @Lazy ActionService actionService,
+                           TaskMapper taskMapper,
+                           ObjectMapper objectMapper) {
         this.taskRepository = taskRepository;
         this.jobService = jobService;
         this.actionService = actionService;
+        this.taskMapper = taskMapper;
+        this.objectMapper = objectMapper;
     }
 
 
@@ -52,6 +61,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskEntity saveTask(TaskEntity task) {
         TaskEntity actionTaskEntity = this.actionService.taskUpdated(task);
+        logTaskEntity(task);
         return taskRepository.saveAndFlush(actionTaskEntity);
     }
 
@@ -85,7 +95,13 @@ public class TaskServiceImpl implements TaskService {
         if (!Collections.isEmpty(statusUpdate.getMetaData())) {
             taskEntity.addMetaData(statusUpdate.getMetaData());
         }
-        saveTask(taskEntity);
+        logTaskEntity(saveTask(taskEntity));
+    }
+
+    @Override
+    public void logTaskEntity(TaskEntity task) {
+        log.info("Task status updated for jobKey: {} data: {}",
+            task.getJob().getKey(), taskMapper.toTaskJson(objectMapper, task));
     }
 
     @Override
