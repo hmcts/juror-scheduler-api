@@ -37,4 +37,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 withNightlyPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableSlackNotifications('#juror-build-notices')
+  enableFortifyScan()
+
+  afterSuccess('fortify-scan') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '/Fortify Scan//*’
+  }
 }
