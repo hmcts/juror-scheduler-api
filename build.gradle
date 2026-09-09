@@ -4,7 +4,7 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.springframework.boot' version '3.5.16'
+    id 'org.springframework.boot' version '4.0.8'
     id 'org.owasp.dependencycheck' version '12.0.2'
     id 'com.github.ben-manes.versions' version '0.52.0'
     id 'org.sonarqube' version '6.0.1.5171'
@@ -169,8 +169,8 @@ repositories {
 ext {
     log4JVersion = "2.26.1"
     logbackVersion = "1.6.0"
-    springVersion = "3.5.16"
-    springDataVersion = "3.5.13"
+    springVersion = "4.0.8"
+    springDataVersion = "4.0.7"
     jwtVersion = "0.13.0"
     lombookVersion = "1.18.46"
 }
@@ -181,19 +181,21 @@ dependencies {
 
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.57'      // upgraded from 10.1.55 - CVE-2026-59083, CVE-2026-59084 fix
     implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.57' // upgraded from 10.1.55 - CVE-2026-59083, CVE-2026-59084 fix
-    implementation 'com.github.hmcts:juror-spring-support-library:1.3.0:plain@jar'
+    implementation 'com.github.hmcts:juror-spring-support-library:2.0.0:plain@jar'
 
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-webmvc', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: springVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aspectj', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jackson', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-flyway', version: springVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-jackson2', version: springVersion
     implementation("org.springframework.data:spring-data-envers:${springDataVersion}")
 
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.17'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '3.0.3'
     implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '8.0.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
@@ -203,7 +205,6 @@ dependencies {
     implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.7'
 
     // Database, repository
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     implementation 'org.postgresql:postgresql:42.7.13'
     implementation 'org.flywaydb:flyway-core:11.20.3'
     implementation 'org.flywaydb:flyway-database-postgresql:11.20.3'
@@ -242,6 +243,7 @@ dependencies {
         exclude group: 'junit', module: 'junit'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }, version: springVersion
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-webmvc-test', version: springVersion
     testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
     testImplementation "org.testcontainers:testcontainers:1.21.4"
     testImplementation "org.testcontainers:junit-jupiter:1.21.4"
@@ -274,7 +276,7 @@ flyway {
     def dbHost = System.getenv("DB_HOST") ?: "localhost"
     def dbPort = System.getenv("DB_PORT") ?: "5432"
     def dbName = System.getenv("DB_NAME") ?: "scheduler_application"
-    def dbUserName = System.getenv("DB_USER_NAME") ?: "system"
+    def dbUserName = System.getenv("DB_USER_NAME") ?: "juror"
     def dbPassword = System.getenv("DB_PASSWORD") ?: "postgres"
 
     url = "jdbc:postgresql://$dbHost:$dbPort/$dbName"

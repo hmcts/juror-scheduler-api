@@ -11,6 +11,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
@@ -343,6 +344,7 @@ class TaskServiceImplTest {
 
     @DisplayName("public List<TaskEntity> getTasks(TaskSearchFilter searchFilter)")
     @Nested
+    @ExtendWith(MockitoExtension.class)
     class GetTasksBySearchFilter {
 
         @Captor

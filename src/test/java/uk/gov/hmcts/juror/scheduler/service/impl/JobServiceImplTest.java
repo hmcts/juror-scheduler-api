@@ -9,6 +9,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -425,6 +426,7 @@ class JobServiceImplTest {
 
     @DisplayName("public List<APIJobDetailsEntity> getJobs(JobSearchFilter searchFilter)")
     @Nested
+    @ExtendWith(MockitoExtension.class)
     class GetJobs {
 
         @Captor
