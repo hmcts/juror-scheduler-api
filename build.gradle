@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'uk.gov.hmcts.juror.scheduler'
-version = '5.29.0'
+version = '5.31.0'
 
 java {
     toolchain {
@@ -226,6 +226,7 @@ dependencies {
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 
     // Validation
+    testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
 
     // Security
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jwtVersion
@@ -297,6 +298,12 @@ task runAllStyleChecks {
     dependsOn 'pmdIntegrationTest'
     dependsOn 'pmdSmokeTest'
     dependsOn 'pmdFunctionalTest'
+}
+
+task fortifyScan(type: JavaExec) {
+  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  classpath += sourceSets.test.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 //project.tasks['integration'].dependsOn flywayClean
 //project.tasks['integration'].dependsOn flywayMigrate
