@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'uk.gov.hmcts.juror.scheduler'
-version = '5.31.0'
+version = '5.32.0'
 
 java {
     toolchain {
