@@ -4,7 +4,7 @@ properties([
     pipelineTriggers([cron('H 08 * * 1-5')])
 ])
 
-@Library("Infrastructure@2.6.0") _
+@Library("Infrastructure@2.9.0") _
 
 def type = "java"
 def product = "juror"
@@ -12,17 +12,9 @@ def component = "scheduler-api"
 
 def secrets = [
   'juror-${env}': [
-    secret('app-insights-connection-string', 'app-insights-connection-string'),
-    secret('AppInsightsInstrumentationKey', 'azure.application-insights.instrumentation-key'),
-    secret('scheduler-api-POSTGRES-HOST', 'DB_HOST'),
-    secret('scheduler-api-POSTGRES-PORT', 'DB_PORT'),
-    secret('scheduler-api-POSTGRES-DATABASE', 'DB_NAME'),
-    secret('scheduler-api-POSTGRES-USER', 'DB_USER_NAME'),
-    secret('scheduler-api-POSTGRES-PASS', 'DB_PASSWORD'),
-    secret('scheduler-api-SECRET', 'SECRET'),
-    secret('api-JWT-SECRET-BUREAU', 'JUROR_API_SERVICE_AUTHENTICATION_SECRET'),
-    secret('scheduler-execution-SECRET', 'API_JOB_EXECUTION_SERVICE_AUTHENTICATION_SECRET')
-    ],
+    secret('fortify-on-demand-username', 'FORTIFY_USER_NAME'),
+    secret('fortify-on-demand-password', 'FORTIFY_PASSWORD'),
+  ]
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
@@ -35,9 +27,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withNightlyPipeline(type, product, component) {
-  loadVaultSecrets(secrets)
   enableSlackNotifications('#juror-build-notices')
+  loadVaultSecrets(secrets)
   enableFortifyScan()
+  env.FORTIFY_SCAN_RUNNER = 'library'
 
   afterSuccess('fortify-scan') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '/Fortify Scan//*'
