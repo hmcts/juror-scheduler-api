@@ -16,8 +16,8 @@ uk:
           token-validity: 1800000
           secret: VGhpc0lzQUR1bW15U2VjcmV0S2V5VGhhdE5vT25lS25vd3NUaGVWYWx1ZXNJdENvbnRhaW5z
           admin-user:
-            email: ${SHCEDULER_SERVICE_USERNAME}
-            password: ${SCHEDULER_SERVICE_PASSWORD}
+            email: ${SCHEDULER_SERVICE_USERNAME:}
+            password: ${SCHEDULER_SERVICE_PASSWORD:}
             firstname: firstname
             lastname: lastname
 scheduler:
