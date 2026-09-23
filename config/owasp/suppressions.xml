@@ -86,15 +86,58 @@
     <cve>CVE-2026-73180</cve>
   </suppress>
 
-  <suppress>
+  <suppress until="2026-12-31Z">
     <notes><![CDATA[
-   dependency-check findings for Spring Framework 6.2.19 artifacts.
-   Spring Boot 3.5.16 manages Spring Framework 6.2.19.
-   Suppressed pending Spring Boot BOM / Spring Framework upgrade to 6.2.20 or later.
+   Spring Framework 6.2.19 (managed by Spring Boot 3.5.16).
+   6.2.19 / Boot 3.5.16 are the final OSS releases; fixes in 6.2.20 are commercial-only.
+   Reviewed for juror-scheduler: REST-only service on Tomcat, no server-side views (XSLT/FreeMarker/
+   UrlFileNameViewController), no SSE, WebFlux used as WebClient only (no WebFlux server, RSocket,
+   Jetty, WebSocket, Aalto), no user-supplied SpEL, SpEL compiler not enabled, UrlHandlerFilter not used.
+   CVE-2026-59282: no DataBinder binding of untrusted property paths (JSON via Jackson).
+   Remediation: Spring Boot 4.x migration.
    ]]></notes>
     <packageUrl regex="true">^pkg:maven/org\.springframework/spring-(aop|aspects|beans|context|context-support|core|expression|jcl|jdbc|orm|tx|web|webflux|webmvc)@6\.2\.19$</packageUrl>
     <cve>CVE-2026-59313</cve>
     <cve>CVE-2026-59314</cve>
+    <cve>CVE-2026-47883</cve>
+    <cve>CVE-2026-47884</cve>
+    <cve>CVE-2026-47885</cve>
+    <cve>CVE-2026-47886</cve>
+    <cve>CVE-2026-47887</cve>
+    <cve>CVE-2026-47888</cve>
+    <cve>CVE-2026-47889</cve>
+    <cve>CVE-2026-47890</cve>
+    <cve>CVE-2026-47891</cve>
+    <cve>CVE-2026-47892</cve>
+    <cve>CVE-2026-47893</cve>
+    <cve>CVE-2026-59280</cve>
+    <cve>CVE-2026-59281</cve>
+    <cve>CVE-2026-59282</cve>
+    <cve>CVE-2026-59283</cve>
+  </suppress>
+
+  <suppress until="2026-12-31Z">
+    <notes><![CDATA[
+   Spring Security 6.5.11 (managed by Spring Boot 3.5.16). Fix 6.5.12 is commercial-only.
+   Reviewed: no embedded UnboundID LDAP, no WebAuthn, AesBytesEncryptor not used;
+   JWT validation performed by jjwt, not Spring Security comparisons.
+   Remediation: Spring Boot 4.x migration.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring-security-(config|core|crypto|web)@6\.5\.11$</packageUrl>
+    <cve>CVE-2026-59270</cve>
+    <cve>CVE-2026-47841</cve>
+    <cve>CVE-2026-47842</cve>
+    <cve>CVE-2026-59276</cve>
+  </suppress>
+
+  <suppress until="2026-12-31Z">
+    <notes><![CDATA[
+   Spring Data JPA / Envers 3.5.13 (Envers match is a low-confidence CPE on spring_data_jpa).
+   Fix 3.5.14 is commercial-only. Reviewed: Sort/Pageable not accepted from untrusted input.
+   Remediation: Spring Boot 4.x migration.
+   ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.springframework\.data/spring-data-(jpa|envers)@3\.5\.13$</packageUrl>
+    <cve>CVE-2026-47834</cve>
   </suppress>
 
 </suppressions>
