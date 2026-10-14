@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.juror.scheduler.testsupport.ConvertUtilIT.mapObjectToJson;
 import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.loginRequest;
 import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.updateJson;
-import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getNextUniqueIndex;
+import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getNextUniqueJobKey;
 import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getTestDataAsStringFromFile;
 
 @ExtendWith(SpringExtension.class)
@@ -52,7 +52,7 @@ public class SchedulerIT extends AbstractIT {
     @BeforeEach
     void init() throws Exception {
         jwtAdmin = generateJwt(loginRequest(ADMIN_EMAIL, ADMIN_PASSWORD_ENCRYPTED));
-        uniqueJobKey = "KEY" + getNextUniqueIndex();
+        uniqueJobKey = getNextUniqueJobKey();
     }
 
     @DisplayName("Schedule a new API job")
