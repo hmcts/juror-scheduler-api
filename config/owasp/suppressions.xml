@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions
   xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <suppress>
+    <notes><![CDATA[
+      Requested suppression for CVE-2025-15104 reported by dependencyCheckAggregate
+      against hibernate-validator-9.0.1.Final.jar. Not verified as a false positive.
+      Review when upgrading Hibernate Validator.
+    ]]></notes>
+    <packageUrl regex="false">pkg:maven/org.hibernate.validator/hibernate-validator@9.0.1.Final</packageUrl>
+    <cve>CVE-2025-15104</cve>
+  </suppress>
 </suppressions>
