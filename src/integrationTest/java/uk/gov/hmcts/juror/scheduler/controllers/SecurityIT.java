@@ -42,7 +42,7 @@ import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.statusUpdateRe
 import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.updateJson;
 import static uk.gov.hmcts.juror.scheduler.testsupport.DataUtilIT.userEmailRequest;
 import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.dynamicEmailGenerator;
-import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getNextUniqueIndex;
+import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getNextUniqueId;
 import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getTestDataAsStringFromFile;
 
 @ExtendWith(SpringExtension.class)
@@ -50,7 +50,7 @@ import static uk.gov.hmcts.juror.scheduler.testsupport.ITestUtil.getTestDataAsSt
 @AutoConfigureMockMvc
 public class SecurityIT extends AbstractIT {
     private String jwtAdmin;
-    private int uniqueId;
+    private String uniqueId;
 
     private static final String URL_AUTH_USER = "/auth/user";
     private static final String URL_AUTH_REGISTER = "/auth/register";
@@ -69,7 +69,7 @@ public class SecurityIT extends AbstractIT {
     @BeforeEach
     void init() throws Exception {
         jwtAdmin = generateJwt(loginRequest(ADMIN_EMAIL, ADMIN_PASSWORD_ENCRYPTED));
-        uniqueId = getNextUniqueIndex();
+        uniqueId = getNextUniqueId();
     }
 
     @DisplayName("JobController - Test permissions associated with getJobDetails operation")

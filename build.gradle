@@ -12,7 +12,7 @@ plugins {
 }
 
 group = 'uk.gov.hmcts.juror.scheduler'
-version = '5.29.0'
+version = '5.33.0'
 
 java {
     toolchain {
@@ -160,15 +160,16 @@ dependencyCheck {
 
 repositories {
   mavenLocal()
-  maven {
-    url = uri('https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1')
+  if (!System.getenv('GITHUB_ACTIONS')) {
+    maven { url'https://artifactory.platform.hmcts.net/artifactory/maven-remotes'}
   }
+  maven { url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
   mavenCentral()
 }
 
 ext {
     log4JVersion = "2.26.1"
-    logbackVersion = "1.6.0"
+    logbackVersion = "1.6.5"
     springVersion = "4.0.8"
     springDataVersion = "4.0.7"
     jwtVersion = "0.13.0"
@@ -179,8 +180,8 @@ ext['snakeyaml.version'] = '2.0'
 
 dependencies {
 
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.57'      // upgraded from 10.1.55 - CVE-2026-59083, CVE-2026-59084 fix
-    implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.57' // upgraded from 10.1.55 - CVE-2026-59083, CVE-2026-59084 fix
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.61'      // upgraded from 10.1.55 - CVE-2026-59083, CVE-2026-59084 fix
+    implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.60' // upgraded from 10.1.55 - CVE-2026-59083, CVE-2026-59084 fix
     implementation 'com.github.hmcts:juror-spring-support-library:2.0.0:plain@jar'
 
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-webmvc', version: springVersion
@@ -217,7 +218,7 @@ dependencies {
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombookVersion
     implementation 'org.jetbrains:annotations:26.1.0'
     testImplementation 'junit:junit:4.13.2'
-    runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '3.7.9')
+    runtimeOnly(group: 'com.microsoft.azure', name: 'applicationinsights-core', version: '3.7.10')
 
     // Data Mapping
     implementation 'org.mapstruct:mapstruct:1.6.3'
@@ -227,6 +228,7 @@ dependencies {
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 
     // Validation
+    testImplementation 'com.github.hmcts:fortify-client:1.4.10:all'
 
     // Security
     implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jwtVersion
@@ -299,6 +301,12 @@ task runAllStyleChecks {
     dependsOn 'pmdIntegrationTest'
     dependsOn 'pmdSmokeTest'
     dependsOn 'pmdFunctionalTest'
+}
+
+task fortifyScan(type: JavaExec) {
+  main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  classpath += sourceSets.test.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 //project.tasks['integration'].dependsOn flywayClean
 //project.tasks['integration'].dependsOn flywayMigrate
