@@ -203,7 +203,7 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
     implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
 
-    implementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.7'
+    implementation group: 'io.rest-assured', name: 'rest-assured', version: '6.0.0'
 
     // Database, repository
     implementation 'org.postgresql:postgresql:42.7.13'
