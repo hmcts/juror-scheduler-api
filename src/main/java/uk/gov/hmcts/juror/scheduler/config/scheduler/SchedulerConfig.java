@@ -1,6 +1,6 @@
 package uk.gov.hmcts.juror.scheduler.config.scheduler;
 
-import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
+import org.springframework.boot.quartz.autoconfigure.QuartzProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

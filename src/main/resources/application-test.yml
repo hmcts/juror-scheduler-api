@@ -1,6 +1,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:scheduler_application}
+    username: ${DB_USERNAME:system}
+    password: ${DB_PASSWORD:postgres}
   flyway:
     enabled: false
 uk:
