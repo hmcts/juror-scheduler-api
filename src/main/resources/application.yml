@@ -12,7 +12,11 @@ management:
         include: health, info, prometheus
 
 springdoc:
-  packagesToScan: uk.gov.hmcts.juror.scheduler.api.controllers
+  packagesToScan: >-
+    uk.gov.hmcts.juror.scheduler.api.controllers,
+    uk.gov.hmcts.juror.standard.api.controllers,
+    org.springframework.boot.actuate.endpoint.web.servlet
+  show-actuator: true
   writer-with-order-by-keys: true
 
 spring:
