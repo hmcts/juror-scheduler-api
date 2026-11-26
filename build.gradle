@@ -173,7 +173,7 @@ ext {
     springVersion = "4.0.8"
     springDataVersion = "4.0.7"
     jwtVersion = "0.13.0"
-    lombookVersion = "1.18.46"
+    lombookVersion = "1.18.48"
 }
 
 ext['snakeyaml.version'] = '2.0'
