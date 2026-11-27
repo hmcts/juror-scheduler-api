@@ -15,7 +15,7 @@ springdoc:
   packagesToScan: >-
     uk.gov.hmcts.juror.scheduler.api.controllers,
     uk.gov.hmcts.juror.standard.api.controllers,
-    org.springframework.boot.actuate.endpoint.web.servlet
+    org.springframework.boot.webmvc.actuate.endpoint.web
   show-actuator: true
   writer-with-order-by-keys: true
 

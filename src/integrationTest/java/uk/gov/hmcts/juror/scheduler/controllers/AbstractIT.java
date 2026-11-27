@@ -6,6 +6,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -42,6 +44,13 @@ public abstract class AbstractIT {
 
     protected AbstractIT(MockMvc mockMvc) {
         this.mockMvc = mockMvc;
+    }
+
+    @DynamicPropertySource
+    static void datasourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", SQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", SQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", SQL_CONTAINER::getPassword);
     }
 
     public ResultActions mockMvcPerform(@NotNull String url,
