@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // Flyway Gradle tasks load database plugins from the build classpath.
+        classpath 'org.flywaydb:flyway-database-postgresql:11.20.3'
+    }
+}
+
 plugins {
     id 'application'
     id 'checkstyle'
